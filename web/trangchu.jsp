@@ -27,10 +27,29 @@
                 <button><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
 
+           <% String username = (String) session.getAttribute("username"); %>
+
             <nav class="menu">
                 <a href="hotro.jsp">Hỗ trợ</a>
+                <% if (username != null) {%>
+                <div class="account-menu">
+                    <span class="account-name">
+                        👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
+                    </span>
+                    <ul class="dropdown">
+                        <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
+                        <li><a href="giohang.jsp">Giỏ hàng</a></li>
+                        <li><a href="donmua.jsp">Đơn mua</a></li>
+                            <% if ("admin".equals(username)) { %>
+                        <li><a href="themsanpham.jsp">Thêm sản phẩm</a></li>
+                            <% } %>
+                        <li><a href="dangxuat.jsp">Đăng xuất</a></li>
+                    </ul>
+                </div>
+                <% } else { %>
                 <a href="dangnhap.jsp">Đăng nhập</a>
                 <a href="dangky.jsp">Đăng ký</a>
+                <% }%>
             </nav>
         </header>
 
@@ -57,7 +76,7 @@
             <div><img src="images/porsche.png"><p>PORSCHE</p></div>
             <div><img src="images/ferrari.png"><p>FERRARI</p></div>
             <div><img src="images/rolls.png"><p>ROLLS-ROYCE</p></div>
-            <div><img src="images/mazda.png"><p>MAZDA</p></div>
+<div><img src="images/mazda.png"><p>MAZDA</p></div>
         </section>
 
         <!-- FERRARI -->
@@ -129,7 +148,7 @@
                 <div class="footer-column">
                     <p class="name">Đào Thị Hồng Lý</p>
                     <p><i class="fa-solid fa-calendar"></i> 2356778</p>
-                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
+<p><i class="fa-solid fa-phone"></i> 0937298465</p>
                     <p><i class="fa-solid fa-location-dot"></i> hn</p>
                     <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
                 </div>

@@ -6,6 +6,25 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
+<%
+    String username = request.getParameter("username");
+    String password = request.getParameter("password");
+    String repassword = request.getParameter("repassword");
+
+    if (username != null && password != null && repassword != null) {
+        if (password.equals(repassword)) {
+            // TODO: Lưu thông tin vào database nếu cần
+            session.setAttribute("username", username);
+            response.sendRedirect("trangchu.jsp");
+            return;
+        } else {
+%>
+            <script>alert("Mật khẩu xác nhận không khớp!");</script>
+<%
+        }
+    }
+%>
+
 <html>
     <head>
 
@@ -41,7 +60,7 @@
         <!-- 🔸 FORM ĐĂNG KÝ --> 
         <section class="register-section"> 
             <h1>ĐĂNG KÝ TÀI KHOẢN</h1> <br><br>
-            <form class="register-form" action="#" method="post"> 
+            <form class="register-form" action="dangky.jsp" method="post"> 
                 <label for="fullname">Họ và tên:</label> 
                 <input type="text" id="fullname" name="fullname" placeholder="Nhập họ và tên" required />
 

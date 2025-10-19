@@ -30,7 +30,7 @@ main{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 40px;
+    padding: 21px 40px;
     color: #fff;
 }
 
@@ -618,4 +618,168 @@ textarea {
 .color-item.selected {
     border: 2px solid #000;
 }
+
+/* hiển thị dropdown khi trỏ chuột */
+.account-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.account-name {
+    cursor: pointer;
+    font-weight: bold;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.account-name i {
+    font-size: 14px;
+    transition: transform 0.3s;
+}
+
+/* Dropdown menu */
+.dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #fff;
+    min-width: 180px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 1001;
+    border-radius: 6px;
+    overflow: hidden;
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+}
+
+/* Các mục trong dropdown */
+.dropdown li a {
+    display: block;
+    padding: 10px 15px;
+    color: #111;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+
+.dropdown li a:hover {
+    background-color: #f2f2f2;
+}
+
+/* ✅ Giữ menu mở khi chuột ở cả tên và dropdown */
+.account-menu:hover .dropdown,
+.account-menu:focus-within .dropdown {
+    display: block;
+}
+
+/* ✅ Xoay mũi tên khi mở menu */
+.account-menu:hover .account-name i,
+.account-menu:focus-within .account-name i {
+    transform: rotate(180deg);
+}
+
+/* ====== BỐ CỤC CHÍNH ====== */
+.main-container {
+    display: flex;
+    padding: 40px;
+    background: url('image/car-background.jpg') no-repeat center center;
+    background-size: cover;
+    flex: 1;
+}
+
+/* ====== SIDEBAR ====== */
+.sidebar {
+    width: 220px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    height: fit-content;
+}
+
+.sidebar a {
+    display: block;
+    color: #fff;
+    text-decoration: none;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background 0.3s ease;
+}
+
+.sidebar a:hover {
+    background-color: #ff3b3f;
+}
+
+.sidebar a.active {
+    background-color: red;
+    font-weight: bold;
+}
+
+/* ====== FORM HỒ SƠ ====== */
+.form-section {
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #333;
+    padding: 30px;
+    margin-left: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.form-section h2 {
+    margin-bottom: 25px;
+    font-size: 24px;
+    color: #d60000;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #444;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="date"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+    border-color: #d60000;
+    outline: none;
+}
+
+/* ====== NÚT LƯU ====== */
+.save-btn {
+    background-color: #d60000;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.save-btn:hover {
+    background-color: #a80000;
+}
+
 

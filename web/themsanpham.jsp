@@ -26,11 +26,28 @@
                 </a>
             </div>
 
+  <% String username = (String) session.getAttribute("username"); %>
 
             <nav class="menu">
-                <a href="hotro.jsp">Hỗ trợ</a>
+                <% if (username != null) {%>
+                <div class="account-menu">
+                    <span class="account-name">
+                        👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
+                    </span>
+                    <ul class="dropdown">
+                        <li><a href="thongtin.jsp">Thông tin cá nhân</a></li>
+                        <li><a href="giohang.jsp">Giỏ hàng</a></li>
+                        <li><a href="donmua.jsp">Đơn mua</a></li>
+                            <% if ("admin".equals(username)) { %>
+                        <li><a href="themsanpham.jsp">Thêm sản phẩm</a></li>
+                            <% } %>
+                        <li><a href="dangxuat.jsp">Đăng xuất</a></li>
+                    </ul>
+                </div>
+                <% } else { %>
                 <a href="dangnhap.jsp">Đăng nhập</a>
                 <a href="dangky.jsp">Đăng ký</a>
+                <% }%>
             </nav>
             <%
                 // Chỉ hiện khi đã đăng nhập là admin
