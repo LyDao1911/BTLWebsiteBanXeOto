@@ -38,7 +38,6 @@ public class DbOperations {
             try {
                 if(ps != null) ps.close();
             } catch (SQLException e) {
-                // Xử lý lỗi đóng PS
                 JOptionPane.showMessageDialog(null, e, "Lỗi đóng Prepared Statement", JOptionPane.ERROR_MESSAGE);
             }
         }
