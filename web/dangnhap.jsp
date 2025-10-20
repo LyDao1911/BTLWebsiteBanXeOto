@@ -6,17 +6,6 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<%
-    String username = request.getParameter("username");
-    String password = request.getParameter("password");
-
-    if (username != null && password != null) {
-        // TODO: kiểm tra tài khoản trong database nếu cần
-        session.setAttribute("username", username);
-        response.sendRedirect("trangchu.jsp");
-        return;
-    }
-%>
 
 
 <html>
@@ -28,7 +17,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     </head>
     <body>
-       <!-- 🔹 THANH TÁC VỤ -->
+        <!-- 🔹 THANH TÁC VỤ -->
         <header class="navbar">
             <div class="logo">
                 <a href="trangchu.jsp" style="text-decoration: none; color: inherit;">
@@ -49,12 +38,13 @@
                 <a href="dangky.jsp">Đăng ký</a>
             </nav>
         </header>
-       
-       <!-- 🔸 FORM ĐĂNG NHẬP --> 
+
+        <!-- 🔸 FORM ĐĂNG NHẬP --> 
         <section class="register-section"> 
             <h1>ĐĂNG NHẬP TÀI KHOẢN</h1> <br><br>
-            <form class="register-form" action="#" method="post"> 
-                
+            <p style="color: red; text-align: center; font-weight: bold;">${errorMessage}</p>
+            <form class="register-form" action="DangNhapServlet" method="post">
+
                 <label for="username">Tên đăng nhập:</label>
                 <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" required />
 

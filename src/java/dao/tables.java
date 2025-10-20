@@ -31,7 +31,6 @@ public class tables {
                     + "Color VARCHAR(50),"
                     + "Description TEXT,"
                     + "Status VARCHAR(50),"
-                    + "Warehouse VARCHAR(100),"
                     + "FOREIGN KEY (BrandID) REFERENCES brand(BrandID)"
                     + ")";
             
@@ -118,6 +117,10 @@ public class tables {
             String supportRequestTable = "CREATE TABLE IF NOT EXISTS supportrequest ("
                     + "SupportID INT AUTO_INCREMENT PRIMARY KEY,"
                     + "CustomerID INT NOT NULL,"
+                    + "FullName VARCHAR(200),"
+                    + "Email VARCHAR(200) UNIQUE,"
+                    + "PhoneNumber VARCHAR(15),"
+                    + "Address VARCHAR(255),"
                     + "Subject VARCHAR(255),"
                     + "Message TEXT,"
                     + "CreatedAt DATETIME NOT NULL,"
@@ -128,10 +131,8 @@ public class tables {
                     + "FOREIGN KEY (RespondentID) REFERENCES useraccount(UserID)"
                     + ")";
             
-            // INSERT ADMIN DETAILS (Tài khoản quản trị viên mẫu)
             String adminAccountDetails = "INSERT INTO useraccount(Username, Password, FullName, Role, Status) VALUES('admin', 'adminpass', 'Quản trị viên', 'Admin', 'Active')";
             
-            // Thực thi tạo bảng theo đúng thứ tự cha - con:
             DbOperations.setDataOrDelete(brandTable, "Bảng Brand đã được tạo thành công!");
             DbOperations.setDataOrDelete(carTable, "Bảng Car đã được tạo thành công!");
             DbOperations.setDataOrDelete(userAccountTable, "Bảng UserAccount đã được tạo thành công!");
@@ -144,7 +145,6 @@ public class tables {
             DbOperations.setDataOrDelete(paymentTable, "Bảng Payment đã được tạo thành công!");
             DbOperations.setDataOrDelete(supportRequestTable, "Bảng SupportRequest đã được tạo thành công!");
             
-            // Chèn dữ liệu ADMIN sau khi bảng UserAccount đã được tạo
             DbOperations.setDataOrDelete(adminAccountDetails, "Thông tin quản trị viên được thêm thành công!");
 
         } catch (Exception e) {

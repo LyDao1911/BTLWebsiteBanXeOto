@@ -10,10 +10,10 @@ body {
     background-color: #fff;
     color: #111;
     overflow-x: hidden;
-    padding-top: 80px; 
+    padding-top: 80px;
     min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 main{
     flex:1;
@@ -339,7 +339,7 @@ h1 {
 }
 
 /* ========== FORM LIÊN HỆ ========== */
-       /* Căn giữa cả phần nội dung liên hệ và form */
+/* Căn giữa cả phần nội dung liên hệ và form */
 .contact-section {
     display: flex;
     justify-content: center;        /* canh giữa ngang */
@@ -599,25 +599,6 @@ textarea {
     background: #a00000;
 }
 
-/* ✅ Bảng màu */
-.color-palette {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 5px;
-}
-
-.color-item {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid transparent;
-}
-
-.color-item.selected {
-    border: 2px solid #000;
-}
 
 /* hiển thị dropdown khi trỏ chuột */
 .account-menu {
@@ -657,6 +638,7 @@ textarea {
 }
 
 /* Các mục trong dropdown */
+
 .dropdown li a {
     display: block;
     padding: 10px 15px;
@@ -668,6 +650,7 @@ textarea {
 .dropdown li a:hover {
     background-color: #f2f2f2;
 }
+
 
 /* ✅ Giữ menu mở khi chuột ở cả tên và dropdown */
 .account-menu:hover .dropdown,
@@ -782,4 +765,457 @@ textarea {
     background-color: #a80000;
 }
 
+
+
+/* Hiện dropdown khi hover */
+.account-menu:hover .dropdown {
+    display: block;
+}
+
+/* Xoay mũi tên khi hover */
+.account-menu:hover .account-name i {
+    transform: rotate(180deg);
+}
+
+
+/*Trang hồ so và trang đổi mật khẩu*/
+
+.profile-container {
+    display: flex;
+    width: 80%;
+    margin: 50px auto;
+    background-color: #2b2b2b; /* Màu nền form */
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #444;
+}
+
+/* Cột Menu bên trái */
+.profile-menu {
+    width: 25%;
+    background-color: #222; /* Màu đậm hơn */
+    padding: 20px;
+    border-right: 1px solid #444;
+}
+.profile-menu .user-avatar {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.profile-menu .user-avatar img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+.profile-menu .user-avatar p {
+    font-weight: bold;
+    margin-top: 10px;
+}
+.profile-menu ul {
+    list-style-type: none;
+    padding: 0;
+}
+.profile-menu ul li a {
+    display: block;
+    padding: 15px;
+    text-decoration: none;
+    color: #ccc;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+.profile-menu ul li a.active,
+.profile-menu ul li a:hover {
+    background-color: #f39c12; /* Màu cam */
+    color: #111;
+}
+
+/* Cột Form bên phải */
+.profile-content {
+    width: 75%;
+    padding: 40px;
+    background: url('path/to/your/car-background.png') no-repeat center center; /* Ảnh nền mờ */
+    background-size: cover;
+}
+.profile-form {
+    max-width: 450px;
+}
+.profile-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #ccc;
+    font-weight: bold;
+}
+.profile-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    background-color: #fff; /* Nền trắng như thiết kế */
+    border: 1px solid #777;
+    color: #333;
+    border-radius: 5px;
+}
+.profile-form input[type="submit"] {
+    background-color: #f39c12;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+.message {
+    color: lightgreen;
+}
+.errorMessage {
+    color: red;
+}
+
+/* ======================================= */
+/* ====== TRANG QUẢN LÝ DANH MỤC (.JSP) ====== */
+/* ======================================= */
+
+.container {
+    display: flex; /* Bố cục hai cột */
+    max-width: 1300px;
+    margin: 50px auto; /* Canh giữa và tạo khoảng cách với header/footer */
+    padding: 20px;
+    gap: 30px; /* Khoảng cách giữa hai panel */
+    align-items: flex-start; /* Canh trên cùng */
+    flex-wrap: wrap; /* Cho phép xuống dòng trên màn hình nhỏ */
+}
+
+/* -------------------- */
+/* --- CỘT TRÁI (LEFT PANEL) --- */
+/* -------------------- */
+
+.left-panel {
+    flex: 0 0 350px; /* Chiếm cố định 350px */
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: sticky; /* Giữ panel lại khi cuộn */
+    top: 100px;
+}
+
+.left-panel img#preview {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    background-color: #f7f7f7;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.left-panel input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.left-panel input[type="file"].form-control {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 8px;
+    cursor: pointer;
+    background-color: #f9f9f9;
+}
+
+/* -------------------- */
+/* --- BUTTONS --- */
+/* -------------------- */
+
+/* Điều chỉnh lại style cho các button (dựa trên class Bootstrap) */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s;
+    border: none;
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn-group-vertical {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+/* Màu sắc theo theme */
+.btn-success {
+    background-color: #0d6efd; /* Blue */
+}
+
+.btn-warning {
+    background-color: #ffc107; /* Yellow */
+    color: #212529;
+}
+
+.btn-danger {
+    background-color: #dc3545; /* Red */
+}
+
+.btn-success:hover {
+    background-color: #0b5ed7;
+}
+.btn-warning:hover {
+    background-color: #ffcd39;
+}
+.btn-danger:hover {
+    background-color: #c9303c;
+}
+
+
+/* -------------------- */
+/* --- CỘT PHẢI (RIGHT PANEL - TABLE) --- */
+/* -------------------- */
+
+.right-panel {
+    flex: 1; /* Chiếm phần còn lại của không gian */
+    padding: 25px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.right-panel h3 {
+    color: #d60000; /* Màu đỏ chủ đạo */
+    margin-bottom: 20px;
+    font-size: 22px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+/* --- TABLE STYLING --- */
+
+.table {
+    width: 100%;
+    border-collapse: collapse; /* Loại bỏ khoảng cách giữa các cell */
+    text-align: left;
+    font-size: 15px;
+}
+
+.table-dark th {
+    background-color: #212529; /* Nền đen cho header */
+    color: #fff;
+    padding: 15px 15px;
+    border: 1px solid #3a3f44;
+}
+
+.table-bordered th, .table-bordered td {
+    border: 1px solid #dee2e6;
+    padding: 12px 15px;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f8f9fa; /* Màu xen kẽ cho dễ nhìn */
+}
+
+.table-hover tbody tr:hover {
+    background-color: #ffe0e0; /* Hover nhẹ màu đỏ hồng */
+    cursor: pointer;
+}
+
+.table img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+
+/* ==================================
+   CSS CHUNG CHO TRANG QUẢN TRỊ (sanpham.jsp)
+   ================================== */
+
+.admin-page-container {
+    padding: 30px 20px;
+    min-height: 80vh; /* Đảm bảo trang có chiều cao tối thiểu */
+    background-color: #f8f9fa; /* Nền trang nhẹ nhàng */
+}
+
+.admin-page-container .right-panel {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem; /* Khoảng cách dưới */
+}
+
+/* ==================================
+   2. CSS BẢNG (TABLE)
+   ================================== */
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+
+/* Thead (Tiêu đề cột) */
+.table-dark th {
+    background-color: #343a40; /* Màu nền đen đậm */
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #454d55;
+    font-weight: 600;
+}
+
+/* Thân bảng (Body) */
+.table tbody td {
+    padding: 10px 15px;
+    border: 1px solid #dee2e6;
+    vertical-align: middle; /* Căn giữa nội dung theo chiều dọc */
+}
+
+/* Hiệu ứng Hover và Dòng được chọn */
+.table tbody tr:hover {
+    background-color: #f1f1f1; /* Nền nhạt khi rê chuột */
+    cursor: pointer;
+}
+
+.table tbody tr.selected-row {
+    background-color: #fff3cd; /* Nền màu vàng nhạt khi được chọn (Cảnh báo/Highlight) */
+    border: 2px solid #ffc107;
+}
+
+/* Định dạng Checkbox */
+.table input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #d1121d; /* Đổi màu checkbox thành màu đỏ chủ đạo */
+    cursor: pointer;
+}
+
+/* ==================================
+   3. CSS NÚT HÀNH ĐỘNG (ACTION BUTTONS)
+   ================================== */
+
+.table-action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: flex-end; /* Đẩy các nút sang phải */
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+/* Nút THÊM (Màu Xanh lá) */
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Nút SỬA (Màu Vàng/Cam) */
+.btn-warning {
+    background-color: #ffc107;
+    color: #343a40;
+}
+.btn-warning:hover {
+    background-color: #e0a800;
+}
+
+/* Nút XÓA (Màu Đỏ) */
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+/* --- CSS CHO MÀU SẮC (RADIO BUTTON - CÓ DẤU TÍCH) --- */
+
+/* Style chung cho label chứa màu */
+.color-item {
+    position: relative; 
+    display: inline-block; 
+    margin-right: 5px; 
+    cursor: pointer;
+}
+
+/* Style cho vòng tròn màu (span) */
+.color-item span {
+    display: block; 
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: all 0.2s ease-in-out;
+    opacity: 0.7; 
+    filter: grayscale(30%); 
+}
+
+/* ⭐ BỎ COMMENT DÒNG NÀY ĐỂ ẨN NÚT RADIO ⭐ */
+.color-item input[type="radio"] {
+    display: none; /* Quan trọng: Phải bỏ comment dòng này */
+}
+
+/* ⭐ Làm MỜ các màu KHÁC khi CÓ MỘT MÀU được chọn ⭐ */
+/* (Đặt luật làm mờ này LÊN TRÊN) */
+.color-palette:has(input[type="radio"]:checked) .color-item span {
+    opacity: 0.4;
+    filter: grayscale(60%);
+    transform: scale(0.95);
+}
+
+/* ⭐ Style KHI MÀU ĐƯỢC CHỌN (Vòng tròn màu) ⭐ */
+/* (Đặt luật làm sáng này Ở DƯỚI) */
+.color-palette .color-item input[type="radio"]:checked + span {
+    border-color: #000; 
+    box-shadow: 0 0 8px yellowgreen; 
+    transform: scale(1.1); 
+    opacity: 1; 
+    filter: grayscale(0%); 
+}
+
+/* ⭐ THÊM DẤU TÍCH KHI MÀU ĐƯỢC CHỌN ⭐ */
+/* (Đặt luật dấu tích này Ở DƯỚI CÙNG) */
+.color-item input[type="radio"]:checked + span::after {
+    content: '\f00c'; 
+    font-family: 'Font Awesome 6 Free'; 
+    font-weight: 900; 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    color: white; 
+    font-size: 14px; 
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6); 
+    pointer-events: none; 
+}
 

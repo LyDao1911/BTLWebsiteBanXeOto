@@ -1,5 +1,3 @@
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
 <%-- 
     Document   : themsanpham
     Created on : Oct 18, 2025, 7:08:23 PM
@@ -11,11 +9,14 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Thêm sản phẩm - Velyra Aero</title>
+        <title>Sửa sản phẩm - Velyra Aero</title>
         <link rel="stylesheet" href="style.css" />
+        <!-- Font Awesome --> 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     </head>
     <body>
+
+        <!-- 🧭 HEADER -->
 
         <header class="navbar">
             <div class="logo">
@@ -33,26 +34,25 @@
 
                 <%-- ✅ Nếu là ADMIN --%>
                 <% if ("admin".equals(username)) {%>
+                <!-- MENU QUẢN TRỊ -->
                 <div class="admin-menu account-menu">
                     <span class="admin-name account-name">
                         Quản trị <i class="fa-solid fa-caret-down"></i>
                     </span>
                     <ul class="dropdown">
-
-                        <%-- SỬA 2: SỬA LINK NÀY ĐỂ LOAD BRAND --%>
-                        <li><a href="ThemSanPhamServlet">Quản lý Xe / Thêm</a></li>
-
-                        <li><a href="BrandServlet">Quản lý Hãng xe</a></li>
+                        <li><a href="themsanpham.jsp">Quản lý Xe / Thêm</a></li>
+                        <li><a href="danhmuc.jsp">Quản lý Hãng xe</a></li>
                         <li><a href="quanlykho.jsp">Quản lý Kho</a></li>
                     </ul>
                 </div>
 
+                <!-- MENU TÀI KHOẢN ADMIN -->
                 <div class="account-menu">
                     <span class="account-name">
                         👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
                     </span>
                     <ul class="dropdown">
-                        <li><a href="ChangePasswordServlet">Đổi mật khẩu</a></li>
+                        <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
                         <li><a href="dangxuat.jsp">Đăng xuất</a></li>
                     </ul>
                 </div>
@@ -64,7 +64,7 @@
                         👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
                     </span>
                     <ul class="dropdown">
-                        <li><a href="ProfileServlet">Thông tin cá nhân</a></li>
+                        <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
                         <li><a href="giohang.jsp">Giỏ hàng</a></li>
                         <li><a href="donmua.jsp">Đơn mua</a></li>
                         <li><a href="dangxuat.jsp">Đăng xuất</a></li>
@@ -79,50 +79,50 @@
                 <% }%>
             </nav>
 
+
         </header>
-
+        <h3 class="title">Sửa sản phẩm</h3> 
         <div class="container">
-            <h2 class="title">Thêm sản phẩm</h2>
 
-            <form action="ThemSanPhamServlet" method="post" enctype="multipart/form-data">
+
+            <form action="SuaSanPhamServlet" method="post" enctype="multipart/form-data">
+
+                <input type="hidden" name="carId" value="[CarID]">
+
                 <div class="top">
                     <div class="left">
+                        <label class="label">Ảnh hiện tại</label>
                         <div class="product-image">
-                            <img id="mainPreview" src="https://via.placeholder.com/500x300.png?text=Main+Image" alt="Ảnh chính">
+                            <div class="main-placeholder"><img id="t1" src="https://via.placeholder.com/90x60.png?text=Ảnh+Chính+Cũ" alt="Ảnh chính"></div>
+                            <div class="main-placeholder"><img id="t2" src="https://via.placeholder.com/90x60.png?text=T2" alt="Ảnh phụ 1"></div>
+                            <div class="main-placeholder"><img id="t3" src="https://via.placeholder.com/90x60.png?text=T3" alt="Ảnh phụ 2"></div>
+                            <div class="main-placeholder"><img id="t4" src="https://via.placeholder.com/90x60.png?text=T4" alt="Ảnh phụ 3"></div>
+
                         </div>
 
-                        <div class="thumbs">
-                            <div class="thumb"><img id="t1" src="https://via.placeholder.com/90x60.png" alt=""></div>
-                            <div class="thumb"><img id="t2" src="https://via.placeholder.com/90x60.png" alt=""></div>
-                            <div class="thumb"><img id="t3" src="https://via.placeholder.com/90x60.png" alt=""></div>
-                        </div>
-
-                        <label class="label">Ảnh chính</label>
-                        <%-- name="mainImage" khớp với Servlet --%>
+                        <label class="label">Ảnh chính (Thay thế)</label>
                         <input type="file" name="mainImage" accept="image/*" onchange="previewMain(event)">
 
-                        <label class="label">Ảnh mô tả (Chọn tối đa 3 ảnh)</label>
+                        <label class="label">Ảnh mô tả (Thay thế)</label>
                         <input type="file" name="thumbs" multiple accept="image/*" onchange="previewThumbs(event)">
                     </div>
 
-                    <div class="right"><br><br>
+                    <div class="right"><br>
                         <label class="label">Thương hiệu</label>
-
-                       
-                        <select name="brandID" class="input" required>
+                        <select name="brand" class="input">
                             <option value="">-- Chọn thương hiệu --</option>
-
-                            <c:forEach var="brand" items="${brandList}">
-                                <option value="${brand.brandID}">${brand.brandName}</option>
-                            </c:forEach>
-
-                        </select><br><br>
+                            <option value="Toyota">Toyota</option>
+                            <option value="Honda">Honda</option>
+                            <option value="BMW">BMW</option>
+                            <option value="Mercedes">Mercedes</option>
+                            <option value="VinFast" selected>VinFast (Mặc định)</option>
+                        </select>
 
                         <label class="label">Tên sản phẩm</label>
-                        <input class="input" type="text" name="carName" placeholder="Tên sản phẩm" required>
+                        <input class="input" type="text" name="name" placeholder="Tên sản phẩm" value="Tên sản phẩm cũ">
 
                         <label class="label">Giá</label>
-                        <input class="input" type="text" name="price" id="price" placeholder="981.695.000" required><br><br>
+                        <input class="input" type="text" name="price" id="price" placeholder="981.695.000" value="981.695.000">
 
                         <label class="label">Màu sắc</label>
                         <div class="color-palette">
@@ -150,54 +150,51 @@
                                 <input type="radio" name="color" value="Brown" id="color_brown"> <%-- Thêm id --%>
                                 <span style="background:#d2691e;"></span>
                             </label>
-                            <%-- Nhớ thêm id/for nếu thêm màu mới --%>
                         </div><br><br>
-
                         <label class="label">Số lượng</label>
                         <div class="qty">
                             <button type="button" onclick="changeQty(-1)">-</button>
-                            <%-- name="quantity" khớp Servlet (khớp Model CarStock.java) --%>
-                            <input type="number" id="quantity" name="quantity" value="1" min="0" style="width:70px; text-align:center;">
+                            <input type="number" id="quantity" name="quantity" value="10" min="0">
                             <button type="button" onclick="changeQty(1)">+</button>
                         </div>
 
                         <label class="label">Mô tả sản phẩm</label>
-                        <%-- name="description" khớp Servlet (khớp Model Car.java) --%>
-                        <textarea name="description" rows="5" placeholder="Nhập mô tả chi tiết..."></textarea><br><br>
+                        <textarea name="description" rows="5" placeholder="Nhập mô tả chi tiết...">Đây là mô tả chi tiết cũ của sản phẩm...</textarea>
 
-                        <button type="submit" class="btn-submit">THÊM SẢN PHẨM</button>
+                        <button type="submit" class="btn-submit">CẬP NHẬT SẢN PHẨM</button>
                     </div>
                 </div>
             </form>
         </div>
 
         <script>
-            // ✅ Preview ảnh chính
+            // Hàm Preview Ảnh chính
             function previewMain(evt) {
                 const [file] = evt.target.files;
+                const el = document.getElementById('t1');
                 if (file) {
-                    document.getElementById('mainPreview').src = URL.createObjectURL(file);
+                    el.src = URL.createObjectURL(file);
+                    el.style.display = 'block';
                 }
             }
 
-            // SỬA: Hàm previewThumbs mới để xử lý "multiple"
+            // Hàm Preview Ảnh phụ
             function previewThumbs(evt) {
-                const files = evt.target.files; // Lấy danh sách các file đã chọn
-                const thumbIds = ['t1', 't2', 't3']; // ID của 3 ô ảnh preview
+                const files = evt.target.files;
 
-                for (let i = 0; i < thumbIds.length; i++) {
-                    const imgElement = document.getElementById(thumbIds[i]);
+                // Bắt đầu từ ô thứ 2 (t2, t3)
+                for (let i = 0; i < 3; i++) {
+                    const el = document.getElementById('t' + (i + 2));
                     if (files[i]) {
-                        // Nếu có file thứ i, hiển thị nó
-                        imgElement.src = URL.createObjectURL(files[i]);
+                        el.src = URL.createObjectURL(files[i]);
                     } else {
-                        // Nếu không có file thứ i (chọn ít hơn 3 ảnh), hiển thị ảnh placeholder
-                        imgElement.src = 'https://via.placeholder.com/90x60.png';
+                        // Nếu không có file mới, đặt lại ảnh placeholder
+                        el.src = 'https://via.placeholder.com/90x60.png';
                     }
                 }
             }
 
-            // ✅ Tăng giảm số lượng
+            // Hàm Tăng/Giảm Số lượng 
             function changeQty(delta) {
                 const input = document.getElementById('quantity');
                 let val = parseInt(input.value) || 0;
@@ -207,24 +204,62 @@
                 input.value = val;
             }
 
-            // ✅ Check màu
-            document.querySelectorAll('.color-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const input = item.querySelector('input');
-                    input.checked = !input.checked;
-                    item.classList.toggle('selected', input.checked);
-                });
-            });
+            // Xử lý Checkbox màu và Format giá khi trang tải
+            window.onload = function () {
 
-            // ✅ Format giá
-            document.getElementById('price').addEventListener('input', (e) => {
-                let value = e.target.value.replace(/\D/g, '');
-                e.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            });
+                // Gán sự kiện click cho việc chọn/bỏ chọn màu
+                document.querySelectorAll('.color-item').forEach(item => {
+                    const input = item.querySelector('input');
+                    item.addEventListener('click', (e) => {
+                        if (e.target !== input) {
+                            input.checked = !input.checked;
+                        }
+                        item.classList.toggle('selected', input.checked);
+                    });
+                });
+
+                // Hàm format giá 
+                document.getElementById('price').addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    e.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                });
+            };
         </script>
 
+
+        <!-- FOOTER -->
         <footer class="footer">
-            ...
+            <h3>THÔNG TIN LIÊN HỆ</h3>
+            <div class="footer-container">
+                <!-- Cột 1 -->
+                <div class="footer-column">
+                    <p class="name">Đào Thị Hồng Lý</p>
+                    <p><i class="fa-solid fa-calendar"></i> 2356778</p>
+                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
+                    <p><i class="fa-solid fa-location-dot"></i> hn</p>
+                    <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
+                </div>
+                <!-- Cột 2 -->
+                <div class="footer-column">
+                    <p class="name">Đào Thị Hồng Lý</p>
+                    <p><i class="fa-solid fa-calendar"></i> 2356778</p>
+                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
+                    <p><i class="fa-solid fa-location-dot"></i> hn</p>
+                    <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
+                </div>
+                <!-- Cột 3 -->
+                <div class="footer-column">
+                    <p class="name">Đào Thị Hồng Lý</p>
+                    <p><i class="fa-solid fa-calendar"></i> 2356778</p>
+                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
+                    <p><i class="fa-solid fa-location-dot"></i> hn</p>
+                    <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
+                </div>
+            </div>
+            <div class="footer-note">
+                Điểm đến tin cậy cho những ai tìm kiếm sự hoàn hảo trong từng chi tiết, 
+                từ lựa chọn xe đến dịch vụ hậu mãi tận tâm.
+            </div>
         </footer>
 
     </body>

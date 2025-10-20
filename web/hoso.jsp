@@ -4,38 +4,42 @@
     Author     : Admin
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Thông tin tài khoản - Velyra Aero</title>
-        <link rel="stylesheet" href="style.css" />
-        <!-- Font Awesome --> 
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        <title>Hồ Sơ Của Bạn</title>
+        <link rel="stylesheet" href="style.css"> 
+        
+
     </head>
     <body>
-
-        <!-- 🧭 HEADER -->
-
+        <!-- 🔹 THANH TÁC VỤ -->
         <header class="navbar">
             <div class="logo">
-                <a href="trangchu.jsp" style="text-decoration: none; color: inherit;">
-                    <img src="image/logo.png" alt="Velyra Aero Logo" />
-                    <span>VELYRA AERO</span>
-                </a>
+                <img src="image/logo.png" alt="Velyra Aero Logo" />
+                <span>VELYRA AERO</span>
+            </div>
+
+
+            <div class="search-box">
+                <input type="text" placeholder="Tìm kiếm xe..." />
+                <button><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
 
             <% String username = (String) session.getAttribute("username"); %>
 
             <nav class="menu">
+                <a href="hotro.jsp">Hỗ trợ</a>
                 <% if (username != null) {%>
                 <div class="account-menu">
                     <span class="account-name">
                         👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
                     </span>
                     <ul class="dropdown">
-                        <li><a href="thongtin.jsp">Thông tin cá nhân</a></li>
+                        <li><a href="ProfileServlet">Thông tin cá nhân</a></li>
                         <li><a href="giohang.jsp">Giỏ hàng</a></li>
                         <li><a href="donmua.jsp">Đơn mua</a></li>
                             <% if ("admin".equals(username)) { %>
@@ -49,58 +53,51 @@
                 <a href="dangky.jsp">Đăng ký</a>
                 <% }%>
             </nav>
-        </header>   
-        <!-- 🔧 MAIN CONTENT -->
-        <div class="main-container">
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <!-- Ảnh đại diện + tên -->
-                <div class="profile-header">
-                    <img src="image/avatar.png" alt="Avatar" />
-                   
-                </div>
+        </header>
+            
+        <!-- 🔹 form -->
+        <div class="profile-container">
 
-
-                <!-- Menu điều hướng -->
-                <a href="hoso.jsp" class="active">HỒ SƠ</a>
-                <a href="doimatkhau.jsp">ĐỔI MẬT KHẨU</a>
-                <a href="donmua.jsp">ĐƠN MUA</a>
-                <a href="giohang.jsp">GIỎ HÀNG</a>
+            <div class="profile-menu">
+                <ul>
+                    <li><a href="ProfileServlet" class="active">HỒ SƠ</a></li>
+                    <li><a href="doimatkhau.jsp">ĐỔI MẬT KHẨU</a></li>
+                    <li><a href="donmua.jsp">ĐƠN MUA</a></li>
+                    <li><a href="giohang.jsp">GIỎ HÀNG</a></li>
+                </ul>
             </div>
 
-            <!-- Form hồ sơ -->
-            <div class="form-section">
-                <h2>Thông tin tài khoản</h2>
-                <form action="saveProfile.jsp" method="post">
-                    <div class="form-group">
-                        <label>Tên đăng nhập</label>
-                        <input type="text" name="username" value="CHAE BY">
-                    </div>
-                    <div class="form-group">
-                        <label>Tên tài khoản</label>
-                        <input type="text" name="accountName">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email">
-                    </div>
-                    <div class="form-group">
-                        <label>Số điện thoại</label>
-                        <input type="text" name="phone">
-                    </div>
-                    <div class="form-group">
-                        <label>Ngày sinh</label>
-                        <input type="date" name="dob">
-                    </div>
-                    <div class="form-group">
-                        <label>Địa chỉ</label>
-                        <input type="text" name="address">
-                    </div>
-                    <button type="submit" class="save-btn">Lưu</button>
+            <div class="profile-content">
+
+                <c:if test="${not empty message}">
+                    <p class="message">${message}</p>
+                </c:if>
+                <c:if test="${not empty errorMessage}">
+                    <p class="errorMessage">${errorMessage}</p>
+                </c:if>
+
+                <form class="profile-form" action="ProfileServlet" method="POST">
+
+                    <label>TÊN ĐĂNG NHẬP:</label>
+                    <input type="text" value="${customer.userName}" disabled />
+
+                    <label>HỌ VÀ TÊN:</label>
+                    <input type="text" name="fullName" value="${customer.fullName}" />
+
+                    <label>EMAIL:</label>
+                    <input type="email" name="email" value="${customer.email}" />
+
+                    <label>SỐ ĐIỆN THOẠI:</label>
+                    <input type="tel" name="phone" value="${customer.phoneNumber}" />
+
+                    <label>ĐỊA CHỈ:</label>
+                    <input type="text" name="address" value="${customer.address}" />
+
+                    <input type="submit" value="LƯU" />
                 </form>
+
             </div>
         </div>
-
         <!-- FOOTER -->
         <footer class="footer">
             <h3>THÔNG TIN LIÊN HỆ</h3>

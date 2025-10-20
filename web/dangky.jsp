@@ -13,13 +13,12 @@
 
     if (username != null && password != null && repassword != null) {
         if (password.equals(repassword)) {
-            // TODO: Lưu thông tin vào database nếu cần
             session.setAttribute("username", username);
             response.sendRedirect("trangchu.jsp");
             return;
         } else {
 %>
-            <script>alert("Mật khẩu xác nhận không khớp!");</script>
+<script>alert("Mật khẩu xác nhận không khớp!");</script>
 <%
         }
     }
@@ -60,7 +59,8 @@
         <!-- 🔸 FORM ĐĂNG KÝ --> 
         <section class="register-section"> 
             <h1>ĐĂNG KÝ TÀI KHOẢN</h1> <br><br>
-            <form class="register-form" action="dangky.jsp" method="post"> 
+            <p style="color: red; text-align: center; font-weight: bold;">${errorMessage}</p>
+            <form class="register-form" action="DangKyServlet" method="post"> 
                 <label for="fullname">Họ và tên:</label> 
                 <input type="text" id="fullname" name="fullname" placeholder="Nhập họ và tên" required />
 
@@ -70,8 +70,6 @@
                 <label for="email">Mail:</label> 
                 <input type="email" id="email" name="email" placeholder="Nhập email" required />
 
-                <label for="dob">Ngày sinh:</label>
-                <input type="date" id="dob" name="dob" required />
 
                 <label for="address">Địa chỉ:</label> 
                 <input type="text" id="address" name="address" placeholder="Nhập địa chỉ" required />

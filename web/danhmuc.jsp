@@ -1,21 +1,26 @@
 <%-- 
-    Document   : hotro
-    Created on : Oct 15, 2025, 10:14:14 PM
-    Author     : Admin
+    Document   : danhmuc
+    Created on : Oct 19, 2025, 5:47:35 PM
+    Author     : Hong Ly
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="java.util.List"%>
+<%@page import="model.Brand"%>
+
+
+
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Hỗ trợ-Velyra Aero</title>
+        <title>Danh mục - Velyra Aero</title>
         <link rel="stylesheet" href="style.css" />
         <!-- Font Awesome --> 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     </head>
     <body>
-        <!-- 🔹 THANH TÁC VỤ -->
+
         <header class="navbar">
             <div class="logo">
                 <a href="trangchu.jsp" style="text-decoration: none; color: inherit;">
@@ -39,7 +44,7 @@
                     </span>
                     <ul class="dropdown">
                         <li><a href="themsanpham.jsp">Quản lý Xe / Thêm</a></li>
-                        <li><a href="danhmuc.jsp">Quản lý Hãng xe</a></li>
+                        <li><a href="BrandServlet">Quản lý Hãng xe</a></li>
                         <li><a href="quanlykho.jsp">Quản lý Kho</a></li>
                     </ul>
                 </div>
@@ -50,7 +55,7 @@
                         👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
                     </span>
                     <ul class="dropdown">
-                         <li><a href="ChangePasswordServlet">Đổi mật khẩu</a></li>
+                        <li><a href="ChangePasswordServlet">Đổi mật khẩu</a></li>
                         <li><a href="dangxuat.jsp">Đăng xuất</a></li>
                     </ul>
                 </div>
@@ -78,42 +83,88 @@
             </nav>
 
         </header>
-        <section class="contact-section">
-            <div class="contact-left">
-                <h2>LIÊN HỆ</h2>
-                <p>Hỗ trợ khách hàng mua online</p>
-                <p>Tổng đài: <strong>1800 6061</strong></p>
-                <p>Từ 9h - 11h, 13h - 17h các ngày từ thứ 2 đến thứ 6</p>
-                <p>Email: saleonline@canifa.com</p>
-                <p>Bạn vui lòng mô tả chi tiết các vấn đề cần hỗ trợ để chúng tôi hỗ trợ bạn nhanh chóng và hiệu quả nhất.</p>
-            </div>
 
-            <div class="contact-form">
-                <form action="HotroServlet" method="post">
-                    <label for="hoten">Họ tên</label>
-                    <input type="text" name="hoten" id="hoten" required><br><br>
+        <div class="container">
 
-                    <label for="email">Email</label>
-                    <input type="email" name="email" id="email" required><br><br>
+            <div class="left-panel">
 
+                <form action="BrandServlet" method="post" enctype="multipart/form-data">
 
-                    <label for="sdt">Số điện thoại</label>
-                    <input type="text" name="sdt" id="sdt" required><br><br>
+                    <input type="hidden" name="brandID" id="brandID_input">
 
+                    <img id="preview" src="image/default.jpg" alt="Ảnh thương hiệu">
+                    <input type="file" name="brandImage" accept="image/*" class="form-control mb-3" onchange="previewImage(event)">
 
-                    <label for="diachi">Địa chỉ</label>
-                    <input type="text" name="diachi" id="diachi"><br><br>
+                    <div class="form-group">
+                        <label>Tên hãng xe:</label>
+                        <input type="text" name="brandName" id="brandName_input">
+                    </div><br><br>
 
-
-                    <label for="noidung">Nội dung cần hỗ trợ</label>
-                    <textarea name="noidung" id="noidung" required></textarea><br><br>
-
-
-                    <button type="submit">GỬI YÊU CẦU</button>
+                    <div class="btn-group-vertical w-100">
+                        <button type="submit" class="btn btn-success" name="action" value="add">➕ Thêm</button>
+                        <button type="submit" class="btn btn-warning" name="action" value="update">✏️ Sửa</button>
+                        <button type="submit" class="btn btn-danger" name="action" value="delete">🗑️ Xóa</button>
+                    </div>
                 </form>
             </div>
-        </section>
 
+            <div class="right-panel">
+                <h3 class="text-center mb-4">Danh sách thương hiệu</h3>
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>BrandID</th>
+                            <th>BrandName</th>
+                            <th>LogoURL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <%
+                            List<Brand> brandList = (List<Brand>) request.getAttribute("brandList");
+                            if (brandList != null && !brandList.isEmpty()) {
+                                for (Brand b : brandList) {
+                        %>
+                       <tr onclick="fillForm('<%= b.getBrandID()%>', '<%= b.getBrandName()%>', '<%= request.getContextPath() %>/uploads/<%= b.getLogoURL()%>')">
+                            <td><%= b.getBrandID()%></td>
+                            <td><%= b.getBrandName()%></td>
+                            <td>
+                                <% if (b.getLogoURL() != null && !b.getLogoURL().isEmpty()) {%>
+                                <img src="<%= request.getContextPath() %>/uploads/<%= b.getLogoURL()%>" alt="Logo" width="80" height="60">
+                                <% } else { %>
+                                Không có ảnh
+                                <% } %>
+                            </td>
+                        </tr>
+                        <%
+                            }
+                        } else {
+                        %>
+                        <tr><td colspan="3">Không có dữ liệu thương hiệu</td></tr>
+                        <%
+                            }
+                        %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <script>
+            // Xem trước ảnh chọn từ máy
+            function previewImage(event) {
+                const reader = new FileReader();
+                reader.onload = function () {
+                    document.getElementById('preview').src = reader.result;
+                }
+                reader.readAsDataURL(event.target.files[0]);
+            }
+
+            // THÊM SCRIPT NÀY: Điền form khi nhấn vào bảng
+            function fillForm(id, name, logoUrl) {
+                document.getElementById('brandID_input').value = id;
+                document.getElementById('brandName_input').value = name;
+                document.getElementById('preview').src = logoUrl;
+            }
+        </script>
         <!-- FOOTER -->
         <footer class="footer">
             <h3>THÔNG TIN LIÊN HỆ</h3>

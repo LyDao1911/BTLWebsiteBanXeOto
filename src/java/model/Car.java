@@ -16,12 +16,11 @@ public class Car {
     private String color;
     private String description;
     private String status;
-    private String warehouse;
 
     public Car() {
     }
 
-    public Car(int carID, String carName, int brandID, BigDecimal price, String color, String description, String status, String warehouse) {
+    public Car(int carID, String carName, int brandID, BigDecimal price, String color, String description, String status) {
         this.carID = carID;
         this.carName = carName;
         this.brandID = brandID;
@@ -29,7 +28,6 @@ public class Car {
         this.color = color;
         this.description = description;
         this.status = status;
-        this.warehouse = warehouse;
     }
 
     public int getCarID() {
@@ -88,17 +86,9 @@ public class Car {
         this.status = status;
     }
 
-    public String getWarehouse() {
-        return warehouse;
-    }
-
-    public void setWarehouse(String warehouse) {
-        this.warehouse = warehouse;
-    }
-
     @Override
     public String toString() {
-        return "Car{" + "carID=" + carID + ", carName=" + carName + ", brandID=" + brandID + ", price=" + price + ", color=" + color + ", description=" + description + ", status=" + status + ", warehouse=" + warehouse + '}';
+        return "Car{" + "carID=" + carID + ", carName=" + carName + ", brandID=" + brandID + ", price=" + price + ", color=" + color + ", description=" + description + ", status=" + status + '}';
     }
-    
+
 }

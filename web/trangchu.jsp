@@ -14,24 +14,48 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     </head>
     <body>
-         <!-- 🔹 THANH TÁC VỤ -->
+        <!-- 🔹 THANH TÁC VỤ -->
         <header class="navbar">
             <div class="logo">
-                <img src="image/logo.png" alt="Velyra Aero Logo" />
-                <span>VELYRA AERO</span>
+                <a href="trangchu.jsp" style="text-decoration: none; color: inherit;">
+                    <img src="image/logo.png" alt="Velyra Aero Logo" />
+                    <span>VELYRA AERO</span>
+                </a>
             </div>
-
-
-            <div class="search-box">
-                <input type="text" placeholder="Tìm kiếm xe..." />
-                <button><i class="fa-solid fa-magnifying-glass"></i></button>
-            </div>
-
-           <% String username = (String) session.getAttribute("username"); %>
 
             <nav class="menu">
                 <a href="hotro.jsp">Hỗ trợ</a>
-                <% if (username != null) {%>
+                <% String username = (String) session.getAttribute("username"); %>
+
+                <% if (username != null) { %>
+
+                <%-- ✅ Nếu là ADMIN --%>
+                <% if ("admin".equals(username)) {%>
+                <!-- MENU QUẢN TRỊ -->
+                <div class="admin-menu account-menu">
+                    <span class="admin-name account-name">
+                        Quản trị <i class="fa-solid fa-caret-down"></i>
+                    </span>
+                    <ul class="dropdown">
+                        <li><a href="ThemSanPhamServlet">Quản lý Xe / Thêm</a></li>
+                        <li><a href="BrandServlet">Quản lý Hãng xe</a></li>
+                        <li><a href="quanlykho.jsp">Quản lý Kho</a></li>
+                    </ul>
+                </div>
+
+                <!-- MENU TÀI KHOẢN ADMIN -->
+                <div class="account-menu">
+                    <span class="account-name">
+                        👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
+                    </span>
+                    <ul class="dropdown">
+                        <li><a href="ChangePasswordServlet">Đổi mật khẩu</a></li>
+                        <li><a href="dangxuat.jsp">Đăng xuất</a></li>
+                    </ul>
+                </div>
+
+                <% } else {%>
+                <%-- ✅ Nếu là NGƯỜI DÙNG THƯỜNG --%>
                 <div class="account-menu">
                     <span class="account-name">
                         👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
@@ -40,17 +64,18 @@
                         <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
                         <li><a href="giohang.jsp">Giỏ hàng</a></li>
                         <li><a href="donmua.jsp">Đơn mua</a></li>
-                            <% if ("admin".equals(username)) { %>
-                        <li><a href="themsanpham.jsp">Thêm sản phẩm</a></li>
-                            <% } %>
                         <li><a href="dangxuat.jsp">Đăng xuất</a></li>
                     </ul>
                 </div>
+                <% } %>
+
                 <% } else { %>
+                <%-- ✅ Nếu chưa đăng nhập --%>
                 <a href="dangnhap.jsp">Đăng nhập</a>
                 <a href="dangky.jsp">Đăng ký</a>
                 <% }%>
             </nav>
+
         </header>
 
         <!-- 🔹 HERO VIDEO -->
@@ -76,7 +101,7 @@
             <div><img src="images/porsche.png"><p>PORSCHE</p></div>
             <div><img src="images/ferrari.png"><p>FERRARI</p></div>
             <div><img src="images/rolls.png"><p>ROLLS-ROYCE</p></div>
-<div><img src="images/mazda.png"><p>MAZDA</p></div>
+            <div><img src="images/mazda.png"><p>MAZDA</p></div>
         </section>
 
         <!-- FERRARI -->
@@ -148,7 +173,7 @@
                 <div class="footer-column">
                     <p class="name">Đào Thị Hồng Lý</p>
                     <p><i class="fa-solid fa-calendar"></i> 2356778</p>
-<p><i class="fa-solid fa-phone"></i> 0937298465</p>
+                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
                     <p><i class="fa-solid fa-location-dot"></i> hn</p>
                     <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
                 </div>
