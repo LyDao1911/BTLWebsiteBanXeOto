@@ -23,7 +23,7 @@
 
         <header class="navbar">
             <div class="logo">
-                <a href="trangchu.jsp" style="text-decoration: none; color: inherit;">
+                <a href="HomeServlet" style="text-decoration: none; color: inherit;">
                     <img src="image/logo.png" alt="Velyra Aero Logo" />
                     <span>VELYRA AERO</span>
                 </a>
@@ -45,7 +45,7 @@
                     <ul class="dropdown">
                         <li><a href="themsanpham.jsp">Quản lý Xe / Thêm</a></li>
                         <li><a href="BrandServlet">Quản lý Hãng xe</a></li>
-                        <li><a href="quanlykho.jsp">Quản lý Kho</a></li>
+                        <li><a href="SanPhamServlet">Quản lý Xe</a></li>
                     </ul>
                 </div>
 

@@ -3,19 +3,30 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package model;
+
 import java.math.BigDecimal;
+import java.util.List;
+
 /**
  *
  * @author Hong Ly
  */
 public class Car {
+
     private int carID;
     private String carName;
     private int brandID;        // Khóa ngoại liên kết tới Brand.java
+    private String brandName; // Tên hãng xe - lấy từ bảng Brand
+
     private BigDecimal price;   // Dùng BigDecimal cho tiền tệ
     private String color;
     private String description;
     private String status;
+    private int quantity;
+    private String mainImageURL;
+
+    // Danh sách ảnh phụ (thumbs)
+    private List<String> thumbs;
 
     public Car() {
     }
@@ -28,6 +39,14 @@ public class Car {
         this.color = color;
         this.description = description;
         this.status = status;
+    }
+
+    public String getBrandName() {
+        return brandName;
+    }
+
+    public void setBrandName(String brandName) {
+        this.brandName = brandName;
     }
 
     public int getCarID() {
@@ -86,9 +105,43 @@ public class Car {
         this.status = status;
     }
 
-    @Override
-    public String toString() {
-        return "Car{" + "carID=" + carID + ", carName=" + carName + ", brandID=" + brandID + ", price=" + price + ", color=" + color + ", description=" + description + ", status=" + status + '}';
+    public int getQuantity() {
+        return quantity;
     }
 
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getMainImageURL() {
+        return mainImageURL;
+    }
+
+    public void setMainImageURL(String mainImageURL) {
+        this.mainImageURL = mainImageURL;
+    }
+
+    public List<String> getThumbs() {
+        return thumbs;
+    }
+
+    public void setThumbs(List<String> thumbs) {
+        this.thumbs = thumbs;
+    }
+
+    @Override
+    public String toString() {
+        return "Car{"
+                + "carID=" + carID
+                + ", carName=" + carName
+                + ", brandID=" + brandID
+                + ", price=" + price
+                + ", color=" + color
+                + ", description=" + description
+                + ", status=" + status
+                + ", quantity=" + quantity
+                + ", mainImageURL=" + mainImageURL
+                + ", thumbs=" + thumbs
+                + '}';
+    }
 }

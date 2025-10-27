@@ -13,7 +13,7 @@
 <!DOCTYPE html>
 <%
     session.invalidate(); // Xóa toàn bộ session
-    response.sendRedirect("trangchu.jsp"); // Quay về trang chủ
+    response.sendRedirect("HomeServlet"); // Quay về trang chủ
 %>
 %>
 

@@ -83,16 +83,18 @@ public class ThemSanPhamServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
         Car car = new Car();
         CarStock stock = new CarStock();
         FileItem mainImageItem = null;
         List<FileItem> thumbItems = new ArrayList<>();
-        
+
         // 2. Khởi tạo Factory cho việc upload
         DiskFileItemFactory factory = DiskFileItemFactory.builder()
                 .setPath(Paths.get(System.getProperty("java.io.tmpdir")))
                 .get();
-        
+
         JakartaServletFileUpload upload = new JakartaServletFileUpload(factory);
 
         try {
@@ -113,7 +115,7 @@ public class ThemSanPhamServlet extends HttpServlet {
                     }
                 }
             }
-            
+
             // 5. Gán các giá trị đã xử lý
             car.setStatus("Available"); // Set giá trị mặc định
             stock.setLastUpdated(LocalDateTime.now()); // Set thời gian
@@ -129,7 +131,7 @@ public class ThemSanPhamServlet extends HttpServlet {
                     CarImage mainImg = new CarImage(0, newCarId, mainImageName, true);
                     carDAO.insertCarImage(mainImg);
                 }
-                
+
                 // 6c. Lưu các Ảnh Phụ (nếu có)
                 for (FileItem thumb : thumbItems) {
                     if (thumb != null && thumb.getSize() > 0) {
@@ -151,10 +153,9 @@ public class ThemSanPhamServlet extends HttpServlet {
         response.sendRedirect("ThemSanPhamServlet");
     }
 
-    
     private void processFormField(FileItem item, Car car, CarStock stock) throws IOException {
         String fieldName = item.getFieldName();
-        String value = item.getString(); // Tạm thời bỏ qua Charset
+        String value = item.getString();
 
         switch (fieldName) {
             case "brandID": // Sửa từ "brand"
@@ -169,7 +170,7 @@ public class ThemSanPhamServlet extends HttpServlet {
                 car.setPrice(new BigDecimal(giaClean));
                 break;
             case "color":
-                car.setColor(value); 
+                car.setColor(value);
                 break;
             case "quantity":
                 stock.setQuantity(Integer.parseInt(value));
@@ -190,7 +191,7 @@ public class ThemSanPhamServlet extends HttpServlet {
 
         String fileName = Paths.get(item.getName()).getFileName().toString();
         // Cậu phải tạo thư mục "uploads" trong Web Pages (image_e3a783.png)
-        String uploadPath = request.getServletContext().getRealPath("") + UPLOAD_DIR; 
+        String uploadPath = request.getServletContext().getRealPath("") + UPLOAD_DIR;
         Path uploadDirPath = Paths.get(uploadPath);
 
         if (!Files.exists(uploadDirPath)) {
@@ -201,7 +202,7 @@ public class ThemSanPhamServlet extends HttpServlet {
             Path filePath = uploadDirPath.resolve(fileName);
             Files.copy(input, filePath, StandardCopyOption.REPLACE_EXISTING);
         }
-        
+
         return fileName;
     }
 

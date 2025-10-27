@@ -19,12 +19,17 @@
         <!-- 🔹 THANH TÁC VỤ -->
         <header class="navbar">
             <div class="logo">
-                <a href="trangchu.jsp" style="text-decoration: none; color: inherit;">
+                <a href="HomeServlet" style="text-decoration: none; color: inherit;">
                     <img src="image/logo.png" alt="Velyra Aero Logo" />
                     <span>VELYRA AERO</span>
                 </a>
             </div>
 
+
+            <div class="search-box">
+                <input type="text" placeholder="Tìm kiếm xe..." />
+                <button><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
             <nav class="menu">
                 <a href="hotro.jsp">Hỗ trợ</a>
                 <% String username = (String) session.getAttribute("username"); %>
@@ -41,7 +46,7 @@
                     <ul class="dropdown">
                         <li><a href="themsanpham.jsp">Quản lý Xe / Thêm</a></li>
                         <li><a href="danhmuc.jsp">Quản lý Hãng xe</a></li>
-                        <li><a href="quanlykho.jsp">Quản lý Kho</a></li>
+                        <li><a href="SanPhamServlet">Quản lý Xe</a></li>
                     </ul>
                 </div>
 
@@ -51,7 +56,7 @@
                         👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
                     </span>
                     <ul class="dropdown">
-                        <li><a href="ChangePasswordServlet">Đổi mật khẩu</a></li>
+                        <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
                         <li><a href="dangxuat.jsp">Đăng xuất</a></li>
                     </ul>
                 </div>
@@ -79,65 +84,83 @@
             </nav>
 
         </header>
-        <!-- ========== NỘI DUNG ========== -->
-        <!-- Khu vực nội dung chính -->
-        <main class="search-page">
-            <!-- CỘT TRÁI: Bộ lọc -->
+        <main class="search-page clean-style">
             <aside class="filter-box">
-                <h3>▼ BỘ LỌC TÌM KIẾM</h3>
-                <p>Thương hiệu</p>
-                <div>
-                    <label><input type="checkbox"> VinFast</label><br>
-                    <label><input type="checkbox"> Lamborghini</label><br>
-                    <label><input type="checkbox"> Porsche</label><br>
-                    <label><input type="checkbox"> Ferrari</label><br>
-                    <label><input type="checkbox"> Rolls-Royce</label><br>
-                    <label><input type="checkbox"> Mercedes-Benz</label>
+                <h3><i class="fas fa-filter"></i> BỘ LỌC TÌM KIẾM</h3>
+
+                <div class="filter-group brand-filter">
+                    <label>Thương hiệu</label>
+                    <div class="checkbox-list">
+                        <label><input type="checkbox" name="brand" value="VinFast"> VinFast</label>
+                        <label><input type="checkbox" name="brand" value="Lamborghini"> Lamborghini</label>
+                        <label><input type="checkbox" name="brand" value="Porsche"> Porsche</label>
+                        <label><input type="checkbox" name="brand" value="Ferrari"> Ferrari</label>
+                        <label><input type="checkbox" name="brand" value="Rolls-Royce"> Rolls-Royce</label>
+                    </div>
                 </div>
 
-                <p>Màu sắc</p>
-                <div>
-                    <label><input type="checkbox"> Đen</label><br>
-                    <label><input type="checkbox"> Vàng</label><br>
-                    <label><input type="checkbox"> Đỏ</label><br>
-                    <label><input type="checkbox"> Trắng</label><br>
-                    <label><input type="checkbox"> Nâu</label>
+                <div class="filter-group color-filter">
+                    <label>Màu sắc</label>
+                    <div class="checkbox-list">
+                        <label><input type="checkbox" name="color" value="Red"> Đỏ</label>
+                        <label><input type="checkbox" name="color" value="Yellow"> Vàng</label>
+                        <label><input type="checkbox" name="color" value="Black"> Đen</label>
+                        <label><input type="checkbox" name="color" value="Blue"> Xanh</label>
+                    </div>
                 </div>
 
-                <p>Khoảng giá</p>
-                <div class="price-range">
-                    <input type="text" placeholder="Từ">
-                    <input type="text" placeholder="Đến">
+                <div class="filter-group price-range-filter">
+                    <label>Khoảng giá</label>
+                    <div class="price-input-group">
+                        <input type="text" placeholder="Từ" class="price-input">
+                        <div class="price-divider">-</div>
+                        <input type="text" placeholder="Đến" class="price-input">
+                    </div>
+                    <button class="btn-filter-apply">ÁP DỤNG</button>
                 </div>
-
-                <button class="btn-filter">ÁP DỤNG</button>
+                <button class="btn-clear-filters">XÓA BỘ LỌC</button>
             </aside>
 
-            <!-- CỘT PHẢI: Danh sách xe -->
             <section class="result-box">
-                <div class="sort-bar">
-                    <span>Sắp xếp theo</span>
-                    <button>Mới nhất</button>
-                    <button>Giá</button>
+
+                <div class="sort-bar clean-sort-bar">
+                    <span>Sắp xếp theo:</span>
+                    <button class="sort-option active">Mới Nhất</button>
+
+                    <div class="sort-option-dropdown">
+                        <button class="sort-option dropdown-toggle">Giá <i class="fas fa-sort"></i></button>
+                        <div class="dropdown-content">
+                            <span class="sort-action" data-sort-order="asc">Tăng dần</span>
+                            <span class="sort-action" data-sort-order="desc">Giảm dần</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="car-list">
-                    <div class="car-item">
-                        <img src="image/vinfast.png" alt="">
-                        <h4>VinFast Lux A2.0</h4>
-                        <p class="price">981.695.000 đồng</p>
-                        <p>Đã bán 15</p>
+                <div class="car-list simple-product-grid">
+
+                    <div class="car-item simple-product-item">
+                        <div class="car-image-container">
+                            <img src="image/vinfast.png" alt="VinFast Lux A2.0">
+                        </div>
+                        <h4 class="product-name">VinFast Lux A2.0</h4>
+                        <p class="product-price">981.695.000 ₫</p>
+                        <span class="product-sales-badge">Đã bán 15</span>
                     </div>
 
-                    <div class="car-item">
-                        <img src="image/lamborghini.png" alt="">
-                        <h4>Lamborghini Aventador</h4>
-                        <p class="price">21.000.000.000 đồng</p>
-                        <p>Đã bán 15</p>
+                    <div class="car-item simple-product-item">
+                        <div class="car-image-container">
+                            <img src="image/lamborghini.png" alt="Lamborghini Aventador SVJ Roadster">
+                        </div>
+                        <h4 class="product-name">Lamborghini Aventador SVJ Roadster</h4>
+                        <p class="product-price">21.000.000.000 ₫</p>
+                        <span class="product-sales-badge">Đã bán 15</span>
                     </div>
+
                 </div>
             </section>
         </main>
+
+
         <!-- FOOTER -->
         <footer class="footer">
             <h3>THÔNG TIN LIÊN HỆ</h3>

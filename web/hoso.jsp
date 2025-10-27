@@ -10,51 +10,94 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Hồ Sơ Của Bạn</title>
-        <link rel="stylesheet" href="style.css"> 
-        
-
+        <title>Đổi mật khẩu- Velyra Aero</title>
+        <link rel="stylesheet" href="style.css" />
+        <!-- Font Awesome --> 
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     </head>
-    <body>
-        <!-- 🔹 THANH TÁC VỤ -->
+    <body style="background-image: url(image/tt.jpg)">
+
+
+        <%
+
+            // Lấy Tên Đăng Nhập từ session
+            String username = (String) session.getAttribute("username");
+
+            // KIỂM TRA ĐĂNG NHẬP
+            if (username == null) {
+                // Nếu chưa đăng nhập, chuyển hướng về trang đăng nhập
+                response.sendRedirect("dangnhap.jsp");
+                return;
+            }
+
+            // Lấy thông báo (nếu có) từ quá trình xử lý form
+            String msg = request.getParameter("msg");
+        %>
+        <!-- 🧭 HEADER -->
+
         <header class="navbar">
             <div class="logo">
-                <img src="image/logo.png" alt="Velyra Aero Logo" />
-                <span>VELYRA AERO</span>
+                <a href="HomeServlet" style="text-decoration: none; color: inherit;">
+                    <img src="image/logo.png" alt="Velyra Aero Logo" />
+                    <span>VELYRA AERO</span>
+                </a>
             </div>
 
-
-            <div class="search-box">
-                <input type="text" placeholder="Tìm kiếm xe..." />
-                <button><i class="fa-solid fa-magnifying-glass"></i></button>
-            </div>
-
-            <% String username = (String) session.getAttribute("username"); %>
 
             <nav class="menu">
                 <a href="hotro.jsp">Hỗ trợ</a>
-                <% if (username != null) {%>
+
+                <% if (username != null) { %>
+
+                <%-- ✅ Nếu là ADMIN --%>
+                <% if ("admin".equals(username)) {%>
+                <!-- MENU QUẢN TRỊ -->
+                <div class="admin-menu account-menu">
+                    <span class="admin-name account-name">
+                        Quản trị <i class="fa-solid fa-caret-down"></i>
+                    </span>
+                    <ul class="dropdown">
+                        <li><a href="themsanpham.jsp">Quản lý Xe / Thêm</a></li>
+                        <li><a href="danhmuc.jsp">Quản lý Hãng xe</a></li>
+                        <li><a href="quanlykho.jsp">Quản lý Kho</a></li>
+                    </ul>
+                </div>
+
+                <!-- MENU TÀI KHOẢN ADMIN -->
                 <div class="account-menu">
                     <span class="account-name">
                         👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
                     </span>
                     <ul class="dropdown">
-                        <li><a href="ProfileServlet">Thông tin cá nhân</a></li>
-                        <li><a href="giohang.jsp">Giỏ hàng</a></li>
-                        <li><a href="donmua.jsp">Đơn mua</a></li>
-                            <% if ("admin".equals(username)) { %>
-                        <li><a href="themsanpham.jsp">Thêm sản phẩm</a></li>
-                            <% } %>
+                        <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
                         <li><a href="dangxuat.jsp">Đăng xuất</a></li>
                     </ul>
                 </div>
+
+                <% } else {%>
+                <%-- ✅ Nếu là NGƯỜI DÙNG THƯỜNG --%>
+                <div class="account-menu">
+                    <span class="account-name">
+                        👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
+                    </span>
+                    <ul class="dropdown">
+                        <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
+                        <li><a href="giohang.jsp">Giỏ hàng</a></li>
+                        <li><a href="donmua.jsp">Đơn mua</a></li>
+                        <li><a href="dangxuat.jsp">Đăng xuất</a></li>
+                    </ul>
+                </div>
+                <% } %>
+
                 <% } else { %>
+                <%-- ✅ Nếu chưa đăng nhập --%>
                 <a href="dangnhap.jsp">Đăng nhập</a>
                 <a href="dangky.jsp">Đăng ký</a>
                 <% }%>
             </nav>
-        </header>
-            
+
+
+        </header>   
         <!-- 🔹 form -->
         <div class="profile-container">
 
@@ -77,7 +120,6 @@
                 </c:if>
 
                 <form class="profile-form" action="ProfileServlet" method="POST">
-
                     <label>TÊN ĐĂNG NHẬP:</label>
                     <input type="text" value="${customer.userName}" disabled />
 

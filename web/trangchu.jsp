@@ -3,8 +3,10 @@
     Created on : Oct 15, 2025, 4:56:23 PM
     Author     : Admin
 --%>
-
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -17,7 +19,7 @@
         <!-- 🔹 THANH TÁC VỤ -->
         <header class="navbar">
             <div class="logo">
-                <a href="trangchu.jsp" style="text-decoration: none; color: inherit;">
+                <a href="HomeServlet" style="text-decoration: none; color: inherit;">
                     <img src="image/logo.png" alt="Velyra Aero Logo" />
                     <span>VELYRA AERO</span>
                 </a>
@@ -39,7 +41,7 @@
                     <ul class="dropdown">
                         <li><a href="ThemSanPhamServlet">Quản lý Xe / Thêm</a></li>
                         <li><a href="BrandServlet">Quản lý Hãng xe</a></li>
-                        <li><a href="quanlykho.jsp">Quản lý Kho</a></li>
+                        <li><a href="SanPhamServlet">Quản lý Xe</a></li>
                     </ul>
                 </div>
 
@@ -91,63 +93,64 @@
                 <p>Trải nghiệm sức mạnh & công nghệ vượt trội cùng Velyra Aero</p>
             </div>
         </section>
-
-
-
-        <!-- HÃNG XE -->
         <section class="brands">
-            <div><img src="images/mercedes.png"><p>MERCEDES-BENZ</p></div>
-            <div><img src="images/tesla.png"><p>TESLA</p></div>
-            <div><img src="images/porsche.png"><p>PORSCHE</p></div>
-            <div><img src="images/ferrari.png"><p>FERRARI</p></div>
-            <div><img src="images/rolls.png"><p>ROLLS-ROYCE</p></div>
-            <div><img src="images/mazda.png"><p>MAZDA</p></div>
-        </section>
+            <c:choose>
+                <c:when test="${not empty brandsList}">
+                    <div class="brand-container"> 
+                        <c:forEach var="brand" items="${brandsList}">
+                            <div class="brand-card">
 
-        <!-- FERRARI -->
-        <section class="car-section">
-            <h2>Ferrari</h2>
-            <div class="car-list">
-                <div class="car-card">
-                    <img src="images/ferrari1.png" alt="Ferrari 296 GTS">
-                    <p>Ferrari 296 GTS</p>
-                </div>
-                <div class="car-card">
-                    <img src="images/ferrari2.png" alt="Ferrari 849 Testarossa">
-                    <p>Ferrari 849 Testarossa</p>
-                </div>
-            </div>
-        </section>
+                                <c:set var="cleanLogoURL" value="${fn:substringAfter(brand.logoURL, '/')}" />
 
-        <!-- MERCEDES -->
-        <section class="car-section">
-            <h2>Mercedes</h2>
-            <div class="car-list">
-                <div class="car-card">
-                    <img src="images/mercedes1.png" alt="GLS 480">
-                    <p>Mercedes-Maybach GLS 480 4MATIC</p>
-                </div>
-                <div class="car-card">
-                    <img src="images/mercedes2.png" alt="S680">
-                    <p>Mercedes-Maybach S680 4MATIC</p>
-                </div>
-            </div>
-        </section>
+                                <img src="${pageContext.request.contextPath}/${cleanLogoURL}" alt="${brand.brandName}" />
 
-        <!-- LEXUS -->
-        <section class="car-section">
-            <h2>Lexus</h2>
-            <div class="car-list">
-                <div class="car-card">
-                    <img src="images/lexus1.png" alt="Lexus LX 570">
-                    <p>Lexus LX 570 2010</p>
-                </div>
-                <div class="car-card">
-                    <img src="images/lexus2.png" alt="Lexus NX 300h">
-                    <p>Lexus NX 300h / NX 200t</p>
-                </div>
-            </div>
+                                <p>${brand.brandName}</p> 
+                            </div>
+                        </c:forEach>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <p style="text-align: center; width: 100%; padding: 20px;">
+                        Không có hãng xe nào để hiển thị.
+                    </p>
+                </c:otherwise>
+            </c:choose>
         </section>
+        <!-- 🔹 DANH SÁCH XE THEO HÃNG -->
+        <c:choose>
+            <c:when test="${not empty carsByBrand}">
+                <c:forEach var="entry" items="${carsByBrand}">
+                    <section class="car-section">
+                        <!-- Tên hãng xe -->
+                        <h2 class="brand-title">${entry.key.brandName}</h2>
+
+                        <div class="car-list">
+                            <c:forEach var="car" items="${entry.value}">
+                                <div class="car-card">
+                                    <a href="mota.jsp?carID=${car.carID}">
+                                        <!-- Ảnh xe -->
+                                        <c:set var="imageDirName" value="${car.carName}" />
+                                        <img src="${pageContext.request.contextPath}/images/${imageDirName}/Black/${car.mainImageURL}" alt="${car.carName}" />
+
+                                        <!-- Tên xe -->
+                                        <p class="car-name">${car.carName}</p>
+
+                                        <!-- Giá xe -->
+                                        <p class="car-price">${car.price} VND</p>
+                                    </a>
+                                </div>
+                            </c:forEach>
+                        </div>
+                    </section>
+                </c:forEach>
+            </c:when>
+            <c:otherwise>
+                <section class="car-section" style="text-align: center;">
+                    <h2>Sản phẩm</h2>
+                    <p>Hiện không có sản phẩm nào để hiển thị.</p>
+                </section>
+            </c:otherwise>
+        </c:choose>
 
         <!-- FOOTER -->
         <footer class="footer">
@@ -185,3 +188,4 @@
         </footer>
     </body>
 </html>
+

@@ -14,7 +14,7 @@
     if (username != null && password != null && repassword != null) {
         if (password.equals(repassword)) {
             session.setAttribute("username", username);
-            response.sendRedirect("trangchu.jsp");
+            response.sendRedirect("HomeServlet");
             return;
         } else {
 %>
@@ -37,7 +37,7 @@
         <!-- 🔹 THANH TÁC VỤ -->
         <header class="navbar">
             <div class="logo">
-                <a href="trangchu.jsp" style="text-decoration: none; color: inherit;">
+                <a href="HomeServlet" style="text-decoration: none; color: inherit;">
                     <img src="image/logo.png" alt="Velyra Aero Logo" />
                     <span>VELYRA AERO</span>
                 </a>

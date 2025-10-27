@@ -20,7 +20,7 @@ public class tables {
                    + "BrandID INT AUTO_INCREMENT PRIMARY KEY,"
                    + "BrandName VARCHAR(100) NOT NULL UNIQUE,"
                     + "LogoURL VARCHAR(255)"
-                    + ")";
+                    + ") ";
             
             // 2. CAR TABLE (Chỉ tham chiếu BrandID)
             String carTable = "CREATE TABLE IF NOT EXISTS car ("

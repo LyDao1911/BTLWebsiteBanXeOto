@@ -3,8 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Documents/NetBeansProjects/SellingCarWebsite/web/suaxe.jsp</file>
-            <file>file:/D:/Documents/NetBeansProjects/SellingCarWebsite/web/themsanpham.jsp</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/web/style.css</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/web/trangchu.jsp</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/src/java/dao/CarDAO.java</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/src/java/controller/HomeServlet.java</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/web/mota.jsp</file>
         </group>
     </open-files>
 </project-private>

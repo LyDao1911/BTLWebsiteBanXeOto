@@ -1,14 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
-/**
- *
- * @author Hong Ly
- */
+import java.util.Objects;
+
 public class Brand {
+
     private int brandID;
     private String brandName;
     private String logoURL;
@@ -22,6 +17,25 @@ public class Brand {
         this.logoURL = logoURL;
     }
 
+    // ✅ Chỉ giữ một phiên bản duy nhất của hashCode và equals
+    @Override
+    public int hashCode() {
+        return Objects.hash(brandID);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Brand other = (Brand) obj;
+        return this.brandID == other.brandID;
+    }
+
+    // --- Getters và Setters ---
     public int getBrandID() {
         return brandID;
     }
@@ -50,5 +64,4 @@ public class Brand {
     public String toString() {
         return "Brand{" + "brandID=" + brandID + ", brandName=" + brandName + ", logoURL=" + logoURL + '}';
     }
-    
 }

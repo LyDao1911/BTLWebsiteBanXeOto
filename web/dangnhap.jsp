@@ -20,7 +20,7 @@
         <!-- 🔹 THANH TÁC VỤ -->
         <header class="navbar">
             <div class="logo">
-                <a href="trangchu.jsp" style="text-decoration: none; color: inherit;">
+                <a href="HomeServlet" style="text-decoration: none; color: inherit;">
                     <img src="image/logo.png" alt="Velyra Aero Logo" />
                     <span>VELYRA AERO</span>
                 </a>

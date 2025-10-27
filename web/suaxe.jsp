@@ -20,7 +20,7 @@
 
         <header class="navbar">
             <div class="logo">
-                <a href="trangchu.jsp" style="text-decoration: none; color: inherit;">
+                <a href="HomeServlet" style="text-decoration: none; color: inherit;">
                     <img src="image/logo.png" alt="Velyra Aero Logo" />
                     <span>VELYRA AERO</span>
                 </a>
@@ -42,7 +42,7 @@
                     <ul class="dropdown">
                         <li><a href="themsanpham.jsp">Quản lý Xe / Thêm</a></li>
                         <li><a href="danhmuc.jsp">Quản lý Hãng xe</a></li>
-                        <li><a href="quanlykho.jsp">Quản lý Kho</a></li>
+                        <li><a href="SanPhamServlet">Quản lý Xe</a></li>
                     </ul>
                 </div>
 
@@ -85,84 +85,90 @@
         <div class="container">
 
 
-            <form action="SuaSanPhamServlet" method="post" enctype="multipart/form-data">
+            <form action="SuaXeServlet" method="post" enctype="multipart/form-data">
 
-                <input type="hidden" name="carId" value="[CarID]">
+                <input type="hidden" name="carID" value="${car.carID}">
+                <input type="hidden" name="status" value="${car.status}"> 
+                <div class="top"> 
 
-                <div class="top">
                     <div class="left">
-                        <label class="label">Ảnh hiện tại</label>
+                        <!-- Ảnh chính hiện tại -->
+                        <label class="label">Ảnh chính hiện tại</label>
                         <div class="product-image">
-                            <div class="main-placeholder"><img id="t1" src="https://via.placeholder.com/90x60.png?text=Ảnh+Chính+Cũ" alt="Ảnh chính"></div>
-                            <div class="main-placeholder"><img id="t2" src="https://via.placeholder.com/90x60.png?text=T2" alt="Ảnh phụ 1"></div>
-                            <div class="main-placeholder"><img id="t3" src="https://via.placeholder.com/90x60.png?text=T3" alt="Ảnh phụ 2"></div>
-                            <div class="main-placeholder"><img id="t4" src="https://via.placeholder.com/90x60.png?text=T4" alt="Ảnh phụ 3"></div>
-
+                            <div class="main-placeholder">
+                                <img id="t1"
+                                     src="${car.mainImageURL != null ? car.mainImageURL : 'https://via.placeholder.com/90x60.png?text=Ảnh+Chính'}"
+                                     alt="Ảnh chính" width="200">
+                                <!-- Ảnh cũ -->
+                                <input type="hidden" name="oldImage" value="${car.mainImageURL}">
+                            </div>
                         </div>
 
+                        <!-- Ảnh chính mới -->
                         <label class="label">Ảnh chính (Thay thế)</label>
                         <input type="file" name="mainImage" accept="image/*" onchange="previewMain(event)">
 
+                        <!-- Ảnh mô tả hiện tại -->
+                        <label class="label">Ảnh mô tả hiện tại</label>
+                        <div class="thumbs-preview">
+                            <c:forEach var="thumb" items="${car.thumbs}">
+                                <input type="hidden" name="oldThumbs" value="${thumb}">
+                                <img src="${thumb}" width="90" height="60" style="margin:5px; border:1px solid #ccc;">
+                            </c:forEach>
+                        </div>
+
+                        <!-- Ảnh mô tả thay thế -->
                         <label class="label">Ảnh mô tả (Thay thế)</label>
                         <input type="file" name="thumbs" multiple accept="image/*" onchange="previewThumbs(event)">
                     </div>
-
-                    <div class="right"><br>
+                    <div class="right"><br> 
                         <label class="label">Thương hiệu</label>
-                        <select name="brand" class="input">
-                            <option value="">-- Chọn thương hiệu --</option>
-                            <option value="Toyota">Toyota</option>
-                            <option value="Honda">Honda</option>
-                            <option value="BMW">BMW</option>
-                            <option value="Mercedes">Mercedes</option>
-                            <option value="VinFast" selected>VinFast (Mặc định)</option>
-                        </select>
-
-                        <label class="label">Tên sản phẩm</label>
-                        <input class="input" type="text" name="name" placeholder="Tên sản phẩm" value="Tên sản phẩm cũ">
-
+                        <select name="brandID" class="input">
+                            <option value="">-- Chọn thương hiệu --</option> 
+                            <option value="1" ${car.brandID == 1 ? "selected" : ""}>Toyota</option> 
+                            <option value="2" ${car.brandID == 2 ? "selected" : ""}>Honda</option> 
+                            <option value="3" ${car.brandID == 3 ? "selected" : ""}>BMW</option> 
+                            <option value="4" ${car.brandID == 4 ? "selected" : ""}>Mercedes</option> 
+                            <option value="5" ${car.brandID == 5 ? "selected" : ""}>VinFast</option>
+                        </select> <label class="label">Tên sản phẩm</label>
+                        <input class="input" type="text" name="carName" placeholder="Tên sản phẩm" value="${car.carName}">
                         <label class="label">Giá</label>
-                        <input class="input" type="text" name="price" id="price" placeholder="981.695.000" value="981.695.000">
-
-                        <label class="label">Màu sắc</label>
-                        <div class="color-palette">
-                            <label class="color-item" for="color_red"> <%-- Thêm for --%>
-                                <input type="radio" name="color" value="Red" id="color_red"> <%-- Thêm id --%>
+                        <input class="input" type="text" name="price" id="price" value="${car.price}">
+                        <label class="label">Màu sắc</label> <div class="color-palette">
+                            <label class="color-item"> 
+                                <input type="radio" name="color" value="Red" ${car.color == 'Red' ? 'checked' : ''}>
                                 <span style="background:#b30b0b;"></span>
+                            </label> <label class="color-item"> 
+                                <input type="radio" name="color" value="Yellow" ${car.color == 'Yellow' ? 'checked' : ''}>
+                                <span style="background:#ffd966;"></span> 
+                            </label> 
+                            <label class="color-item"> 
+                                <input type="radio" name="color" value="Pink" ${car.color == 'Pink' ? 'checked' : ''}>
+                                <span style="background:#ff8ad9;"></span> 
                             </label>
-                            <label class="color-item" for="color_yellow"> <%-- Thêm for --%>
-                                <input type="radio" name="color" value="Yellow" id="color_yellow"> <%-- Thêm id --%>
-                                <span style="background:#ffd966;"></span>
-                            </label>
-                            <label class="color-item" for="color_pink"> <%-- Thêm for --%>
-                                <input type="radio" name="color" value="Pink" id="color_pink"> <%-- Thêm id --%>
-                                <span style="background:#ff8ad9;"></span>
-                            </label>
-                            <label class="color-item" for="color_blue"> <%-- Thêm for --%>
-                                <input type="radio" name="color" value="Blue" id="color_blue"> <%-- Thêm id --%>
+                            <label class="color-item"> 
+                                <input type="radio" name="color" value="Blue" ${car.color == 'Blue' ? 'checked' : ''}> 
                                 <span style="background:#00c1d4;"></span>
-                            </label>
-                            <label class="color-item" for="color_green"> <%-- Thêm for --%>
-                                <input type="radio" name="color" value="Green" id="color_green"> <%-- Thêm id --%>
+                            </label> 
+                            <label class="color-item"> 
+                                <input type="radio" name="color" value="Green" ${car.color == 'Green' ? 'checked' : ''}> 
                                 <span style="background:#2a7f2a;"></span>
-                            </label>
-                            <label class="color-item" for="color_brown"> <%-- Thêm for --%>
-                                <input type="radio" name="color" value="Brown" id="color_brown"> <%-- Thêm id --%>
+                            </label> 
+                            <label class="color-item"> 
+                                <input type="radio" name="color" value="Brown" ${car.color == 'Brown' ? 'checked' : ''}>
                                 <span style="background:#d2691e;"></span>
-                            </label>
-                        </div><br><br>
+                            </label> 
+                        </div><br><br> 
                         <label class="label">Số lượng</label>
                         <div class="qty">
                             <button type="button" onclick="changeQty(-1)">-</button>
-                            <input type="number" id="quantity" name="quantity" value="10" min="0">
+                            <input type="number" id="quantity" name="quantity" value="${car.quantity}" min="0"> 
                             <button type="button" onclick="changeQty(1)">+</button>
-                        </div>
-
-                        <label class="label">Mô tả sản phẩm</label>
-                        <textarea name="description" rows="5" placeholder="Nhập mô tả chi tiết...">Đây là mô tả chi tiết cũ của sản phẩm...</textarea>
-
+                        </div> 
+                        <label class="label">Mô tả sản phẩm</label> 
+                        <textarea name="description" rows="5">${car.description}</textarea>
                         <button type="submit" class="btn-submit">CẬP NHẬT SẢN PHẨM</button>
-                    </div>
+                    </div> 
                 </div>
             </form>
         </div>

@@ -81,7 +81,7 @@ public class DangNhapServlet extends HttpServlet {
             session.setAttribute("username", user.getUsername());
             
             // 5. Chuyển hướng đến trang chủ
-            response.sendRedirect("trangchu.jsp");
+            response.sendRedirect("HomeServlet");
         } else {
             // Đăng nhập thất bại
             

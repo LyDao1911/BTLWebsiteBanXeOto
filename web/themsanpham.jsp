@@ -6,8 +6,12 @@
     Author     : Admin
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+
 <!DOCTYPE html>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+
+
+
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -19,7 +23,7 @@
 
         <header class="navbar">
             <div class="logo">
-                <a href="trangchu.jsp" style="text-decoration: none; color: inherit;">
+                <a href="HomeServlet" style="text-decoration: none; color: inherit;">
                     <img src="image/logo.png" alt="Velyra Aero Logo" />
                     <span>VELYRA AERO</span>
                 </a>
@@ -43,7 +47,7 @@
                         <li><a href="ThemSanPhamServlet">Quản lý Xe / Thêm</a></li>
 
                         <li><a href="BrandServlet">Quản lý Hãng xe</a></li>
-                        <li><a href="quanlykho.jsp">Quản lý Kho</a></li>
+                        <li><a href="SanPhamServlet">Quản lý Xe</a></li>
                     </ul>
                 </div>
 
@@ -84,7 +88,7 @@
         <div class="container">
             <h2 class="title">Thêm sản phẩm</h2>
 
-            <form action="ThemSanPhamServlet" method="post" enctype="multipart/form-data">
+            <form action="ThemSanPhamServlet" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
                 <div class="top">
                     <div class="left">
                         <div class="product-image">
@@ -108,7 +112,7 @@
                     <div class="right"><br><br>
                         <label class="label">Thương hiệu</label>
 
-                       
+
                         <select name="brandID" class="input" required>
                             <option value="">-- Chọn thương hiệu --</option>
 
@@ -208,11 +212,21 @@
             }
 
             // ✅ Check màu
+
             document.querySelectorAll('.color-item').forEach(item => {
                 item.addEventListener('click', () => {
-                    const input = item.querySelector('input');
-                    input.checked = !input.checked;
-                    item.classList.toggle('selected', input.checked);
+                    // 1. Xóa class 'selected' khỏi tất cả các ô khác
+                    document.querySelectorAll('.color-item').forEach(otherItem => {
+                        otherItem.classList.remove('selected');
+                    });
+
+                    const input = item.querySelector('input[type="radio"]');
+
+                    // 2. Tự động click vào input radio để nó được chọn
+                    input.checked = true;
+
+                    // 3. Thêm class 'selected' cho ô đang được chọn
+                    item.classList.add('selected');
                 });
             });
 
