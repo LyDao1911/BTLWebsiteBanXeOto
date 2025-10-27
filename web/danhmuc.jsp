@@ -129,7 +129,7 @@
                             <td><%= b.getBrandName()%></td>
                             <td>
                                 <% if (b.getLogoURL() != null && !b.getLogoURL().isEmpty()) {%>
-                                <img src="<%= request.getContextPath() %>/uploads/<%= b.getLogoURL()%>" alt="Logo" width="80" height="60">
+                                <img src="<%= request.getContextPath() %>/uploads/logos/<%= b.getLogoURL()%>" alt="Logo" width="80" height="60">
                                 <% } else { %>
                                 Không có ảnh
                                 <% } %>

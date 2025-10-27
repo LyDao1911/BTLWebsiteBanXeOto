@@ -103,10 +103,10 @@
 
                         <label class="label">Ảnh chính</label>
                         <%-- name="mainImage" khớp với Servlet --%>
-                        <input type="file" name="mainImage" accept="image/*" onchange="previewMain(event)">
+                        <input type="file" name="mainImage" accept="uploads/*" onchange="previewMain(event)">
 
                         <label class="label">Ảnh mô tả (Chọn tối đa 3 ảnh)</label>
-                        <input type="file" name="thumbs" multiple accept="image/*" onchange="previewThumbs(event)">
+                        <input type="file" name="thumbs" multiple accept="uploads/*" onchange="previewThumbs(event)">
                     </div>
 
                     <div class="right"><br><br>
