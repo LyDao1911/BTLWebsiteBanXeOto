@@ -102,7 +102,7 @@
 
                                 <c:set var="cleanLogoURL" value="${fn:substringAfter(brand.logoURL, '/')}" />
 
-                                <img src="${pageContext.request.contextPath}/${cleanLogoURL}" alt="${brand.brandName}" />
+                                <img src="${pageContext.request.contextPath}/uploads/logos/${brand.logoURL}" alt="${brand.brandName}" />
 
                                 <p>${brand.brandName}</p> 
                             </div>
@@ -130,7 +130,7 @@
                                     <a href="mota.jsp?carID=${car.carID}">
                                         <!-- Ảnh xe -->
                                         <c:set var="imageDirName" value="${car.carName}" />
-                                        <img src="${pageContext.request.contextPath}/images/${imageDirName}/Black/${car.mainImageURL}" alt="${car.carName}" />
+                                        <img src="uploads/${car.mainImageURL}" alt="${car.carName}">
 
                                         <!-- Tên xe -->
                                         <p class="car-name">${car.carName}</p>
