@@ -5,8 +5,18 @@
 package controller;
 
 import dao.CarDAO;
+import dao.BrandDAO;
+import model.Brand;
+import model.Car;
+
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,23 +24,21 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
-import java.math.BigDecimal;
-import java.nio.file.Paths;
-import model.Car;
 
 /**
  *
  * @author Admin
  */
 @MultipartConfig(
-        fileSizeThreshold = 1024 * 1024 * 2, // 2MB
-        maxFileSize = 1024 * 1024 * 10, // 10MB
-        maxRequestSize = 1024 * 1024 * 50 // 50MB
+        fileSizeThreshold = 1024 * 1024 * 2,
+        maxFileSize = 1024 * 1024 * 10,
+        maxRequestSize = 1024 * 1024 * 50
 )
 @WebServlet(name = "SuaXeServlet", urlPatterns = {"/SuaXeServlet"})
 public class SuaXeServlet extends HttpServlet {
 
-    private final CarDAO dao = new CarDAO();
+    private final CarDAO carDAO = new CarDAO();
+    private final BrandDAO brandDAO = new BrandDAO();
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -44,18 +52,7 @@ public class SuaXeServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet SuaXeServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet SuaXeServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -70,25 +67,32 @@ public class SuaXeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String carIdParam = request.getParameter("carId");
-        if (carIdParam == null) {
-            carIdParam = request.getParameter("carID"); // fallback
-        }
         try {
-            int carID = Integer.parseInt(carIdParam);
-            Car car = dao.getCarById(carID);
-            if (car != null) {
-                request.setAttribute("car", car);
-                request.getRequestDispatcher("suaxe.jsp").forward(request, response);
-                return;
-            } else {
-                response.getWriter().println("Không tìm thấy xe có ID: " + carID);
-                return;
+            String carIdParam = request.getParameter("carId");
+            if (carIdParam == null) {
+                carIdParam = request.getParameter("carID");
             }
+
+            int carId = Integer.parseInt(carIdParam);
+            Car car = carDAO.getCarById(carId);
+
+            if (car != null) {
+                // Lấy thêm ảnh phụ
+                car.setThumbs(carDAO.getCarThumbs(carId));
+
+                List<Brand> brandList = brandDAO.getAllBrands();
+                request.setAttribute("brandList", brandList);
+                request.setAttribute("car", car);
+
+                RequestDispatcher rd = request.getRequestDispatcher("suaxe.jsp");
+                rd.forward(request, response);
+            } else {
+                response.getWriter().println("Không tìm thấy xe có ID = " + carId);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             response.getWriter().println("Lỗi khi lấy thông tin xe: " + e.getMessage());
-            return;
         }
     }
 
@@ -106,119 +110,65 @@ public class SuaXeServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         try {
-            // Lấy carId (chấp nhận cả "carId" và "carID")
-            String carIdParam = request.getParameter("carId");
-            if (carIdParam == null) {
-                carIdParam = request.getParameter("carID");
-            }
-            int carId = Integer.parseInt(carIdParam);
-
-            // Lấy các tham số khác (tên tham số phải trùng với name trong form JSP)
+            // 1️⃣ LẤY THÔNG TIN CƠ BẢN
+            int carId = Integer.parseInt(request.getParameter("carId"));
             String carName = request.getParameter("carName");
-            String brandIdParam = request.getParameter("brandID");
-            if (brandIdParam == null) {
-                brandIdParam = request.getParameter("brandId");
-            }
-            int brandId = Integer.parseInt(brandIdParam);
-
-            String priceRaw = request.getParameter("price");
-            if (priceRaw == null) {
-                priceRaw = "0";
-            }
-
-            // BẮT ĐẦU SỬA LỖI PRICE PARSING
-            // Loại bỏ CẢ dấu chấm (.) và dấu phẩy (,) để xử lý mọi định dạng phân nhóm
-            String priceStr = priceRaw.replace(".", "").replace(",", "").trim();
+            int brandId = Integer.parseInt(request.getParameter("brandID"));
+            String priceStr = request.getParameter("price").replace(".", "").replace(",", "").trim();
             BigDecimal price = new BigDecimal(priceStr);
-            // KẾT THÚC SỬA LỖI PRICE PARSING
-
             String color = request.getParameter("color");
-            String quantityParam = request.getParameter("quantity");
-            if (quantityParam == null) {
-                quantityParam = "0";
-            }
-            int quantity = Integer.parseInt(quantityParam);
-
+            int quantity = Integer.parseInt(request.getParameter("quantity"));
             String description = request.getParameter("description");
             String status = request.getParameter("status");
 
-            // ... (Giữ nguyên logic xử lý ảnh và tạo đối tượng Car) ...
-            // Xử lý ảnh chính - lưu file nếu có
-            Part mainPart = null;
-            try {
-                mainPart = request.getPart("mainImage");
-            } catch (IllegalStateException ex) {
-                // multipart có thể gây lỗi nếu config server khác, cho qua
-                mainPart = null;
-            }
+            
+            // 2️⃣ XỬ LÝ ẢNH CHÍNH
+            Part mainPart = request.getPart("mainImage");
+            String oldMainImage = request.getParameter("oldImage");
+            String uploadPath = getServletContext().getRealPath("/uploads");
+            String mainImagePath = oldMainImage;
 
-            String oldMain = request.getParameter("oldImage"); // tên hidden input chứa đường dẫn cũ
-            String mainImagePath;
             if (mainPart != null && mainPart.getSize() > 0) {
                 String fileName = Paths.get(mainPart.getSubmittedFileName()).getFileName().toString();
-                String uploadPath = getServletContext().getRealPath("/images");
                 mainPart.write(uploadPath + "/" + fileName);
-                mainImagePath = "images/" + fileName;
-            } else {
-                mainImagePath = oldMain;
+                mainImagePath = fileName;
             }
 
-            // Xử lý ảnh mô tả (thumbs)
+            // 3️⃣ XỬ LÝ ẢNH PHỤ
             String[] oldThumbs = request.getParameterValues("oldThumbs");
-            java.util.Collection<Part> parts = request.getParts();
-            java.util.List<String> newThumbs = new java.util.ArrayList<>();
-            String uploadPath = getServletContext().getRealPath("/images");
-            for (Part part : parts) {
-                // đảm bảo name của input file mô tả là "thumbs"
+            List<String> thumbs = new ArrayList<>();
+            for (Part part : request.getParts()) {
                 if ("thumbs".equals(part.getName()) && part.getSize() > 0) {
                     String fileName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
                     part.write(uploadPath + "/" + fileName);
-                    newThumbs.add("images/" + fileName);
+                    thumbs.add(fileName);
                 }
             }
 
-            java.util.List<String> finalThumbs = new java.util.ArrayList<>();
-            if (!newThumbs.isEmpty()) {
-                finalThumbs.addAll(newThumbs);
-            } else if (oldThumbs != null) {
-                finalThumbs.addAll(java.util.Arrays.asList(oldThumbs));
+            // Nếu không upload ảnh phụ mới, giữ lại ảnh cũ
+            if (thumbs.isEmpty() && oldThumbs != null) {
+                thumbs.addAll(Arrays.asList(oldThumbs));
             }
 
-            // Tạo object Car (đảm bảo constructor và setter trùng với model của bạn)
+            // 4️⃣ TẠO OBJECT CAR
             Car car = new Car(carId, carName, brandId, price, color, description, status);
             car.setMainImageURL(mainImagePath);
-            car.setThumbs(finalThumbs);
+            car.setThumbs(thumbs);
 
-            // Debugging log (Giữ nguyên để kiểm tra dữ liệu)
-            System.out.println(">>> [DEBUG] Chuẩn bị cập nhật xe:");
-            System.out.println("    CarID: " + carId);
-            System.out.println("    Tên xe: " + carName);
-            System.out.println("    BrandID: " + brandId);
-            System.out.println("    Giá: " + price);
-            System.out.println("    Màu: " + color);
-            System.out.println("    Mô tả: " + description);
-            System.out.println("    Trạng thái: " + status);
-            System.out.println("    Số lượng tồn: " + quantity);
-            System.out.println("    Ảnh chính: " + mainImagePath);
-            System.out.println("    Ảnh mô tả: " + finalThumbs);
-
-            // Gọi đúng phương thức trong CarDAO 
-            boolean updated = dao.updateCarWithStock(car, quantity);
+            // 5️⃣ CẬP NHẬT DATABASE
+            boolean updated = carDAO.updateCarWithStock(car, quantity);
 
             if (updated) {
                 response.sendRedirect("SanPhamServlet?msg=success");
             } else {
-                // Trường hợp update thất bại ở đây, cần kiểm tra DAO
-                System.err.println("Update thất bại cho CarID=" + carId + ". KIỂM TRA LẠI CARDAO VÀ SQL.");
+                System.err.println("❌ Update thất bại cho CarID=" + carId);
                 response.sendRedirect("SanPhamServlet?msg=fail");
             }
 
-        } catch (NumberFormatException nfe) {
-            // Lỗi nếu không parse được CarID, BrandID, Price, hoặc Quantity
-            nfe.printStackTrace();
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
             response.sendRedirect("SanPhamServlet?msg=invalid_input");
         } catch (Exception e) {
-            // Lỗi chung: Thường là IOException hoặc ServletException
             e.printStackTrace();
             response.sendRedirect("SanPhamServlet?msg=error");
         }

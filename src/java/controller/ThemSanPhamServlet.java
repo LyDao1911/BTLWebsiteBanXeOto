@@ -21,10 +21,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+import java.io.File;
 import org.apache.commons.fileupload2.core.FileItem;
 import org.apache.commons.fileupload2.core.DiskFileItemFactory;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
@@ -34,6 +37,7 @@ import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
  * @author Hong Ly
  */
 @WebServlet(name = "ThemSanPhamServlet", urlPatterns = {"/ThemSanPhamServlet"})
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 1, maxFileSize = 1024 * 1024 * 10, maxRequestSize = 1024 * 1024 * 50)
 public class ThemSanPhamServlet extends HttpServlet {
 
     private final BrandDAO brandDAO = new BrandDAO();
@@ -132,12 +136,14 @@ public class ThemSanPhamServlet extends HttpServlet {
                     carDAO.insertCarImage(mainImg);
                 }
 
-                // 6c. Lưu các Ảnh Phụ (nếu có)
-                for (FileItem thumb : thumbItems) {
-                    if (thumb != null && thumb.getSize() > 0) {
-                        String thumbName = saveFile(thumb, request);
-                        CarImage thumbImg = new CarImage(0, newCarId, thumbName, false);
-                        carDAO.insertCarImage(thumbImg);
+                // 6c. Lưu các Ảnh Phụ (thumbs) nếu có
+                if (thumbItems != null && !thumbItems.isEmpty()) {
+                    for (FileItem thumbItem : thumbItems) {
+                        if (thumbItem.getSize() > 0) {
+                            String thumbName = saveFile(thumbItem, request); // dùng lại hàm saveFile()
+                            CarImage thumbImg = new CarImage(0, newCarId, thumbName, false);
+                            carDAO.insertCarImage(thumbImg);
+                        }
                     }
                 }
             } else {

@@ -5,6 +5,8 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -40,8 +42,8 @@
                         Quản trị <i class="fa-solid fa-caret-down"></i>
                     </span>
                     <ul class="dropdown">
-                        <li><a href="themsanpham.jsp">Quản lý Xe / Thêm</a></li>
-                        <li><a href="danhmuc.jsp">Quản lý Hãng xe</a></li>
+                        <li><a href="ThemSanPhamServlet">Quản lý Xe / Thêm</a></li>
+                        <li><a href="BrandServlet">Quản lý Hãng xe</a></li>
                         <li><a href="SanPhamServlet">Quản lý Xe</a></li>
                     </ul>
                 </div>
@@ -87,7 +89,7 @@
 
             <form action="SuaXeServlet" method="post" enctype="multipart/form-data">
 
-                <input type="hidden" name="carID" value="${car.carID}">
+                <input type="hidden" name="carId" value="${car.carID}">
                 <input type="hidden" name="status" value="${car.status}"> 
                 <div class="top"> 
 
@@ -97,7 +99,7 @@
                         <div class="product-image">
                             <div class="main-placeholder">
                                 <img id="t1"
-                                     src="${car.mainImageURL != null ? car.mainImageURL : 'https://via.placeholder.com/90x60.png?text=Ảnh+Chính'}"
+                                     src="${pageContext.request.contextPath}/uploads/${car.mainImageURL}"
                                      alt="Ảnh chính" width="200">
                                 <!-- Ảnh cũ -->
                                 <input type="hidden" name="oldImage" value="${car.mainImageURL}">
@@ -113,7 +115,10 @@
                         <div class="thumbs-preview">
                             <c:forEach var="thumb" items="${car.thumbs}">
                                 <input type="hidden" name="oldThumbs" value="${thumb}">
-                                <img src="${thumb}" width="90" height="60" style="margin:5px; border:1px solid #ccc;">
+                                <img src="${pageContext.request.contextPath}/uploads/${thumb}"
+                                     alt="Ảnh mô tả"
+                                     width="90" height="60"
+                                     style="margin:5px; border:1px solid #ccc;">
                             </c:forEach>
                         </div>
 
@@ -123,13 +128,16 @@
                     </div>
                     <div class="right"><br> 
                         <label class="label">Thương hiệu</label>
-                        <select name="brandID" class="input">
-                            <option value="">-- Chọn thương hiệu --</option> 
-                            <option value="1" ${car.brandID == 1 ? "selected" : ""}>Toyota</option> 
-                            <option value="2" ${car.brandID == 2 ? "selected" : ""}>Honda</option> 
-                            <option value="3" ${car.brandID == 3 ? "selected" : ""}>BMW</option> 
-                            <option value="4" ${car.brandID == 4 ? "selected" : ""}>Mercedes</option> 
-                            <option value="5" ${car.brandID == 5 ? "selected" : ""}>VinFast</option>
+                        <select name="brandID" class="input" required>
+                            <option value="">-- Chọn thương hiệu --</option>
+                            <c:forEach var="brand" items="${brandList}">
+                                <option value="${brand.brandID}"
+                                        ${brand.brandID == car.brandID ? 'selected' : ''}>
+                                    ${brand.brandName}
+                                </option>
+                            </c:forEach>
+                        </select>
+
                         </select> <label class="label">Tên sản phẩm</label>
                         <input class="input" type="text" name="carName" placeholder="Tên sản phẩm" value="${car.carName}">
                         <label class="label">Giá</label>

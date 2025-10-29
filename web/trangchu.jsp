@@ -127,10 +127,10 @@
                         <div class="car-list">
                             <c:forEach var="car" items="${entry.value}">
                                 <div class="car-card">
-                                    <a href="mota.jsp?carID=${car.carID}">
+                                    <a href="MotaServlet?carID=${car.carID}">
                                         <!-- Ảnh xe -->
                                         <c:set var="imageDirName" value="${car.carName}" />
-                                        <img src="uploads/${car.mainImageURL}" alt="${car.carName}">
+                                        <img src="${pageContext.request.contextPath}/uploads/${car.mainImageURL}" alt="${car.carName}">
 
                                         <!-- Tên xe -->
                                         <p class="car-name">${car.carName}</p>

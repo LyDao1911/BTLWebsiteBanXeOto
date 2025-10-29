@@ -195,7 +195,11 @@ public class CarDAO {
                     car.setStatus(rs.getString("Status"));
                     car.setQuantity(rs.getInt("Quantity"));
                     // CẬP NHẬT: Gán MainImageURL (đã có trong query JOIN)
-                    car.setMainImageURL(rs.getString("MainImageURL"));
+                    String mainImage = rs.getString("MainImageURL");
+                    if (mainImage != null && !mainImage.startsWith("uploads/")) {
+                        mainImage = mainImage;
+                    }
+                    car.setMainImageURL(mainImage);
                 }
             }
         } catch (Exception e) {
@@ -271,41 +275,45 @@ public class CarDAO {
 
             // 🟢 3. SỬA LỖI 2: Cập nhật hoặc Thêm mới ảnh chính
             if (car.getMainImageURL() != null && !car.getMainImageURL().isEmpty()) {
+                String imgName = car.getMainImageURL();
+                if (imgName.startsWith("uploads/")) {
+                    imgName = imgName.substring("uploads/".length());
+                }
+
                 try (PreparedStatement imgPs = con.prepareStatement(imageMainQuery)) {
-                    imgPs.setString(1, car.getMainImageURL());
+                    imgPs.setString(1, imgName);
                     imgPs.setInt(2, car.getCarID());
                     int imgRows = imgPs.executeUpdate();
-                    System.out.println(">>> [DAO] Cập nhật ảnh chính: " + imgRows + " dòng.");
 
-                    if (imgRows == 0) { // Nếu UPDATE thất bại (chưa có record ảnh chính)
+                    if (imgRows == 0) {
                         try (PreparedStatement insertPs = con.prepareStatement(insertMainImage)) {
                             insertPs.setInt(1, car.getCarID());
-                            insertPs.setString(2, car.getMainImageURL());
+                            insertPs.setString(2, imgName);
                             insertPs.executeUpdate();
-                            System.out.println("ℹ️ [DAO] Chưa có ảnh chính → Đã THÊM MỚI ảnh chính.");
                         }
                     }
                 }
             }
 
             // 🟢 4. Ảnh mô tả (Thumbs)
-            if (car.getThumbs() != null) { // Chỉ kiểm tra null, danh sách trống thì vẫn giữ nguyên ảnh cũ
+            // 🟢 4. Ảnh mô tả (Thumbs)
+            if (car.getThumbs() != null) {
                 try (PreparedStatement delPs = con.prepareStatement(deleteThumbsQuery)) {
                     delPs.setInt(1, car.getCarID());
-                    int deleted = delPs.executeUpdate();
-                    System.out.println(">>> [DAO] Đã xóa " + deleted + " ảnh phụ cũ.");
+                    delPs.executeUpdate();
                 }
 
-                // Nếu có ảnh mới hoặc ảnh cũ được gửi lại, thì thêm vào
                 if (!car.getThumbs().isEmpty()) {
                     try (PreparedStatement insPs = con.prepareStatement(insertThumbQuery)) {
                         for (String thumb : car.getThumbs()) {
+                            if (thumb.startsWith("uploads/")) {
+                                thumb = thumb.substring("uploads/".length());
+                            }
                             insPs.setInt(1, car.getCarID());
                             insPs.setString(2, thumb);
                             insPs.addBatch();
                         }
                         insPs.executeBatch();
-                        System.out.println(">>> [DAO] Đã thêm mới " + car.getThumbs().size() + " ảnh phụ.");
                     }
                 }
             }
@@ -504,7 +512,11 @@ public class CarDAO {
             ps.setInt(1, carID);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    thumbs.add(rs.getString("ImageURL"));
+                    String img = rs.getString("ImageURL");
+                    if (img != null && !img.startsWith("uploads/")) {
+                        img = img;
+                    }
+                    thumbs.add(img);
                 }
             }
         } catch (Exception e) {
@@ -512,5 +524,5 @@ public class CarDAO {
         }
         return thumbs;
     }
-    
+
 }

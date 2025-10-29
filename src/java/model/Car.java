@@ -28,6 +28,8 @@ public class Car {
     // Danh sách ảnh phụ (thumbs)
     private List<String> thumbs;
 
+    
+
     public Car() {
     }
 
