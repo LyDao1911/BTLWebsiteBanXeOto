@@ -3,25 +3,23 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package dao;
+
 import javax.swing.JOptionPane;
+
 /**
  *
  * @author Hong Ly
  */
 public class tables {
+
     public static void main(String[] args) {
         try {
-            
-            
-            // THỨ TỰ TẠO BẢNG CƠ BẢN (CHỈ CÁC BẢNG CHA):
-            
-            // 1. BRAND TABLE (Không tham chiếu ai)
-           String brandTable = "CREATE TABLE IF NOT EXISTS brand ("
-                   + "BrandID INT AUTO_INCREMENT PRIMARY KEY,"
-                   + "BrandName VARCHAR(100) NOT NULL UNIQUE,"
+            String brandTable = "CREATE TABLE IF NOT EXISTS brand ("
+                    + "BrandID INT AUTO_INCREMENT PRIMARY KEY,"
+                    + "BrandName VARCHAR(100) NOT NULL UNIQUE,"
                     + "LogoURL VARCHAR(255)"
                     + ") ";
-            
+
             // 2. CAR TABLE (Chỉ tham chiếu BrandID)
             String carTable = "CREATE TABLE IF NOT EXISTS car ("
                     + "CarID INT AUTO_INCREMENT PRIMARY KEY,"
@@ -33,7 +31,7 @@ public class tables {
                     + "Status VARCHAR(50),"
                     + "FOREIGN KEY (BrandID) REFERENCES brand(BrandID)"
                     + ")";
-            
+
             // 3. USERACCOUNT TABLE (Không tham chiếu ai)
             String userAccountTable = "CREATE TABLE IF NOT EXISTS useraccount ("
                     + "UserID INT AUTO_INCREMENT PRIMARY KEY,"
@@ -43,7 +41,7 @@ public class tables {
                     + "Role VARCHAR(50) NOT NULL,"
                     + "Status VARCHAR(50) NOT NULL"
                     + ")";
-            
+
             // 4. CUSTOMER TABLE (Tham chiếu Username tới useraccount)
             String customerTable = "CREATE TABLE IF NOT EXISTS customer ("
                     + "CustomerID INT AUTO_INCREMENT PRIMARY KEY,"
@@ -54,9 +52,8 @@ public class tables {
                     + "Username VARCHAR(100) UNIQUE," // Phải là UNIQUE để làm Khóa ngoại
                     + "FOREIGN KEY (Username) REFERENCES useraccount(Username)"
                     + ")";
-            
+
             // BẮT ĐẦU TẠO CÁC BẢNG CON:
-            
             // 5. CARIMAGE TABLE (Tham chiếu CarID)
             String carImageTable = "CREATE TABLE IF NOT EXISTS carimage ("
                     + "ImageID INT AUTO_INCREMENT PRIMARY KEY,"
@@ -65,7 +62,7 @@ public class tables {
                     + "IsMain TINYINT(1)," // Dùng TINYINT(1) cho BOOLEAN trong MySQL
                     + "FOREIGN KEY (CarID) REFERENCES car(CarID) ON DELETE CASCADE"
                     + ")";
-            
+
             // 6. CARSTOCK TABLE (Tham chiếu BrandID và CarID)
             String carStockTable = "CREATE TABLE IF NOT EXISTS carstock ("
                     + "StockID INT AUTO_INCREMENT PRIMARY KEY,"
@@ -76,7 +73,7 @@ public class tables {
                     + "FOREIGN KEY (BrandID) REFERENCES brand(BrandID),"
                     + "FOREIGN KEY (CarID) REFERENCES car(CarID) ON DELETE CASCADE"
                     + ")";
-            
+
             // 7. ORDER TABLE (Tham chiếu CustomerID)
             String orderTable = "CREATE TABLE IF NOT EXISTS `order` ("
                     + "OrderID INT AUTO_INCREMENT PRIMARY KEY,"
@@ -88,7 +85,7 @@ public class tables {
                     + "Note TEXT,"
                     + "FOREIGN KEY (CustomerID) REFERENCES customer(CustomerID)"
                     + ")";
-            
+
             // 8. ORDERDETAIL TABLE (Tham chiếu OrderID và CarID)
             String orderDetailTable = "CREATE TABLE IF NOT EXISTS orderdetail ("
                     + "OrderDetailID INT AUTO_INCREMENT PRIMARY KEY,"
@@ -101,7 +98,7 @@ public class tables {
                     + "FOREIGN KEY (OrderID) REFERENCES `order`(OrderID) ON DELETE CASCADE,"
                     + "FOREIGN KEY (CarID) REFERENCES car(CarID)"
                     + ")";
-            
+
             // 9. PAYMENT TABLE (Tham chiếu OrderID)
             String paymentTable = "CREATE TABLE IF NOT EXISTS payment ("
                     + "PaymentID INT AUTO_INCREMENT PRIMARY KEY,"
@@ -112,7 +109,7 @@ public class tables {
                     + "Status VARCHAR(50),"
                     + "FOREIGN KEY (OrderID) REFERENCES `order`(OrderID) ON DELETE CASCADE"
                     + ")";
-            
+
             // 10. SUPPORTREQUEST TABLE (Tham chiếu CustomerID và RespondentID)
             String supportRequestTable = "CREATE TABLE IF NOT EXISTS supportrequest ("
                     + "SupportID INT AUTO_INCREMENT PRIMARY KEY,"
@@ -130,21 +127,54 @@ public class tables {
                     + "FOREIGN KEY (CustomerID) REFERENCES customer(CustomerID),"
                     + "FOREIGN KEY (RespondentID) REFERENCES useraccount(UserID)"
                     + ")";
-            
+     
+            String supplierTable = "CREATE TABLE IF NOT EXISTS supplier ("
+                    + "SupplierID INT AUTO_INCREMENT PRIMARY KEY,"
+                    + "SupplierName VARCHAR(200) NOT NULL UNIQUE,"
+                    + "PhoneNumber VARCHAR(20),"
+                    + "Address TEXT,"
+                    + "Email VARCHAR(100) UNIQUE"
+                    + ")";
+
+            // --- 12. BẢNG HÓA ĐƠN NHẬP (SỬA LẠI) ---
+            // (Đã bỏ UserID và Khóa ngoại tham chiếu đến useraccount)
+            String purchaseInvoiceTable = "CREATE TABLE IF NOT EXISTS purchaseinvoice ("
+                    + "InvoiceID INT AUTO_INCREMENT PRIMARY KEY,"
+                    + "SupplierID INT NOT NULL," // MaNCC
+                    + "InvoiceDate DATETIME DEFAULT CURRENT_TIMESTAMP," // NgayNhap
+                    + "TotalAmount DECIMAL(18, 2) NOT NULL," // TongTien
+                    + "FOREIGN KEY (SupplierID) REFERENCES supplier(SupplierID)"
+                    + ")";
+
+            // --- 13. BẢNG CHI TIẾT HÓA ĐƠN NHẬP (GIỮ NGUYÊN) ---
+            String purchaseInvoiceDetailTable = "CREATE TABLE IF NOT EXISTS purchaseinvoicedetail ("
+                    + "DetailID INT AUTO_INCREMENT PRIMARY KEY,"
+                    + "InvoiceID INT NOT NULL,"
+                    + "CarID INT NOT NULL,"
+                    + "Quantity INT NOT NULL,"
+                    + "ImportPrice DECIMAL(18, 2) NOT NULL,"
+                    + "Subtotal DECIMAL(18, 2) NOT NULL,"
+                    + "FOREIGN KEY (InvoiceID) REFERENCES purchaseinvoice(InvoiceID) ON DELETE CASCADE,"
+                    + "FOREIGN KEY (CarID) REFERENCES car(CarID)"
+                    + ")";
+
             String adminAccountDetails = "INSERT INTO useraccount(Username, Password, FullName, Role, Status) VALUES('admin', 'adminpass', 'Quản trị viên', 'Admin', 'Active')";
-            
+
             DbOperations.setDataOrDelete(brandTable, "Bảng Brand đã được tạo thành công!");
             DbOperations.setDataOrDelete(carTable, "Bảng Car đã được tạo thành công!");
             DbOperations.setDataOrDelete(userAccountTable, "Bảng UserAccount đã được tạo thành công!");
             DbOperations.setDataOrDelete(customerTable, "Bảng Customer đã được tạo thành công!");
-            
+
             DbOperations.setDataOrDelete(carImageTable, "Bảng CarImage đã được tạo thành công!");
             DbOperations.setDataOrDelete(carStockTable, "Bảng CarStock đã được tạo thành công!");
             DbOperations.setDataOrDelete(orderTable, "Bảng Order đã được tạo thành công!");
             DbOperations.setDataOrDelete(orderDetailTable, "Bảng OrderDetail đã được tạo thành công!");
             DbOperations.setDataOrDelete(paymentTable, "Bảng Payment đã được tạo thành công!");
             DbOperations.setDataOrDelete(supportRequestTable, "Bảng SupportRequest đã được tạo thành công!");
-            
+
+            DbOperations.setDataOrDelete(supplierTable, "Bảng Supplier đã được tạo thành công!");
+            DbOperations.setDataOrDelete(purchaseInvoiceTable, "Bảng PurchaseInvoice đã được tạo thành công!");
+            DbOperations.setDataOrDelete(purchaseInvoiceDetailTable, "Bảng PurchaseInvoiceDetail đã được tạo thành công!");
             DbOperations.setDataOrDelete(adminAccountDetails, "Thông tin quản trị viên được thêm thành công!");
 
         } catch (Exception e) {
