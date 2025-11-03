@@ -32,71 +32,7 @@
             // Lấy thông báo (nếu có) từ quá trình xử lý form
             String msg = request.getParameter("msg");
         %>
-        <!-- 🧭 HEADER -->
-
-        <header class="navbar">
-            <div class="logo">
-                <a href="HomeServlet" style="text-decoration: none; color: inherit;">
-                    <img src="image/logo.png" alt="Velyra Aero Logo" />
-                    <span>VELYRA AERO</span>
-                </a>
-            </div>
-
-
-            <nav class="menu">
-                <a href="hotro.jsp">Hỗ trợ</a>
-
-                <% if (username != null) { %>
-
-                <%-- ✅ Nếu là ADMIN --%>
-                <% if ("admin".equals(username)) {%>
-                <!-- MENU QUẢN TRỊ -->
-                <div class="admin-menu account-menu">
-                    <span class="admin-name account-name">
-                        Quản trị <i class="fa-solid fa-caret-down"></i>
-                    </span>
-                    <ul class="dropdown">
-                        <li><a href="themsanpham.jsp">Quản lý Xe / Thêm</a></li>
-                        <li><a href="danhmuc.jsp">Quản lý Hãng xe</a></li>
-                        <li><a href="quanlykho.jsp">Quản lý Kho</a></li>
-                    </ul>
-                </div>
-
-                <!-- MENU TÀI KHOẢN ADMIN -->
-                <div class="account-menu">
-                    <span class="account-name">
-                        👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
-                    </span>
-                    <ul class="dropdown">
-                        <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
-                        <li><a href="dangxuat.jsp">Đăng xuất</a></li>
-                    </ul>
-                </div>
-
-                <% } else {%>
-                <%-- ✅ Nếu là NGƯỜI DÙNG THƯỜNG --%>
-                <div class="account-menu">
-                    <span class="account-name">
-                        👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
-                    </span>
-                    <ul class="dropdown">
-                        <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
-                        <li><a href="giohang.jsp">Giỏ hàng</a></li>
-                        <li><a href="donmua.jsp">Đơn mua</a></li>
-                        <li><a href="dangxuat.jsp">Đăng xuất</a></li>
-                    </ul>
-                </div>
-                <% } %>
-
-                <% } else { %>
-                <%-- ✅ Nếu chưa đăng nhập --%>
-                <a href="dangnhap.jsp">Đăng nhập</a>
-                <a href="dangky.jsp">Đăng ký</a>
-                <% }%>
-            </nav>
-
-
-        </header>   
+        <jsp:include page="header.jsp" />   
 
         <div class="profile-container">
 
@@ -138,39 +74,6 @@
         </div>
 
 
-        <!-- FOOTER -->
-        <footer class="footer">
-            <h3>THÔNG TIN LIÊN HỆ</h3>
-            <div class="footer-container">
-                <!-- Cột 1 -->
-                <div class="footer-column">
-                    <p class="name">Đào Thị Hồng Lý</p>
-                    <p><i class="fa-solid fa-calendar"></i> 2356778</p>
-                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
-                    <p><i class="fa-solid fa-location-dot"></i> hn</p>
-                    <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
-                </div>
-                <!-- Cột 2 -->
-                <div class="footer-column">
-                    <p class="name">Đào Thị Hồng Lý</p>
-                    <p><i class="fa-solid fa-calendar"></i> 2356778</p>
-                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
-                    <p><i class="fa-solid fa-location-dot"></i> hn</p>
-                    <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
-                </div>
-                <!-- Cột 3 -->
-                <div class="footer-column">
-                    <p class="name">Đào Thị Hồng Lý</p>
-                    <p><i class="fa-solid fa-calendar"></i> 2356778</p>
-                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
-                    <p><i class="fa-solid fa-location-dot"></i> hn</p>
-                    <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
-                </div>
-            </div>
-            <div class="footer-note">
-                Điểm đến tin cậy cho những ai tìm kiếm sự hoàn hảo trong từng chi tiết, 
-                từ lựa chọn xe đến dịch vụ hậu mãi tận tâm.
-            </div>
-        </footer>
+        <jsp:include page="footer.jsp" />
     </body>
 </html>

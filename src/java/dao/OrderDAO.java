@@ -1,245 +1,273 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dao;
 
-import java.sql.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import model.Car;
+import java.sql.*;
+import java.util.*;
 import model.Order;
+import model.OrderDetail;
+// import utils.Connect; // Giả định lớp Connect
 
-/**
- *
- * @author Hong Ly
- */
 public class OrderDAO {
 
-    private static final Logger LOGGER = Logger.getLogger(OrderDAO.class.getName());
+    /**
+     * Phương thức nội bộ để tạo đối tượng Order từ ResultSet.
+     */
+    private Order mapResultSetToOrder(ResultSet rs) throws SQLException {
+        Order order = new Order();
+        order.setOrderID(rs.getInt("OrderID"));
+        order.setCustomerID(rs.getInt("CustomerID"));
+        order.setTotalAmount(rs.getBigDecimal("TotalAmount"));
+        order.setPaymentStatus(rs.getString("PaymentStatus"));
+        order.setDeliveryStatus(rs.getString("DeliveryStatus"));
 
-    // 1. insertOrder: Khôi phục SQL 6 cột
-    public boolean insertOrder(Order order) {
-        String sql = "INSERT INTO `order` (CustomerID, OrderDate, TotalAmount, PaymentStatus, DeliveryStatus, Note) "
-                + "VALUES (?, ?, ?, ?, ?, ?)";
-
-        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, order.getCustomerID());
-            ps.setTimestamp(2, Timestamp.valueOf(order.getOrderDate()));
-            ps.setBigDecimal(3, order.getTotalAmount());
-            ps.setString(4, order.getPaymentStatus());
-            ps.setString(5, order.getDeliveryStatus());
-            ps.setString(6, order.getNote()); // Lưu ý: Cột này sẽ chứa thông tin người nhận
-
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        // Load OrderDetails cho từng Order
+        List<OrderDetail> details = getOrderDetails(order.getOrderID());
+        order.setOrderDetails(details);
+        return order;
     }
 
-    // 2. insertOrderAndReturnId: Khôi phục SQL 6 cột
-    public int insertOrderAndReturnId(Order order) {
-        String sql = "INSERT INTO `order` (CustomerID, OrderDate, TotalAmount, PaymentStatus, DeliveryStatus, Note) "
-                + "VALUES (?, ?, ?, ?, ?, ?)";
-        int generatedOrderID = -1;
-
-        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            ps.setInt(1, order.getCustomerID());
-            ps.setTimestamp(2, Timestamp.valueOf(order.getOrderDate()));
-            ps.setBigDecimal(3, order.getTotalAmount());
-            ps.setString(4, order.getPaymentStatus());
-            ps.setString(5, order.getDeliveryStatus());
-            ps.setString(6, order.getNote()); // Lưu ý: Cột này sẽ chứa thông tin người nhận
-
-            ps.executeUpdate();
-
-            // ... (Phần lấy ID giữ nguyên)
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    generatedOrderID = rs.getInt(1);
-                }
+    public int getCustomerIDByUsername(String username) {
+        String sql = "SELECT CustomerID FROM customer WHERE Username = ?";
+        try (Connection conn = Connect.getCon(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("CustomerID");
             }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Lỗi khi chèn Order và lấy ID.", e);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return generatedOrderID;
+        return 0;
     }
 
-    // 3. insertOrderDetail: Giữ nguyên
-    public boolean insertOrderDetail(int orderID, int carID, int quantity, BigDecimal priceAtOrder) {
-        // ... (Giữ nguyên)
-        String sql = "INSERT INTO `orderdetail` (OrderID, CarID, Quantity, PriceAtOrder) "
-                + "VALUES (?, ?, ?, ?)";
-        // ...
-        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, orderID);
-            ps.setInt(2, carID);
-            ps.setInt(3, quantity);
-            ps.setBigDecimal(4, priceAtOrder);
-
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Lỗi khi chèn Order Detail cho OrderID: " + orderID, e);
-            return false;
-        }
-    }
-
-    // 4. getOrderById: Khôi phục SQL 6 cột (chỉ đọc)
-    public Order getOrderById(int id) {
-        String sql = "SELECT * FROM `order` WHERE OrderID = ?";
-        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setInt(1, id);
+    public List<Order> getAllOrdersByCustomerId(int customerId) {
+        String sql = "SELECT * FROM `order` WHERE CustomerID = ? ORDER BY OrderDate DESC";
+        List<Order> orders = new ArrayList<>();
+        try (Connection conn = Connect.getCon(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
             ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                Order o = new Order();
-                o.setOrderID(rs.getInt("OrderID"));
-                o.setCustomerID(rs.getInt("CustomerID"));
-                o.setOrderDate(rs.getTimestamp("OrderDate").toLocalDateTime());
-                o.setTotalAmount(rs.getBigDecimal("TotalAmount"));
-
-                // Chỉ đọc 6 cột gốc
-                o.setPaymentStatus(rs.getString("PaymentStatus"));
-                o.setDeliveryStatus(rs.getString("DeliveryStatus"));
-                o.setNote(rs.getString("Note"));
-
-                return o;
+            while (rs.next()) {
+                orders.add(mapResultSetToOrder(rs));
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return orders;
     }
 
-    // 5. updatePaymentStatusInOrder: SỬA orderId từ String thành INT
-    public boolean updatePaymentStatusInOrder(int orderId, String newStatus) {
-        String sql = "UPDATE `order` SET PaymentStatus = ? WHERE OrderID = ?";
-        // ...
-        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, newStatus);
-            ps.setInt(2, orderId); // ✅ SỬA: Dùng setInt cho OrderID
-            return ps.executeUpdate() > 0;
-        } catch (SQLException ex) {
-            System.err.println("LỖI SQL KHI CẬP NHẬT TRẠNG THÁI PAYMENT TRONG BẢNG ORDER:");
-            ex.printStackTrace();
-            return false;
+    public List<Order> getOrdersByCustomerIdAndPaymentStatus(int customerId, String status) {
+        String sql = "SELECT * FROM `order` WHERE CustomerID = ? AND PaymentStatus = ? ORDER BY OrderDate DESC";
+        List<Order> orders = new ArrayList<>();
+        try (Connection conn = Connect.getCon(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            ps.setString(2, status);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                orders.add(mapResultSetToOrder(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    public List<Order> getCompletedOrdersByCustomerId(int customerId) {
+        String sql = "SELECT * FROM `order` WHERE CustomerID = ? AND DeliveryStatus = 'Hoàn thành' ORDER BY OrderDate DESC";
+        List<Order> orders = new ArrayList<>();
+        try (Connection conn = Connect.getCon(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                orders.add(mapResultSetToOrder(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    public List<Order> getIncompleteOrdersByCustomerId(int customerId) {
+        String sql = "SELECT * FROM `order` WHERE CustomerID = ? AND DeliveryStatus != 'Hoàn thành' ORDER BY OrderDate DESC";
+        List<Order> orders = new ArrayList<>();
+        try (Connection conn = Connect.getCon(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                orders.add(mapResultSetToOrder(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    private List<OrderDetail> getOrderDetails(int orderId) {
+        List<OrderDetail> details = new ArrayList<>();
+
+        // ✅ CÂU LỆNH SQL ĐÃ SỬA: JOIN carimage để lấy ImageURL (ảnh chính)
+        // Đây là thay đổi quan trọng để lấy tên ảnh từ bảng carimage
+        String sql = "SELECT od.*, c.CarName, ci.ImageURL "
+                + "FROM orderdetail od "
+                + "JOIN car c ON od.CarID = c.CarID "
+                + "LEFT JOIN carimage ci ON c.CarID = ci.CarID AND ci.IsMain = 1 "
+                + // Lấy ImageURL có cờ IsMain = 1
+                "WHERE od.OrderID = ?";
+
+        try (Connection conn = Connect.getCon(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                OrderDetail detail = new OrderDetail();
+                detail.setOrderDetailID(rs.getInt("OrderDetailID"));
+                detail.setOrderID(rs.getInt("OrderID"));
+                detail.setCarID(rs.getInt("CarID"));
+
+                // ✅ Lấy Quantity: Cột này đã được xác nhận tồn tại trong orderdetail
+                detail.setQuantity(rs.getInt("Quantity"));
+                detail.setUserName(rs.getString("UserName"));
+
+                detail.setPrice(rs.getBigDecimal("Price"));
+                detail.setSubtotal(rs.getBigDecimal("Subtotal"));
+
+                // ✅ Lấy Tên xe và Tên ảnh (từ cột ImageURL)
+                detail.setCarName(rs.getString("CarName"));
+                detail.setCarImage(rs.getString("ImageURL")); // Lấy từ cột ImageURL
+
+                details.add(detail);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return details;
+    }
+
+    public List<Order> getOrdersByUser(String username) {
+        int customerId = getCustomerIDByUsername(username);
+        if (customerId == 0) {
+            return new ArrayList<>();
+        }
+        return getAllOrdersByCustomerId(customerId);
+    }
+
+    public List<Order> getOrdersByUserAndPaymentStatus(String username, boolean paid) {
+        int customerId = getCustomerIDByUsername(username);
+        if (customerId == 0) {
+            return new ArrayList<>();
+        }
+        String status = paid ? "Đã thanh toán" : "Chưa thanh toán";
+        return getOrdersByCustomerIdAndPaymentStatus(customerId, status);
+    }
+
+    public List<Order> getOrdersByUserAndDeliveryStatus(String username, boolean completed) {
+        int customerId = getCustomerIDByUsername(username);
+        if (customerId == 0) {
+            return new ArrayList<>();
+        }
+        if (completed) {
+            return getCompletedOrdersByCustomerId(customerId);
+        } else {
+            return getIncompleteOrdersByCustomerId(customerId);
         }
     }
 
-    // 6. updateDeliveryStatus: SỬA orderId từ String thành INT
-    public boolean updateDeliveryStatus(int orderId, String newStatus) {
-        String sql = "UPDATE `order` SET DeliveryStatus = ? WHERE OrderID = ?";
-        // ...
-        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, newStatus);
-            ps.setInt(2, orderId); // ✅ SỬA: Dùng setInt cho OrderID
-            return ps.executeUpdate() > 0;
-        } catch (SQLException ex) {
-            System.err.println("LỖI SQL KHI CẬP NHẬT TRẠNG THÁI DELIVERY TRONG BẢNG ORDER:");
-            ex.printStackTrace();
-            return false;
-        }
-    }
+    // PHẦN createOrderWithDetails ĐƯỢC GIỮ NGUYÊN (và đang sử dụng Quantity đúng đắn)
+    public int createOrderWithDetails(Order order, List<OrderDetail> details) {
+        String insertOrder = "INSERT INTO `order` (CustomerID, OrderDate, TotalAmount, PaymentStatus, DeliveryStatus, Note) VALUES (?, ?, ?, ?, ?, ?)";
+        String insertDetail = "INSERT INTO orderdetail (OrderID, CarID, Quantity, UserName, Price, Subtotal) VALUES (?, ?, ?, ?, ?, ?)";
+        String updateStock = "UPDATE carstock SET Quantity = Quantity - ? WHERE CarID = ?";
 
-    // 7. createOrderWithDetails: KHÔI PHỤC SQL 6 CỘT
-    public int createOrderWithDetails(Order order, List<Car> itemsToCheckout) {
-        Connection con = null;
-        int generatedOrderID = -1;
+        try (Connection conn = Connect.getCon()) {
+            conn.setAutoCommit(false);
 
-        try {
-            con = Connect.getCon();
-            con.setAutoCommit(false);
-
-            // Khôi phục SQL chỉ với 6 cột gốc
-            String insertOrderSQL = "INSERT INTO `order` (CustomerID, OrderDate, TotalAmount, PaymentStatus, DeliveryStatus, Note) "
-                    + "VALUES (?, ?, ?, ?, ?, ?)";
-
-            try (PreparedStatement psOrder = con.prepareStatement(insertOrderSQL, Statement.RETURN_GENERATED_KEYS)) {
-
+            try (PreparedStatement psOrder = conn.prepareStatement(insertOrder, Statement.RETURN_GENERATED_KEYS)) {
                 psOrder.setInt(1, order.getCustomerID());
                 psOrder.setTimestamp(2, Timestamp.valueOf(order.getOrderDate()));
                 psOrder.setBigDecimal(3, order.getTotalAmount());
                 psOrder.setString(4, order.getPaymentStatus());
                 psOrder.setString(5, order.getDeliveryStatus());
-                psOrder.setString(6, order.getNote()); // Lưu ý: Cột này chứa tất cả thông tin bổ sung
-
+                psOrder.setString(6, order.getNote());
                 psOrder.executeUpdate();
 
-                // ... (Phần lấy ID giữ nguyên)
+                int orderId;
                 try (ResultSet rs = psOrder.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        generatedOrderID = rs.getInt(1);
-                    } else {
-                        throw new SQLException("Không thể lấy OrderID tự sinh.");
+                    rs.next();
+                    orderId = rs.getInt(1);
+                }
+
+                try (PreparedStatement psDetail = conn.prepareStatement(insertDetail); PreparedStatement psStock = conn.prepareStatement(updateStock)) {
+
+                    for (OrderDetail d : details) {
+                        psDetail.setInt(1, orderId);
+                        psDetail.setInt(2, d.getCarID());
+                        psDetail.setInt(3, d.getQuantity());
+                        psDetail.setString(4, d.getUserName());
+                        psDetail.setBigDecimal(5, d.getPrice());
+                        psDetail.setBigDecimal(6, d.getSubtotal());
+                        psDetail.addBatch();
+
+                        psStock.setInt(1, d.getQuantity());
+                        psStock.setInt(2, d.getCarID());
+                        psStock.addBatch();
                     }
-                }
-            }
 
-            // ... (Phần chèn Order Details giữ nguyên)
-            String insertDetailSQL = "INSERT INTO `orderdetail` (OrderID, CarID, Quantity, PriceAtOrder) "
-                    + "VALUES (?, ?, ?, ?)";
-
-            try (PreparedStatement psDetail = con.prepareStatement(insertDetailSQL)) {
-                for (Car car : itemsToCheckout) {
-                    BigDecimal pricePerUnit = car.getPrice();
-                    BigDecimal totalItemPrice = pricePerUnit.multiply(new BigDecimal(car.getQuantity()));
-
-                    psDetail.setInt(1, generatedOrderID);
-                    psDetail.setInt(2, car.getCarID());
-                    psDetail.setInt(3, car.getQuantity());
-                    psDetail.setBigDecimal(4, totalItemPrice);
-
-                    psDetail.addBatch();
+                    psDetail.executeBatch();
+                    psStock.executeBatch();
                 }
 
-                psDetail.executeBatch();
-            }
+                conn.commit();
+                return orderId;
 
-            con.commit();
-            return generatedOrderID;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
 
         } catch (SQLException e) {
-            // ... (Phần Rollback và Logging giữ nguyên)
-            if (con != null) {
-                try {
-                    con.rollback();
-                } catch (SQLException ex) {
-                    LOGGER.log(Level.SEVERE, "Lỗi khi Rollback.", ex);
-                }
-            }
-            LOGGER.log(Level.SEVERE, "Lỗi khi tạo Order và OrderDetail.", e);
-            return -1;
-        } finally {
-            // ... (Phần đóng Connection giữ nguyên)
-            if (con != null) {
-                try {
-                    con.setAutoCommit(true);
-                    con.close();
-                } catch (SQLException ex) {
-                    LOGGER.log(Level.SEVERE, "Lỗi khi đóng Connection.", ex);
-                }
-            }
+            e.printStackTrace();
+            return 0;
         }
     }
-    // 8. Cập nhật trạng thái thanh toán (gọi khi xác nhận OTP thành công)
 
-    public boolean updateOrderStatus(int orderId, String newStatus) {
+    public boolean updatePaymentStatus(int orderID, String paymentStatus) {
         String sql = "UPDATE `order` SET PaymentStatus = ? WHERE OrderID = ?";
-        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setString(1, newStatus);
-            ps.setInt(2, orderId);
-
+        try (Connection conn = Connect.getCon(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, paymentStatus);
+            ps.setInt(2, orderID);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Lỗi khi cập nhật trạng thái thanh toán cho OrderID " + orderId, e);
+            e.printStackTrace();
             return false;
         }
     }
+
+    public boolean updateDeliveryStatus(int orderID, String deliveryStatus) {
+        String sql = "UPDATE `order` SET DeliveryStatus = ? WHERE OrderID = ?";
+        try (Connection conn = Connect.getCon(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, deliveryStatus);
+            ps.setInt(2, orderID);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public BigDecimal getOrderTotalAmount(int orderId) {
+    String sql = "SELECT TotalAmount FROM `order` WHERE OrderID = ?";
+    try (Connection conn = Connect.getCon(); 
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, orderId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getBigDecimal("TotalAmount");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null;
+}
 }

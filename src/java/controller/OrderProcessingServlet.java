@@ -1,155 +1,190 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.OrderDAO;
-import java.io.IOException;
-import java.io.PrintWriter;
+import dao.PaymentDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import model.Payment;
 
-/**
- *
- * @author Hong Ly
- */
 @WebServlet(name = "OrderProcessingServlet", urlPatterns = {"/OrderProcessingServlet"})
 public class OrderProcessingServlet extends HttpServlet {
 
-    private static final String PAYMENT_STATUS_PAID = "Paid";
-    private static final String PAYMENT_STATUS_PENDING = "Pending";
+    private final PaymentDAO paymentDAO = new PaymentDAO();
+    private final OrderDAO orderDAO = new OrderDAO();
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet OrderProcessingServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet OrderProcessingServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8"); // ✅ THÊM DÒNG NÀY
+
+        // Nhận dữ liệu từ form
+        String orderId = request.getParameter("orderId");
+        String otp_verificationInput = request.getParameter("otp_verification");
+        String amountStr = request.getParameter("amount");
+
+        // Lấy dữ liệu từ session
         HttpSession session = request.getSession();
-
-        String orderIdStr = request.getParameter("orderId");
-        String userOtp = request.getParameter("otp");
-        String amount = request.getParameter("amount"); // Dùng để hiển thị lại
-
-        // Lấy OTP và Order ID đang chờ xử lý từ Session
-        String sessionOtp = (String) session.getAttribute("generatedOtp");
+        String generatedOtp = (String) session.getAttribute("generatedOtp");
+        Long otp_verificationExpireTime = (Long) session.getAttribute("otp_verificationExpireTime");
         Integer pendingOrderId = (Integer) session.getAttribute("pendingOrderId");
 
-        // Khởi tạo các giá trị cho việc chuyển hướng lại trang lỗi
-        request.setAttribute("orderId", orderIdStr);
-        request.setAttribute("amount", amount);
+        // 🛑 Kiểm tra thông tin phiên giao dịch
+        if (orderId == null || orderId.trim().isEmpty() || 
+            otp_verificationInput == null || otp_verificationInput.trim().isEmpty() || 
+            amountStr == null || amountStr.trim().isEmpty() ||
+            pendingOrderId == null) {
 
-        // ✅ Kiểm tra: Thông tin Session có còn hợp lệ hay không?
-        if (orderIdStr == null || sessionOtp == null || pendingOrderId == null) {
-            request.setAttribute("error", "Không tìm thấy thông tin đơn hàng hoặc OTP đã hết hạn. Vui lòng thử lại quy trình đặt hàng.");
+            setErrorAttributes(request, orderId, amountStr, "Thiếu thông tin phiên giao dịch hoặc mã OTP không hợp lệ.");
             request.getRequestDispatcher("otp_verification.jsp").forward(request, response);
             return;
         }
 
+        // 🛑 Kiểm tra OTP có tồn tại và còn hiệu lực
+        long now = System.currentTimeMillis();
+        if (otp_verificationExpireTime == null || now > otp_verificationExpireTime || generatedOtp == null) {
+            setErrorAttributes(request, orderId, amountStr, "Mã OTP đã hết hạn. Vui lòng yêu cầu gửi lại mã mới.");
+            request.getRequestDispatcher("otp_verification.jsp").forward(request, response);
+            return;
+        }
+
+        // 🛑 Kiểm tra OTP có khớp không
+        if (!otp_verificationInput.equals(generatedOtp)) {
+            setErrorAttributes(request, orderId, amountStr, "Mã OTP không chính xác. Vui lòng thử lại.");
+            request.getRequestDispatcher("otp_verification.jsp").forward(request, response);
+            return;
+        }
+
+        // 🛑 Kiểm tra orderId từ form có khớp với session không
         try {
-            int orderId = Integer.parseInt(orderIdStr);
+            int orderIdInt = Integer.parseInt(orderId);
+            if (orderIdInt != pendingOrderId) {
+                setErrorAttributes(request, orderId, amountStr, "Thông tin đơn hàng không khớp. Vui lòng thử lại.");
+                request.getRequestDispatcher("otp_verification.jsp").forward(request, response);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            setErrorAttributes(request, orderId, amountStr, "Mã đơn hàng không hợp lệ.");
+            request.getRequestDispatcher("otp_verification.jsp").forward(request, response);
+            return;
+        }
 
-            // ✅ So sánh OTP VÀ so sánh ID đơn hàng trong Session với ID gửi từ form
-            if (userOtp != null && userOtp.equals(sessionOtp) && orderId == pendingOrderId.intValue()) {
+        // ✅ OTP HỢP LỆ: XỬ LÝ THANH TOÁN
+        try {
+            int orderIdInt = Integer.parseInt(orderId);
+            BigDecimal paymentAmount = new BigDecimal(amountStr);
 
-                // Xóa các session liên quan để ngăn chặn tái sử dụng
+            // 1. CẬP NHẬT PaymentStatus
+            boolean orderUpdated = orderDAO.updatePaymentStatus(orderIdInt, "Đã thanh toán");
+
+            // 2. TẠO BẢN GHI PAYMENT
+            Payment payment = new Payment();
+            payment.setOrderID(orderIdInt);
+            payment.setPaymentDate(LocalDateTime.now());
+            payment.setPaymentMethod("Thanh toán khi nhận hàng (OTP)");
+            payment.setAmount(paymentAmount);
+            payment.setStatus("Đã thanh toán");
+
+            boolean paymentRecorded = paymentDAO.createPayment(payment);
+
+            if (orderUpdated && paymentRecorded) {
+                // Xóa session OTP
                 session.removeAttribute("generatedOtp");
+                session.removeAttribute("otp_verificationExpireTime");
                 session.removeAttribute("pendingOrderId");
 
-                // ✅ Cập nhật trạng thái thanh toán trong DB
-                OrderDAO orderDAO = new OrderDAO();
-                // Giả sử updateOrderStatus(orderId, status) có sẵn
-                boolean isUpdated = orderDAO.updateOrderStatus(orderId, PAYMENT_STATUS_PAID);
-
-                if (isUpdated) {
-                    // Chuyển sang trang thành công
-                    request.setAttribute("orderId", orderId);
-                    request.setAttribute("amount", amount);
-                    request.getRequestDispatcher("payment_success.jsp").forward(request, response);
-                } else {
-                    // Lỗi cập nhật DB
-                    request.setAttribute("error", "Xác nhận thành công nhưng lỗi cập nhật cơ sở dữ liệu. Vui lòng liên hệ hỗ trợ.");
-                    request.getRequestDispatcher("otp_verification.jsp").forward(request, response);
-                }
-
+                // ✅ CHUYỂN HƯỚNG THÀNH CÔNG
+                String redirectURL = request.getContextPath() + "/DonMuaServlet?tab=paid&orderSuccess=true&orderId=" + orderIdInt;
+                response.sendRedirect(redirectURL);
+                return;
             } else {
-                // ❌ OTP sai hoặc ID đơn hàng không khớp (dấu hiệu giả mạo)
-                request.setAttribute("error", "Mã OTP không chính xác hoặc đơn hàng không hợp lệ. Vui lòng kiểm tra lại!");
+                // Rollback trong trường hợp thất bại
+                if (orderUpdated) {
+                    orderDAO.updatePaymentStatus(orderIdInt, "Chưa thanh toán");
+                }
+                setErrorAttributes(request, orderId, amountStr, "Xác nhận thành công nhưng ghi nhận vào CSDL thất bại.");
                 request.getRequestDispatcher("otp_verification.jsp").forward(request, response);
             }
 
-        } catch (NumberFormatException e) {
-            // Lỗi khi parse orderIdStr
-            request.setAttribute("error", "Mã đơn hàng không hợp lệ.");
-            request.getRequestDispatcher("otp_verification.jsp").forward(request, response);
         } catch (Exception e) {
-            // Bắt các lỗi DAO hoặc lỗi khác
             e.printStackTrace();
-            request.setAttribute("error", "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.");
+            
+            // ✅ XỬ LÝ LỖI CỤ THỂ
+            String specificError = "Lỗi: " + e.getClass().getSimpleName();
+            if (e instanceof NumberFormatException) {
+                specificError = "Lỗi định dạng số (orderId hoặc amount không phải số)";
+            } else if (e instanceof NullPointerException) {
+                specificError = "Lỗi null pointer";
+            } else if (e instanceof IllegalArgumentException) {
+                specificError = "Lỗi tham số không hợp lệ";
+            }
+            
+            setErrorAttributes(request, orderId, amountStr, specificError + ": " + e.getMessage());
             request.getRequestDispatcher("otp_verification.jsp").forward(request, response);
         }
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
+   @Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+
+    response.setContentType("text/html;charset=UTF-8");
+    request.setCharacterEncoding("UTF-8");
+
+    HttpSession session = request.getSession();
+    Integer pendingOrderId = (Integer) session.getAttribute("pendingOrderId");
+    // Lấy amount từ session thay vì request parameter
+    String amountStr = (String) session.getAttribute("pendingAmount"); // CẦN ĐẢM BẢO ĐÃ LƯU
+    
+    // Nếu amount không có trong session, cố gắng lấy từ request (cho trường hợp resend)
+    if (amountStr == null || amountStr.trim().isEmpty()) {
+         amountStr = request.getParameter("amount");
+    }
+
+    if (pendingOrderId != null) {
+        request.setAttribute("orderId", pendingOrderId.toString());
+        request.setAttribute("amount", amountStr != null ? amountStr : "");
+
+        // Logic Resend OTP
+        if ("true".equals(request.getParameter("resend"))) {
+            String newOtp = generateNewOtp();
+            long newExpireTime = System.currentTimeMillis() + (5 * 60 * 1000); // 5 phút
+
+            session.setAttribute("generatedOtp", newOtp);
+            session.setAttribute("otp_verificationExpireTime", newExpireTime);
+
+            // Gửi lại OTP cần giữ lại amount và orderId
+            request.setAttribute("info", "Mã OTP mới đã được gửi lại.");
+            request.setAttribute("generatedOtp", newOtp); // Gửi OTP mới lên request để alert (chế độ test)
+        }
+
+        request.getRequestDispatcher("otp_verification.jsp").forward(request, response);
+    } else {
+        response.sendRedirect(request.getContextPath() + "/trangchu.jsp?error=Phiên giao dịch đã hết hạn");
+    }
+}
+    // 🎯 PHƯƠNG THỨC HỖ TRỢ
+    private void setErrorAttributes(HttpServletRequest request, String orderId, String amount, String error) {
+        request.setAttribute("orderId", orderId != null ? orderId : "");
+        request.setAttribute("amount", amount != null ? amount : "");
+        request.setAttribute("error", error);
+    }
+
+    private String generateNewOtp() {
+        return String.format("%06d", (int) (Math.random() * 1000000));
+    }
+
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Xử lý xác nhận OTP và cập nhật trạng thái đơn hàng.";
+    }
 }

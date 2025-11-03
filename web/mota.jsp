@@ -1,151 +1,89 @@
-<%-- 
-    Document   : mota
-    Created on : Oct 19, 2025, 2:39:14 PM
-    Author     : Admin
---%>
-
+<%@page import="model.Car" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %> 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ page import="model.Car" %>
-<%@ page import="dao.CarDAO" %>
-<%
-    Car car = (Car) request.getAttribute("car");
-%>
+<% Car car = (Car) request.getAttribute("car");%> 
 
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Mô tả sản phẩm - Velyra Aero</title>
         <link rel="stylesheet" href="style.css" />
-        <!-- Font Awesome --> 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     </head>
     <body>
 
-        <!-- 🧭 HEADER -->
+        <jsp:include page="header.jsp" />
 
-        <header class="navbar">
-            <div class="logo">
-                <a href="HomeServlet" style="text-decoration: none; color: inherit;">
-                    <img src="image/logo.png" alt="Velyra Aero Logo" />
-                    <span>VELYRA AERO</span>
-                </a>
-            </div>
-            <nav class="menu">
-                <a href="hotro.jsp">Hỗ trợ</a>
-                <% String username = (String) session.getAttribute("username"); %>
-
-                <% if (username != null) { %>
-
-                <%-- ✅ Nếu là ADMIN --%>
-                <% if ("admin".equals(username)) {%>
-                <!-- MENU QUẢN TRỊ -->
-                <div class="admin-menu account-menu">
-                    <span class="admin-name account-name">
-                        Quản trị <i class="fa-solid fa-caret-down"></i>
-                    </span>
-                    <ul class="dropdown">
-                        <li><a href="ThemSanPhamServlet">Quản lý Xe / Thêm</a></li>
-                        <li><a href="BrandServlet">Quản lý Hãng xe</a></li>
-                        <li><a href="SanPhamServlet">Quản lý Xe</a></li>
-                    </ul>
-                </div>
-
-                <!-- MENU TÀI KHOẢN ADMIN -->
-                <div class="account-menu">
-                    <span class="account-name">
-                        👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
-                    </span>
-                    <ul class="dropdown">
-                        <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
-                        <li><a href="dangxuat.jsp">Đăng xuất</a></li>
-                    </ul>
-                </div>
-
-                <% } else {%>
-                <%-- ✅ Nếu là NGƯỜI DÙNG THƯỜNG --%>
-                <div class="account-menu">
-                    <span class="account-name">
-                        👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
-                    </span>
-                    <ul class="dropdown">
-                        <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
-                        <li><a href="giohang.jsp">Giỏ hàng</a></li>
-                        <li><a href="donmua.jsp">Đơn mua</a></li>
-                        <li><a href="dangxuat.jsp">Đăng xuất</a></li>
-                    </ul>
-                </div>
-                <% } %>
-
-                <% } else { %>
-                <%-- ✅ Nếu chưa đăng nhập --%>
-                <a href="dangnhap.jsp">Đăng nhập</a>
-                <a href="dangky.jsp">Đăng ký</a>
-                <% }%>
-            </nav>
-
-        </header>
-
-
-        <% if (car != null) {%>
-        <div class="product-container">
-            <div class="product-images">
+        <c:if test="${not empty car}"> 
+            <div class="product-container">
                 <div class="product-images">
-                    <div class="main-image">
-                        <img src="${pageContext.request.contextPath}/uploads/${car.mainImageURL}" alt="Ảnh chính" style="width:100%; height:auto;">
+                    <div class="product-images">
+                        <div class="main-image">
+                            <img src="${pageContext.request.contextPath}/uploads/${car.mainImageURL}" alt="Ảnh chính" style="width:100%; height:auto;">
+                        </div>
+
+                        <div class="thumbs">
+                            <c:forEach var="thumb" items="${car.thumbs}">
+                                <img 
+                                    src="${pageContext.request.contextPath}/uploads/${thumb}" 
+                                    alt="Ảnh mô tả" 
+                                    class="thumb-image"
+                                    style="width:100px; height:auto; margin:5px; cursor:pointer; transition: transform .15s;"
+                                    onclick="swapImage(this)">
+                            </c:forEach>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-details">
+                    <h1>${car.carName}</h1> 
+
+                    <div class="price">
+                        Giá: <fmt:formatNumber value="${car.price}" pattern="#,##0"/>đ 
                     </div>
 
-                    <!-- ẢNH MÔ TẢ / ẢNH PHỤ -->
-                    <div class="thumbs">
-                        <c:forEach var="thumb" items="${car.thumbs}">
-                            <img 
-                                src="${pageContext.request.contextPath}/uploads/${thumb}" 
-                                alt="Ảnh mô tả" 
-                                class="thumb-image"
-                                style="width:100px; height:auto; margin:5px; cursor:pointer; transition: transform .15s;"
-                                onclick="swapImage(this)">
-                        </c:forEach>
+                    <div class="color-options">
+                        <span class="color-label">MÀU SẮC:</span>
+                        <div class="color-swatch"
+                             style="background-color:${car.color != null ? car.color : "#ccc"};
+                             width:20px;height:20px;border-radius:50%;display:inline-block;">
+                        </div>
                     </div>
+
+                    <div class="quantity-selector">
+                        <span class="quantity-label">SỐ LƯỢNG:</span>
+                        <button type="button" onclick="decrementQuantity()">-</button>
+                        <input type="number" id="quantity" value="1" min="1" max="${car.quantity}">
+                        <button type="button" onclick="incrementQuantity()">+</button>
+
+                        <span>(Còn ${car.quantity} sản phẩm)</span> 
+                    </div>
+
+                    <form id="cartForm" method="post" action="${pageContext.request.contextPath}/GioHangServlet">
+                        <input type="hidden" name="carID" value="${car.carID}"> 
+                        <input type="hidden" name="quantity" id="hiddenQuantity" value="1">
+
+                        <div class="action-buttons">
+                            <button type="button" class="buy-now" onclick="muaNgay()">MUA NGAY</button>
+                            <button type="button" class="add-to-cart" onclick="themGioHang()">THÊM VÀO GIỎ HÀNG</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <div class="product-details">
-                <h1><%= car.getCarName()%></h1>
-
-                <div class="price">
-                    Giá: <%= String.format("%,.0f", car.getPrice())%>đ
-                </div>
-
-                <div class="color-options">
-                    <span class="color-label">MÀU SẮC:</span>
-                    <div class="color-swatch"
-                         style="background-color:<%= car.getColor() != null ? car.getColor() : "#ccc"%>;
-                         width:20px;height:20px;border-radius:50%;display:inline-block;">
-                    </div>
-                </div>
-
-                <div class="quantity-selector">
-                    <span class="quantity-label">SỐ LƯỢNG:</span>
-                    <input type="number" id="quantity" value="1" min="1" max="<%= car.getQuantity()%>">
-                    <span>(Còn <%= car.getQuantity()%> sản phẩm)</span>
-                </div>
-
-                <div class="action-buttons">
-                    <button class="buy-now">MUA NGAY</button>
-                    <button class="add-to-cart">THÊM VÀO GIỎ HÀNG</button>
-                </div>
+            <div class="product-description">
+                <h2>MÔ TẢ SẢN PHẨM</h2>
+                <p>${car.description}</p> 
             </div>
-        </div>
+        </c:if>
 
-        <div class="product-description">
-            <h2>MÔ TẢ SẢN PHẨM</h2>
-            <p><%= car.getDescription()%></p>
-        </div>
-        <% } else { %>
-        <h2 style="text-align:center; color:red;">Không tìm thấy sản phẩm!</h2>
-        <% }%>
+        <c:if test="${empty car}">
+            <h2 style="text-align:center; color:red;">Không tìm thấy sản phẩm!</h2>
+        </c:if>
 
         <script>
+            // Các hàm tăng giảm số lượng giữ nguyên
             function getQuantityInput() {
                 return document.getElementById('quantity');
             }
@@ -173,51 +111,97 @@
                 if (!mainImg || !thumbEl)
                     return;
 
-                // swap src
                 const tmp = mainImg.src;
                 mainImg.src = thumbEl.src;
                 thumbEl.src = tmp;
 
-                // (tùy) thêm hiệu ứng ngắn khi đổi ảnh
                 mainImg.style.opacity = 0;
                 setTimeout(() => mainImg.style.opacity = 1, 60);
             }
+
+            // ⭐⭐⭐ HÀM MUA NGAY GIỮ NGUYÊN (Không dùng AJAX) ⭐⭐⭐
+            function muaNgay() {
+                const quantityInput = document.getElementById('quantity');
+                let qty = parseInt(quantityInput.value);
+                let maxQty = parseInt(quantityInput.max);
+
+                if (qty > maxQty) {
+                    alert('Số lượng tối đa có thể mua là ' + maxQty);
+                    qty = maxQty;
+                }
+                if (qty < 1) {
+                    qty = 1;
+                }
+
+                const carID = document.querySelector('input[name="carID"]').value;
+                window.location.href = '${pageContext.request.contextPath}/DatHangServlet?carID=' + carID + '&quantity=' + qty;
+            }
+
+
+            // ⭐⭐⭐ HÀM THÊM GIỎ HÀNG DÙNG AJAX (ĐÃ SỬA) ⭐⭐⭐
+            async function themGioHang() {
+                const quantityInput = document.getElementById('quantity');
+                const hiddenQuantityInput = document.getElementById('hiddenQuantity');
+                const form = document.getElementById('cartForm');
+
+                if (!form)
+                    return;
+
+                // 1. Kiểm tra và lấy số lượng
+                let qty = parseInt(quantityInput.value);
+                let maxQty = parseInt(quantityInput.max);
+
+                if (qty > maxQty) {
+                    alert('Số lượng tối đa có thể mua là ' + maxQty);
+                    qty = maxQty;
+                    quantityInput.value = maxQty;
+                }
+                if (qty < 1) {
+                    qty = 1;
+                    quantityInput.value = 1;
+                }
+
+                hiddenQuantityInput.value = qty;
+
+                // 2. Chuẩn bị dữ liệu để gửi đi
+                const formData = new FormData(form);
+                const url = form.action;
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        // Chuyển FormData sang chuỗi query param để Servlet đọc dễ dàng
+                        body: new URLSearchParams(formData)
+                    });
+
+                    // Đảm bảo response là OK và có thể đọc JSON
+                    if (!response.ok) {
+                        throw new Error(`Lỗi HTTP: ${response.status}`);
+                    }
+
+                    const data = await response.json(); // Nhận JSON từ GioHangServlet
+
+                    if (data.success) {
+                        // 3. Cập nhật số lượng giỏ hàng trên header
+                        const cartCountElement = document.getElementById('cart-item-count');
+                        if (cartCountElement && data.totalItems !== undefined) {
+                            cartCountElement.textContent = data.totalItems;
+                        }
+
+                        // 4. Hiển thị thông báo thành công
+                        alert(data.message);
+
+                    } else {
+                        // Hiển thị thông báo lỗi từ Server (nếu success: false)
+                        alert("Lỗi: " + data.message);
+                    }
+                } catch (error) {
+                    console.error('Lỗi AJAX khi thêm giỏ hàng:', error);
+                    alert("Đã xảy ra lỗi hệ thống khi thêm vào giỏ hàng. Vui lòng thử lại.");
+                }
+            }
         </script>
 
-
-        <!-- FOOTER -->
-        <footer class="footer">
-            <h3>THÔNG TIN LIÊN HỆ</h3>
-            <div class="footer-container">
-                <!-- Cột 1 -->
-                <div class="footer-column">
-                    <p class="name">Đào Thị Hồng Lý</p>
-                    <p><i class="fa-solid fa-calendar"></i> 2356778</p>
-                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
-                    <p><i class="fa-solid fa-location-dot"></i> hn</p>
-                    <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
-                </div>
-                <!-- Cột 2 -->
-                <div class="footer-column">
-                    <p class="name">Đào Thị Hồng Lý</p>
-                    <p><i class="fa-solid fa-calendar"></i> 2356778</p>
-                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
-                    <p><i class="fa-solid fa-location-dot"></i> hn</p>
-                    <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
-                </div>
-                <!-- Cột 3 -->
-                <div class="footer-column">
-                    <p class="name">Đào Thị Hồng Lý</p>
-                    <p><i class="fa-solid fa-calendar"></i> 2356778</p>
-                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
-                    <p><i class="fa-solid fa-location-dot"></i> hn</p>
-                    <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
-                </div>
-            </div>
-            <div class="footer-note">
-                Điểm đến tin cậy cho những ai tìm kiếm sự hoàn hảo trong từng chi tiết, 
-                từ lựa chọn xe đến dịch vụ hậu mãi tận tâm.
-            </div>
-        </footer>
+        <jsp:include page="footer.jsp" />
     </body>
 </html>

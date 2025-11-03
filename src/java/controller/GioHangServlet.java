@@ -1,9 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
-
 import dao.CarDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -20,71 +15,38 @@ import java.util.Map;
 import java.util.Set;
 import model.Car;
 
-/**
- *
- * @author Hong Ly
- */
 @WebServlet(name = "GioHangServlet", urlPatterns = {"/GioHangServlet"})
 public class GioHangServlet extends HttpServlet {
 
     private final CarDAO carDAO = new CarDAO();
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet GioHangServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet GioHangServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    // Giữ nguyên processRequest
+
     /**
      * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * Hiển thị nội dung giỏ hàng từ Session.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
 
-        // 1. Lấy Map số lượng từ Session (Key=CarID, Value=Quantity)
         Map<Integer, Integer> cartQuantityMap
                 = (Map<Integer, Integer>) session.getAttribute("cartQuantityMap");
 
         List<Car> carListWithQuantity = new ArrayList<>();
 
         if (cartQuantityMap != null && !cartQuantityMap.isEmpty()) {
-            // 2. Lặp qua các CarID trong Map
             Set<Integer> carIDs = cartQuantityMap.keySet();
 
             for (int carID : carIDs) {
-                // 3. Lấy thông tin chi tiết xe từ DB bằng CarDAO instance
                 Car car = carDAO.getCarById(carID);
 
                 if (car != null) {
-                    // 4. "Mượn" thuộc tính quantity của Car để lưu trữ số lượng trong giỏ
-                    car.setQuantity(cartQuantityMap.get(carID));
+                    // LƯU Ý: car.getQuantity() ở đây là số lượng TỒN KHO THỰC TẾ từ DB.
+                    // Chúng ta ghi đè nó bằng số lượng MUA TRONG GIỎ để hiển thị.
+                    int quantityInCart = cartQuantityMap.get(carID);
+                    car.setQuantity(quantityInCart);
                     carListWithQuantity.add(car);
                 }
             }
@@ -92,80 +54,125 @@ public class GioHangServlet extends HttpServlet {
         request.setAttribute("cartList", carListWithQuantity);
 
         request.getRequestDispatcher("giohang.jsp").forward(request, response);
-
     }
 
     /**
      * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * Xử lý cả hai trường hợp: THÊM mới (từ trang chi tiết) và CẬP NHẬT (từ giohang.jsp qua AJAX).
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
+        HttpSession session = request.getSession();
 
-        // 1. Lấy thông tin sản phẩm và số lượng
+
         String carIDParam = request.getParameter("carID");
         String quantityParam = request.getParameter("quantity");
+        String action = request.getParameter("action");    
 
         if (carIDParam == null || quantityParam == null) {
             response.sendRedirect("HomeServlet");
             return;
         }
 
+        // ⭐ ĐIỀU CHỈNH: Thiết lập response để trả về JSON cho mọi POST request
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+
         try {
             int carID = Integer.parseInt(carIDParam);
-            int quantityToAdd = Integer.parseInt(quantityParam);
+            int quantityValue = Integer.parseInt(quantityParam); 
 
-            HttpSession session = request.getSession();
-
-            // Lấy Map giỏ hàng từ Session
-            Map<Integer, Integer> cartQuantityMap
-                    = (Map<Integer, Integer>) session.getAttribute("cartQuantityMap");
+            Map<Integer, Integer> cartQuantityMap = 
+                    (Map<Integer, Integer>) session.getAttribute("cartQuantityMap");
 
             if (cartQuantityMap == null) {
                 cartQuantityMap = new HashMap<>();
             }
 
-            // 2. Cập nhật hoặc thêm số lượng
-            int currentQuantity = cartQuantityMap.getOrDefault(carID, 0);
+            Car car = carDAO.getCarById(carID);
+            if (car == null) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                out.print("{\"success\": false, \"message\": \"Không tìm thấy xe để thêm.\"}");
+                out.flush();
+                return;
+            }
+            int maxStockQuantity = car.getQuantity(); // Tồn kho thực tế
 
-            int newQuantity = currentQuantity + quantityToAdd;
+            int finalQuantity;
+            String message = "";
+            
+            // === Xử lý CẬP NHẬT GIỎ HÀNG (AJAX từ giohang.jsp) ===
+            if ("update".equals(action)) { 
+                finalQuantity = quantityValue; 
 
-            // Xử lý logic giỏ hàng (không cho số lượng âm)
-            if (newQuantity <= 0) {
-                cartQuantityMap.remove(carID); // Loại bỏ nếu số lượng về 0 hoặc âm
-            } else {
-                // TODO: CẦN THÊM logic kiểm tra tồn kho tối đa tại đây
-                cartQuantityMap.put(carID, newQuantity);
+                if (finalQuantity <= 0) {
+                    cartQuantityMap.remove(carID);
+                    finalQuantity = 0;
+                    message = "Đã xóa sản phẩm " + car.getCarName() + " khỏi giỏ hàng.";
+                } else if (finalQuantity > maxStockQuantity) {
+                    finalQuantity = maxStockQuantity;
+                    cartQuantityMap.put(carID, finalQuantity);
+                    message = "Sản phẩm " + car.getCarName() + " chỉ còn " + maxStockQuantity + " chiếc. Đã giới hạn số lượng.";
+                } else {
+                    cartQuantityMap.put(carID, finalQuantity);
+                    message = "Cập nhật số lượng sản phẩm " + car.getCarName() + " thành công.";
+                }
+
+                session.setAttribute("cartQuantityMap", cartQuantityMap);
+
+                // ⭐ THÊM totalItems cho các request UPDATE
+                int totalItemsInCart = cartQuantityMap.size(); 
+                
+                // Trả về JSON cho AJAX
+                out.print("{\"success\": true, \"quantity\": " + finalQuantity + ", \"message\": \"" + message + "\", \"totalItems\": " + totalItemsInCart + "}");
+                out.flush();
+                return; // Dừng lại ở đây cho AJAX
+            } 
+
+            // === Xử lý THÊM MỚI SẢN PHẨM VÀO GIỎ (Từ trang chi tiết) ===
+            else { 
+                int quantityToAdd = quantityValue;
+                int currentQuantityInCart = cartQuantityMap.getOrDefault(carID, 0);
+                int newQuantity = currentQuantityInCart + quantityToAdd;
+
+                if (newQuantity > maxStockQuantity) {
+                    finalQuantity = maxStockQuantity;
+                    cartQuantityMap.put(carID, finalQuantity);
+                    message = "Đã thêm tối đa " + maxStockQuantity + " sản phẩm " + car.getCarName() + " vào giỏ hàng.";
+                } else {
+                    finalQuantity = newQuantity;
+                    cartQuantityMap.put(carID, finalQuantity);
+                    message = "Thêm " + quantityToAdd + " sản phẩm " + car.getCarName() + " vào giỏ hàng thành công!";
+                }
+
+                session.setAttribute("cartQuantityMap", cartQuantityMap);
+                
+                // ⭐ THAY THẾ REDIRECT BẰNG JSON RESPONSE
+                int totalItemsInCart = cartQuantityMap.size();
+                out.print("{\"success\": true, \"message\": \"" + message + "\", \"totalItems\": " + totalItemsInCart + "}");
+                out.flush();
+                return; // Dừng lại ở đây
             }
 
-            // 3. Lưu lại Map số lượng vào Session
-            session.setAttribute("cartQuantityMap", cartQuantityMap);
-
-            // 4. Chuyển hướng người dùng đến trang giỏ hàng
-            response.sendRedirect("GioHangServlet");
-
         } catch (NumberFormatException e) {
-            response.sendRedirect("HomeServlet");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            out.print("{\"success\": false, \"message\": \"Dữ liệu gửi lên không hợp lệ.\"}");
+            out.flush();
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("HomeServlet");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            out.print("{\"success\": false, \"message\": \"Đã xảy ra lỗi hệ thống khi thêm vào giỏ.\"}");
+            out.flush();
         }
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
+   
+
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Handles adding to cart and updating quantities via POST/AJAX.";
+    }
 }

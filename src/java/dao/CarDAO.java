@@ -163,6 +163,41 @@ public class CarDAO {
         return list;
     }
 
+    public boolean updateCarQuantity(int carID, int newQuantity) {
+        // SỬA LỖI 1: Đảm bảo chỉ UPDATE Quantity và LastUpdated
+        String sql = "UPDATE carstock SET Quantity = ?, LastUpdated = NOW() WHERE CarID = ?";
+
+        // Thêm kiểm tra số lượng >= 0
+        if (newQuantity < 0) {
+            LOGGER.log(Level.WARNING, "Không thể cập nhật số lượng tồn kho âm cho CarID: " + carID);
+            return false;
+        }
+
+        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, newQuantity);
+            ps.setInt(2, carID);
+
+            int rowsAffected = ps.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("✅ [DAO] Cập nhật Quantity thành công cho CarID=" + carID + ". Số lượng mới: " + newQuantity);
+                return true;
+            } else {
+                // Trường hợp CarID tồn tại trong bảng car nhưng chưa có trong carstock (cần INSERT)
+                // Tuy nhiên, để đơn giản và phù hợp với chức năng update/mua hàng, 
+                // ta chỉ cần đảm bảo logic gọi phương thức này đã kiểm tra sự tồn tại của stock.
+                System.out.println("ℹ️ [DAO] Update Quantity thất bại: Không tìm thấy tồn kho cho CarID=" + carID);
+                return false;
+            }
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi cập nhật tồn kho cho CarID: " + carID, e);
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // Trong CarDAO.java
     public Car getCarById(int carId) {
         // KẾT HỢP: Lấy thông tin xe, tồn kho, tên hãng và URL ảnh chính trong 1 QUERY

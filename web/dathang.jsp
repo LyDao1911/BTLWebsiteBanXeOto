@@ -1,167 +1,135 @@
-<%-- 
-    Document   : dathang
-    Created on : Oct 21, 2025, 9:48:41 PM
-    Author     : Admin
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page import="model.Customer" %>
+<%
+    Customer customer = (Customer) request.getAttribute("customer");
+%>
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Đặt hàng - Velyra Aero</title>
         <link rel="stylesheet" href="style.css" />
-        <!-- Font Awesome --> 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     </head>
     <body>
 
-        <!-- 🧭 HEADER -->
+        <jsp:include page="header.jsp" />
 
-        <header class="navbar">
-            <div class="logo">
-                <a href="HomeServlet" style="text-decoration: none; color: inherit;">
-                    <img src="image/logo.png" alt="Velyra Aero Logo" />
-                    <span>VELYRA AERO</span>
-                </a>
+        <c:if test="${not empty sessionScope.toastMessage}">
+            <script>
+                alert("<c:out value='${sessionScope.toastMessage}' escapeXml='true'/>");
+            </script>
+            <c:remove var="toastMessage" scope="session"/>
+        </c:if>
+
+
+        <c:if test="${not empty errorMessage}">
+            <div class="error-box" style="color: red; text-align: center; margin-bottom: 15px;">
+                ${errorMessage}
             </div>
-            <nav class="menu">
-                <a href="hotro.jsp">Hỗ trợ</a>
-                <% String username = (String) session.getAttribute("username"); %>
+        </c:if>
 
-                <% if (username != null) { %>
-
-                <%-- ✅ Nếu là ADMIN --%>
-                <% if ("admin".equals(username)) {%>
-                <!-- MENU QUẢN TRỊ -->
-                <div class="admin-menu account-menu">
-                    <span class="admin-name account-name">
-                        Quản trị <i class="fa-solid fa-caret-down"></i>
-                    </span>
-                    <ul class="dropdown">
-                        <li><a href="themsanpham.jsp">Quản lý Xe / Thêm</a></li>
-                        <li><a href="danhmuc.jsp">Quản lý Hãng xe</a></li>
-                        <li><a href="SanPhamServlet">Quản lý Xe</a></li>
-                    </ul>
-                </div>
-
-                <!-- MENU TÀI KHOẢN ADMIN -->
-                <div class="account-menu">
-                    <span class="account-name">
-                        👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
-                    </span>
-                    <ul class="dropdown">
-                        <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
-                        <li><a href="dangxuat.jsp">Đăng xuất</a></li>
-                    </ul>
-                </div>
-
-                <% } else {%>
-                <%-- ✅ Nếu là NGƯỜI DÙNG THƯỜNG --%>
-                <div class="account-menu">
-                    <span class="account-name">
-                        👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
-                    </span>
-                    <ul class="dropdown">
-                        <li><a href="hoso.jsp">Thông tin cá nhân</a></li>
-                        <li><a href="giohang.jsp">Giỏ hàng</a></li>
-                        <li><a href="donmua.jsp">Đơn mua</a></li>
-                        <li><a href="dangxuat.jsp">Đăng xuất</a></li>
-                    </ul>
-                </div>
-                <% } %>
-
-                <% } else { %>
-                <%-- ✅ Nếu chưa đăng nhập --%>
-                <a href="dangnhap.jsp">Đăng nhập</a>
-                <a href="dangky.jsp">Đăng ký</a>
-                <% }%>
-            </nav>
-
-        </header>
         <div class="order-container">
-            <h2 class="section-title">Thông tin khách hàng</h2>
-            <div class="customer-info">
-                <div class="field">
-                    <label>Họ tên</label>
-                    <input type="text" placeholder="Nhập họ tên">
-                </div>
-                <div class="field">
-                    <label>Địa chỉ</label>
-                    <input type="text" placeholder="Nhập địa chỉ">
-                </div>
-                <div class="field">
-                    <label>Số điện thoại</label>
-                    <input type="text" placeholder="Nhập số điện thoại">
-                </div>
-            </div>
+            <form action="DatHangServlet" method="POST">
 
-            <h2 class="section-title">Mercedes</h2>
-            <div class="product-order">
-                <div class="product-item">
-                    <img src="images/vinfast-lux.png" alt="VinFast Lux A2.0">
-                    <div class="prod-info">
-                        <div class="prod-name">VinFast Lux A2.0</div>
-                        <div class="prod-qty">x1</div>
+                <h2 class="section-title">Thông tin khách hàng</h2>
+                <div class="customer-info">
+                    <div class="field">
+                        <label>Họ tên</label>
+                        <input type="text" name="fullname" placeholder="Nhập họ tên"
+                               value="${customer.fullName}" required>
                     </div>
-                    <div class="prod-price">981.695.000đ</div>
-                </div>
-            </div>
 
-            <div class="payment-summary">
-                <div class="row">
-                    <div class="label">Giá sản phẩm:</div>
-                    <div class="value">981.695.000đ</div>
-                </div>
-                <div class="row">
-                    <div class="label">Thuế:</div>
-                    <div class="value">0đ</div>
-                </div>
-                <div class="row">
-                    <div class="label">Phụ phí:</div>
-                    <div class="value">0đ</div>
-                </div>
-            </div>
+                    <div class="field">
+                        <label>Địa chỉ</label>
+                        <input type="text" name="address" placeholder="Nhập địa chỉ"
+                               value="${customer.address}" required>
+                    </div>
 
-            <div class="order-footer">
-                <div class="total-label">Tổng thanh toán:</div>
-                <div class="total-value" id="totalPay">981.695.000đ</div>
-                <button class="btn-order">Đặt hàng</button>
-            </div>
+                    <div class="field">
+                        <label>Số điện thoại</label>
+                        <input type="text" name="phone" placeholder="Nhập số điện thoại"
+                               value="${customer.phoneNumber}" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Email</label>
+                        <input type="email" name="email" placeholder="Nhập email"
+                               value="${customer.email}" required readonly>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Phương thức thanh toán</h2>
+                <div class="payment-method-selection">
+                    <label class="payment-option">
+                        <input type="radio" name="paymentMethod" value="Chuyển khoản/Thẻ" checked>
+                        <div class="custom-radio-box">
+                            <span class="payment-icon"><i class="fa-solid fa-credit-card"></i></span>
+                            <span class="payment-text">Chuyển khoản ngân hàng / Thẻ tín dụng</span>
+                        </div>
+                    </label>
+                </div>
+
+                <h2 class="section-title">Sản phẩm đặt mua</h2>
+                <div class="product-order">
+                    <c:set var="subtotalPrice" value="${0}" />
+                    <c:forEach var="item" items="${itemsToCheckout}">
+                        <div class="product-item">
+                            <img src="${pageContext.request.contextPath}/uploads/${item.mainImageURL}" alt="${item.carName}">
+                            <div class="prod-info">
+                                <div class="prod-name">${item.carName}</div>
+                                <div class="prod-qty">x ${item.quantity}</div>
+                            </div>
+
+                            <c:set var="itemTotal" value="${item.price * item.quantity}" />
+                            <c:set var="subtotalPrice" value="${subtotalPrice + itemTotal}" />
+
+                            <div class="prod-price">
+                                <fmt:formatNumber value="${item.price}" pattern="#,##0" />đ
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="carID" value="${item.carID}">
+                        <input type="hidden" name="quantity" value="${item.quantity}">
+                    </c:forEach>
+                </div>
+
+                <c:set var="taxRate" value="${0.10}" />
+                <c:set var="taxAmount" value="${subtotalPrice * taxRate}" />
+                <c:set var="extra" value="${0}" />
+                <c:set var="totalAmount" value="${subtotalPrice + taxAmount + extra}" />
+
+                <div class="payment-summary">
+                    <div class="row">
+                        <div class="label">Giá sản phẩm (Tạm tính):</div>
+                        <div class="value"><fmt:formatNumber value="${subtotalPrice}" pattern="#,##0" />đ</div>
+                    </div>
+                    <div class="row">
+                        <div class="label">Thuế (<fmt:formatNumber value="${taxRate*100}" pattern="#0" />%):</div>
+                        <div class="value"><fmt:formatNumber value="${taxAmount}" pattern="#,##0" />đ</div>
+                    </div>
+                    <div class="row">
+                        <div class="label">Phụ phí:</div>
+                        <div class="value"><fmt:formatNumber value="${extra}" pattern="#,##0" />đ</div>
+                    </div>
+                </div>
+
+                <fmt:formatNumber value="${totalAmount}" pattern="#0" var="rawTotalAmount"/>
+                <input type="hidden" name="totalAmount" value="${rawTotalAmount}">
+
+                <div class="order-footer">
+                    <div class="total-label">Tổng thanh toán:</div>
+                    <div class="total-value">
+                        <fmt:formatNumber value="${totalAmount}" pattern="#,##0" />đ
+                    </div>
+                    <button type="submit" class="btn-order">Đặt hàng</button>
+                </div>
+
+            </form>
         </div>
-        <!-- FOOTER -->
-        <footer class="footer">
-            <h3>THÔNG TIN LIÊN HỆ</h3>
-            <div class="footer-container">
-                <!-- Cột 1 -->
-                <div class="footer-column">
-                    <p class="name">Đào Thị Hồng Lý</p>
-                    <p><i class="fa-solid fa-calendar"></i> 2356778</p>
-                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
-                    <p><i class="fa-solid fa-location-dot"></i> hn</p>
-                    <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
-                </div>
-                <!-- Cột 2 -->
-                <div class="footer-column">
-                    <p class="name">Đào Thị Hồng Lý</p>
-                    <p><i class="fa-solid fa-calendar"></i> 2356778</p>
-                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
-                    <p><i class="fa-solid fa-location-dot"></i> hn</p>
-                    <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
-                </div>
-                <!-- Cột 3 -->
-                <div class="footer-column">
-                    <p class="name">Đào Thị Hồng Lý</p>
-                    <p><i class="fa-solid fa-calendar"></i> 2356778</p>
-                    <p><i class="fa-solid fa-phone"></i> 0937298465</p>
-                    <p><i class="fa-solid fa-location-dot"></i> hn</p>
-                    <p><i class="fa-solid fa-envelope"></i> abc@gmail.com</p>
-                </div>
-            </div>
-            <div class="footer-note">
-                Điểm đến tin cậy cho những ai tìm kiếm sự hoàn hảo trong từng chi tiết, 
-                từ lựa chọn xe đến dịch vụ hậu mãi tận tâm.
-            </div>
-        </footer>
+
+        <jsp:include page="footer.jsp" />
     </body>
 </html>

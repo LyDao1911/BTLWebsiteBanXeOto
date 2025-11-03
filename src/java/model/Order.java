@@ -1,10 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List; // ⭐ Cần Import List
+
 /**
  *
  * @author Hong Ly
@@ -12,11 +10,14 @@ import java.time.LocalDateTime;
 public class Order {
     private int orderID;
     private int customerID;
-    private LocalDateTime orderDate; // Đã chuyển sang LocalDateTime
-    private BigDecimal totalAmount; // Dùng BigDecimal
+    private LocalDateTime orderDate; 
+    private BigDecimal totalAmount; 
     private String paymentStatus;
     private String deliveryStatus;
     private String note;
+    
+    // ⭐ BỔ SUNG: Thuộc tính chứa danh sách chi tiết đơn hàng
+    private List<OrderDetail> orderDetails; 
 
     public Order() {
     }
@@ -30,6 +31,16 @@ public class Order {
         this.deliveryStatus = deliveryStatus;
         this.note = note;
     }
+    
+    // ⭐ BỔ SUNG: Getter và Setter cho OrderDetails
+    public List<OrderDetail> getOrderDetails() {
+        return orderDetails;
+    }
+
+    public void setOrderDetails(List<OrderDetail> orderDetails) {
+        this.orderDetails = orderDetails;
+    }
+    // ⭐ KẾT THÚC BỔ SUNG
 
     public int getOrderID() {
         return orderID;

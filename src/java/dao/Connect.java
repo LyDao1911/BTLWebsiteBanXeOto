@@ -21,9 +21,13 @@ public class Connect {
                     ""
             );
 
+            System.out.println("Kết nối CSDL thành công!"); // Bổ sung log thành công
             return con;
         } catch (Exception e) {
+            System.err.println("Lỗi kết nối CSDL: " + e.getMessage()); // ✅ IN RA LỖI THẬT
+            // e.printStackTrace(); // Có thể dùng thêm để in toàn bộ stack trace
             return null;
+
         }
     }
 }

@@ -1,45 +1,62 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import model.Payment; // Import model Payment
+import java.sql.Timestamp; // Cần thiết để lưu LocalDateTime
 
-/**
- *
- * @author Hong Ly
- */
+// Giả định bạn có lớp Connect
+// import utils.Connect; 
+
 public class PaymentDAO {
 
-    private static final String CREATE_PAYMENT_SQL = "INSERT INTO `payment` (OrderID, PaymentMethod, PaymentDate, Amount, Status) VALUES (?, ?, NOW(), ?, ?)";
-    private static final String UPDATE_STATUS_SQL = "UPDATE `payment` SET Status = ?, Amount = ? WHERE OrderID = ?";
+    // CHUỖI SQL GHI MỚI DỮ LIỆU PAYMENT
+    private static final String CREATE_PAYMENT_SQL = "INSERT INTO `payment` (OrderID, PaymentMethod, PaymentDate, Amount, Status) VALUES (?, ?, ?, ?, ?)";
 
-    public boolean createPaymentRecord(String orderId, String method, double amount, String status) {
-        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(CREATE_PAYMENT_SQL)) {
+    /**
+     * Ghi một bản ghi Payment mới vào Database.
+     * Sử dụng Payment model.
+     * Status mặc định sẽ là "Đã thanh toán" (nếu null) để khớp với logic OTP.
+     */
+    public boolean createPayment(Payment payment) {
+        try (Connection con = Connect.getCon(); 
+             PreparedStatement ps = con.prepareStatement(CREATE_PAYMENT_SQL)) {
 
-            ps.setString(1, orderId);
-            ps.setString(2, method);
-            ps.setDouble(3, amount);
-            ps.setString(4, status);
+            // Chuyển đổi LocalDateTime sang Timestamp để lưu vào DB
+            Timestamp paymentTimestamp = payment.getPaymentDate() != null ? 
+                                         Timestamp.valueOf(payment.getPaymentDate()) : 
+                                         new Timestamp(System.currentTimeMillis()); 
+            
+            // Xử lý Status: Sử dụng "Đã thanh toán" nếu giá trị từ model là null
+            String statusToSave = payment.getStatus() != null ? payment.getStatus() : "Đã thanh toán";
+            
+            ps.setInt(1, payment.getOrderID());
+            ps.setString(2, payment.getPaymentMethod());
+            ps.setTimestamp(3, paymentTimestamp); // Lưu ngày giờ
+            ps.setBigDecimal(4, payment.getAmount()); // Dùng BigDecimal
+            ps.setString(5, statusToSave); // Ghi trạng thái tiếng Việt
 
             return ps.executeUpdate() > 0;
         } catch (SQLException ex) {
-            ex.printStackTrace(); // 🛑 RẤT QUAN TRỌNG: In lỗi SQL ra Console
+            System.err.println("LỖI SQL KHI TẠO PAYMENT RECORD:");
+            ex.printStackTrace();
             return false;
         }
     }
-
-    public boolean updatePaymentStatusByOrderId(String orderId, String newStatus) {
-        // Chỉ cập nhật cột Status
+    
+    /**
+     * Cập nhật trạng thái Payment trong bảng payment (Thường không cần thiết
+     * vì trạng thái chính nằm trong bảng 'order', nhưng giữ lại để đồng bộ).
+     */
+    public boolean updatePaymentStatusByOrderId(int orderId, String newStatus) { 
         String sql = "UPDATE `payment` SET Status = ? WHERE OrderID = ?";
 
-        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = Connect.getCon(); 
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, newStatus);
-            ps.setString(2, orderId);
+            ps.setInt(2, orderId); 
 
             return ps.executeUpdate() > 0;
         } catch (SQLException ex) {
