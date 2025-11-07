@@ -3,18 +3,16 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/controller/ResendOtpServlet.java</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/controller/DatHangServlet.java</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/dao/OrderDAO.java</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/web/otp_verification.jsp</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/dao/PaymentDAO.java</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/controller/GioHangServlet.java</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/controller/PaymentProcessingServlet.java</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/web/giohang.jsp</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/controller/DonMuaServlet.java</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/controller/OrderProcessingServlet.java</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/web/orderSuccess.jsp</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/model/OrderDetail.java</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/src/java/dao/CustomerDAO.java</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/web/admin-support.jsp</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/src/java/dao/SupportRequestDAO.java</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/src/java/dao/tables.java</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/web/hotro.jsp</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/src/java/model/Customer.java</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/src/java/controller/HotroServlet.java</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/web/admin-respond.jsp</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/web/customer-support.jsp</file>
+            <file>file:/D:/BTLWebsiteBanXeOto/src/java/model/UserAccount.java</file>
         </group>
     </open-files>
 </project-private>

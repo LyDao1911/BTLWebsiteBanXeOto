@@ -94,9 +94,6 @@
 
         <script>
             // ✅ Thêm sản phẩm vào phiếu nhập
-            // ✅ Thêm sản phẩm vào phiếu nhập
-            // ✅ Thêm sản phẩm vào phiếu nhập
-            // ✅ Thêm sản phẩm vào phiếu nhập (PHIÊN BẢN SỬA LỖI CACHE)
             document.getElementById('btnAddItem').addEventListener('click', function () {
                 const carSelector = document.getElementById('carSelector');
                 const selectedOption = carSelector.options[carSelector.selectedIndex];
@@ -106,7 +103,7 @@
                 const importPriceStr = document.getElementById('itemImportPrice').value.trim().replace(/\D/g, '');
                 const importPrice = parseInt(importPriceStr);
 
-                // 1. Kiểm tra dữ liệu (Vẫn như cũ)
+                // 1. Kiểm tra dữ liệu
                 if (!carId || isNaN(quantity) || isNaN(importPrice) || quantity <= 0 || importPrice <= 0) {
                     alert('⚠️ Vui lòng chọn xe, nhập số lượng và đơn giá nhập hợp lệ!');
                     return;
@@ -116,20 +113,33 @@
                 const tableBody = document.getElementById('invoiceDetailBody');
                 const formatter = new Intl.NumberFormat('vi-VN');
 
-                // ========================================================
-                // ✅ BẮT ĐẦU: Code thêm hàng mới (thay thế insertAdjacentHTML)
-                // ========================================================
                 try {
-                    // Tạo 1 hàng mới
+                    // Tạo hàng mới
                     const newRow = document.createElement('tr');
                     newRow.setAttribute('data-subtotal', subtotal);
 
                     // Ô 1: Tên xe + input ẩn
                     const cellName = document.createElement('td');
-                    cellName.textContent = carName; // Thêm tên xe
-                    cellName.innerHTML += `<input type="hidden" name="carId" value="${carId}">`;
-                    cellName.innerHTML += `<input type="hidden" name="quantity" value="${quantity}">`;
-                    cellName.innerHTML += `<input type="hidden" name="importPrice" value="${importPrice}">`;
+                    cellName.textContent = carName;
+
+                    // Tạo input hidden bằng createElement (tránh lỗi)
+                    const carIdInput = document.createElement('input');
+                    carIdInput.type = 'hidden';
+                    carIdInput.name = 'carId';
+                    carIdInput.value = carId;
+                    cellName.appendChild(carIdInput);
+
+                    const quantityInput = document.createElement('input');
+                    quantityInput.type = 'hidden';
+                    quantityInput.name = 'quantity';
+                    quantityInput.value = quantity;
+                    cellName.appendChild(quantityInput);
+
+                    const importPriceInput = document.createElement('input');
+                    importPriceInput.type = 'hidden';
+                    importPriceInput.name = 'importPrice';
+                    importPriceInput.value = importPrice;
+                    cellName.appendChild(importPriceInput);
 
                     // Ô 2: Số lượng
                     const cellQty = document.createElement('td');
@@ -145,7 +155,14 @@
 
                     // Ô 5: Nút Xóa
                     const cellDelete = document.createElement('td');
-                    cellDelete.innerHTML = '<button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">Xóa</button>';
+                    const deleteButton = document.createElement('button');
+                    deleteButton.type = 'button';
+                    deleteButton.className = 'btn btn-danger btn-sm';
+                    deleteButton.textContent = 'Xóa';
+                    deleteButton.onclick = function () {
+                        removeItem(this);
+                    };
+                    cellDelete.appendChild(deleteButton);
 
                     // Gắn tất cả ô vào hàng
                     newRow.appendChild(cellName);
@@ -158,15 +175,10 @@
                     tableBody.appendChild(newRow);
 
                 } catch (e) {
-                    // Nếu có bất kỳ lỗi nào, báo cho chúng ta biết
-                    console.error("LỖI KHI TẠO HÀNG (createElement):", e);
+                    console.error("LỖI KHI TẠO HÀNG:", e);
                     alert("Đã xảy ra lỗi khi tạo hàng: " + e.message);
                     return;
                 }
-                // ========================================================
-                // ✅ KẾT THÚC: Code thêm hàng mới
-                // ========================================================
-
 
                 updateTotal(); // Cập nhật tổng tiền
 
@@ -178,8 +190,10 @@
 
             // ✅ Xóa dòng
             function removeItem(button) {
-                button.closest('tr').remove();
-                updateTotal();
+                if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+                    button.closest('tr').remove();
+                    updateTotal();
+                }
             }
 
             // ✅ Cập nhật tổng tiền
@@ -187,31 +201,58 @@
                 let total = 0;
                 document.querySelectorAll('#invoiceDetailBody tr').forEach(row => {
                     const sub = parseFloat(row.getAttribute('data-subtotal'));
-                    if (!isNaN(sub))
+                    if (!isNaN(sub)) {
                         total += sub;
+                    }
                 });
                 const formatter = new Intl.NumberFormat('vi-VN');
-                document.getElementById('totalAmountDisplay').innerText = formatter.format(total) + " VNĐ";
+                document.getElementById('totalAmountDisplay').textContent = formatter.format(total) + " VNĐ";
                 document.getElementById('totalAmountInput').value = total;
             }
 
             // ✅ Format tiền khi nhập
-            document.getElementById('itemImportPrice').addEventListener('input', (e) => {
+            document.getElementById('itemImportPrice').addEventListener('input', function (e) {
                 let value = e.target.value.replace(/\D/g, '');
-                e.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                if (value) {
+                    e.target.value = new Intl.NumberFormat('vi-VN').format(parseInt(value));
+                } else {
+                    e.target.value = '';
+                }
+            });
+
+            // ✅ Lấy giá trị số khi mất focus
+            document.getElementById('itemImportPrice').addEventListener('blur', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                // Giữ lại giá trị số trong thuộc tính data
+                e.target.dataset.rawValue = value;
             });
 
             // ✅ Kiểm tra trước khi submit
             document.getElementById('purchaseForm').addEventListener('submit', function (e) {
                 const rows = document.querySelectorAll('#invoiceDetailBody tr');
+                const supplier = document.querySelector('[name="supplierID"]').value;
+
+                if (!supplier) {
+                    e.preventDefault();
+                    alert('⚠️ Vui lòng chọn nhà cung cấp!');
+                    return;
+                }
+
                 if (rows.length === 0) {
                     e.preventDefault();
                     alert('⚠️ Vui lòng thêm ít nhất một sản phẩm trước khi lưu!');
                     return;
                 }
+
                 if (!confirm('Bạn có chắc muốn lưu phiếu nhập này không?')) {
                     e.preventDefault();
                 }
+            });
+
+            // ✅ Đảm bảo lấy đúng giá trị số khi thêm sản phẩm
+            document.getElementById('itemImportPrice').addEventListener('focus', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                e.target.value = value; // Hiển thị giá trị số khi focus
             });
         </script>
 

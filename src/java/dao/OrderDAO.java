@@ -3,6 +3,7 @@ package dao;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
+import model.Customer;
 import model.Order;
 import model.OrderDetail;
 // import utils.Connect; // Giả định lớp Connect
@@ -256,18 +257,94 @@ public class OrderDAO {
             return false;
         }
     }
+
     public BigDecimal getOrderTotalAmount(int orderId) {
-    String sql = "SELECT TotalAmount FROM `order` WHERE OrderID = ?";
-    try (Connection conn = Connect.getCon(); 
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+        String sql = "SELECT TotalAmount FROM `order` WHERE OrderID = ?";
+        try (Connection conn = Connect.getCon(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getBigDecimal("TotalAmount");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Order getOrderById(int orderId) {
+    Order order = null;
+    try {
+        Connection con = Connect.getCon();
+        String sql = "SELECT o.*, c.FullName, c.PhoneNumber, c.Address, p.PaymentMethod "
+                + "FROM `order` o "
+                + "JOIN customer c ON o.CustomerID = c.CustomerID "
+                + "LEFT JOIN payment p ON o.OrderID = p.OrderID "  // LEFT JOIN để lấy payment method
+                + "WHERE o.OrderID = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
         ps.setInt(1, orderId);
         ResultSet rs = ps.executeQuery();
+
         if (rs.next()) {
-            return rs.getBigDecimal("TotalAmount");
+            order = new Order();
+            order.setOrderID(rs.getInt("OrderID"));
+            order.setCustomerID(rs.getInt("CustomerID"));
+            order.setOrderDate(rs.getTimestamp("OrderDate").toLocalDateTime());
+            order.setTotalAmount(rs.getBigDecimal("TotalAmount"));
+            order.setPaymentStatus(rs.getString("PaymentStatus"));
+            order.setDeliveryStatus(rs.getString("DeliveryStatus"));
+            order.setNote(rs.getString("Note"));
+
+           
+            List<OrderDetail> orderDetails = getOrderDetails(orderId);
+            order.setOrderDetails(orderDetails);
         }
     } catch (SQLException e) {
         e.printStackTrace();
     }
-    return null;
+    return order;
 }
+
+    public Customer getCustomerByOrderId(int orderId) {
+        Customer customer = null;
+        try {
+            Connection con = Connect.getCon();
+            String sql = "SELECT c.* FROM customer c "
+                    + "JOIN `order` o ON c.CustomerID = o.CustomerID "
+                    + "WHERE o.OrderID = ?";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                customer = new Customer();
+                customer.setCustomerID(rs.getInt("CustomerID"));
+                customer.setFullName(rs.getString("FullName"));
+                customer.setEmail(rs.getString("Email"));
+                customer.setPhoneNumber(rs.getString("PhoneNumber"));
+                customer.setAddress(rs.getString("Address"));
+                customer.setUserName(rs.getString("UserName"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return customer;
+    }
+
+    public String getPaymentMethodByOrderId(int orderId) {
+        try {
+            Connection con = Connect.getCon();
+            String sql = "SELECT PaymentMethod FROM payment WHERE OrderID = ?";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("PaymentMethod");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

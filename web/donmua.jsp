@@ -10,7 +10,19 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
         <style>
-            /* ✅ THÊM STYLE CHO THÔNG BÁO THÀNH CÔNG */
+            .product-item img {
+                cursor: pointer;
+                transition: transform 0.2s ease;
+            }
+
+            .product-item img:hover {
+                transform: scale(1.05);
+            }
+
+            .product-item a {
+                text-decoration: none;
+                display: block;
+            }
             .success-notification {
                 background: #d4edda;
                 color: #155724;
@@ -62,7 +74,7 @@
                 <a href="DonMuaServlet?tab=paid" class="tab <c:if test="${currentTab == 'paid'}">active</c:if>">ĐÃ THANH TOÁN</a>
                 <a href="DonMuaServlet?tab=unpaid" class="tab <c:if test="${currentTab == 'unpaid'}">active</c:if>">CHƯA THANH TOÁN</a>
                 <a href="DonMuaServlet?tab=completed" class="tab <c:if test="${currentTab == 'completed'}">active</c:if>">HOÀN THÀNH</a>
-            </div>
+                </div>
 
             <c:choose>
                 <c:when test="${not empty requestScope.ordersAll}">
@@ -104,14 +116,17 @@
                             <div class="product-list">
                                 <c:forEach var="detail" items="${order.orderDetails}">
                                     <div class="product-item">
-                                        <c:choose>
-                                            <c:when test="${not empty detail.carImage}">
-                                                <img src="${pageContext.request.contextPath}/uploads/${detail.carImage}" alt="${detail.carName}">
-                                            </c:when>
-                                            <c:otherwise>
-                                                <img src="${pageContext.request.contextPath}/images/xe1.png" alt="${detail.carName}">
-                                            </c:otherwise>
-                                        </c:choose>
+
+                                        <a href="hoadon.jsp?orderId=${order.orderID}" style="display: block;">
+                                            <c:choose>
+                                                <c:when test="${not empty detail.carImage}">
+                                                    <img src="${pageContext.request.contextPath}/uploads/${detail.carImage}" alt="${detail.carName}">
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <img src="${pageContext.request.contextPath}/images/xe1.png" alt="${detail.carName}">
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </a>
                                         <div class="prod-info">
                                             <div class="prod-name">${detail.carName}</div>
                                             <div class="prod-qty">x ${detail.quantity}</div> 

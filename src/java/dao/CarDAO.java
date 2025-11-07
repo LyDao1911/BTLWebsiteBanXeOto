@@ -20,6 +20,7 @@ import model.CarStock;
 import model.Brand;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.math.BigDecimal; // Import thêm BigDecimal
 
 /**
  *
@@ -30,11 +31,7 @@ public class CarDAO {
     private static final Logger LOGGER = Logger.getLogger(CarDAO.class.getName());
 
     public int insertCarAndStock(Car car, CarStock stock) {
-
-        // Query cho bảng car (Khớp với model Car.java)
         String carQuery = "INSERT INTO car (CarName, BrandID, Price, Color, Description, Status) VALUES (?, ?, ?, ?, ?, ?)";
-
-        // Query cho bảng carstock (Khớp với model CarStock.java)
         String stockQuery = "INSERT INTO carstock (BrandID, CarID, Quantity, LastUpdated) VALUES (?, ?, ?, ?)";
 
         int generatedCarId = -1;
@@ -42,10 +39,8 @@ public class CarDAO {
 
         try {
             con = Connect.getCon();
-            // Bắt đầu Transaction
             con.setAutoCommit(false);
 
-            // 1. Chèn vào bảng 'car'
             try (PreparedStatement carPs = con.prepareStatement(carQuery, Statement.RETURN_GENERATED_KEYS)) {
                 carPs.setString(1, car.getCarName());
                 carPs.setInt(2, car.getBrandID());
@@ -56,7 +51,6 @@ public class CarDAO {
 
                 carPs.executeUpdate();
 
-                // Lấy CarID tự tăng
                 try (ResultSet rs = carPs.getGeneratedKeys()) {
                     if (rs.next()) {
                         generatedCarId = rs.getInt(1);
@@ -64,22 +58,18 @@ public class CarDAO {
                 }
             }
 
-            // 2. Chèn vào bảng 'carstock' (Chỉ thực hiện nếu lấy được CarID)
             if (generatedCarId != -1) {
                 try (PreparedStatement stockPs = con.prepareStatement(stockQuery)) {
-                    stockPs.setInt(1, car.getBrandID()); // Lấy BrandID từ đối tượng Car
-                    stockPs.setInt(2, generatedCarId); // Dùng CarID vừa tạo
+                    stockPs.setInt(1, car.getBrandID());
+                    stockPs.setInt(2, generatedCarId);
                     stockPs.setInt(3, stock.getQuantity());
-                    stockPs.setTimestamp(4, Timestamp.valueOf(stock.getLastUpdated())); // Chuyển LocalDateTime sang Timestamp
-
+                    stockPs.setTimestamp(4, Timestamp.valueOf(stock.getLastUpdated()));
                     stockPs.executeUpdate();
                 }
             } else {
-                // Nếu không lấy được CarID, hủy bỏ
                 throw new Exception("Không thể tạo CarID mới.");
             }
 
-            // Commit transaction nếu cả hai lệnh INSERT đều thành công
             con.commit();
             return generatedCarId;
 
@@ -87,16 +77,16 @@ public class CarDAO {
             LOGGER.log(Level.SEVERE, "Lỗi khi thêm xe và stock. Tiến hành Rollback.", e);
             if (con != null) {
                 try {
-                    con.rollback(); // Hoàn tác nếu có lỗi
+                    con.rollback();
                 } catch (Exception rbEx) {
                     LOGGER.log(Level.SEVERE, "Lỗi khi rollback.", rbEx);
                 }
             }
-            return -1; // Thêm thất bại
+            return -1;
         } finally {
             if (con != null) {
                 try {
-                    con.setAutoCommit(true); // Trả lại chế độ AutoCommit
+                    con.setAutoCommit(true);
                     con.close();
                 } catch (Exception closeEx) {
                     LOGGER.log(Level.SEVERE, "Lỗi khi đóng kết nối.", closeEx);
@@ -105,25 +95,14 @@ public class CarDAO {
         }
     }
 
-    /**
-     * Phương thức chèn đối tượng CarImage vào bảng 'carimage'.
-     *
-     * @param image Đối tượng CarImage (chứa CarID, ImageURL, IsMain)
-     * @return true nếu chèn thành công, false nếu thất bại
-     */
     public boolean insertCarImage(CarImage image) {
-        // Query khớp với model CarImage.java
         String query = "INSERT INTO carimage (CarID, ImageURL, IsMain) VALUES (?, ?, ?)";
 
         try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(query)) {
-
             ps.setInt(1, image.getCarID());
-// (Lưu ý: Tên cột trong DB của cậu là ImageURL hay ImagePath? Tớ dùng ImageURL khớp với model)
             ps.setString(2, image.getImageURL());
-            ps.setBoolean(3, image.isIsMain()); // Dùng getter isIsMain()
-
+            ps.setBoolean(3, image.isIsMain());
             return ps.executeUpdate() > 0;
-
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Lỗi khi chèn ảnh mô tả cho CarID: " + image.getCarID(), e);
             return false;
@@ -138,7 +117,6 @@ public class CarDAO {
                 + "LEFT JOIN carstock s ON c.CarID = s.CarID";
 
         try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
-
             while (rs.next()) {
                 Car car = new Car();
                 car.setCarID(rs.getInt("CarID"));
@@ -148,49 +126,34 @@ public class CarDAO {
                 car.setColor(rs.getString("Color"));
                 car.setDescription(rs.getString("Description"));
                 car.setStatus(rs.getString("Status"));
-
-                // Lấy thêm Quantity
                 int quantity = rs.getInt("Quantity");
                 car.setQuantity(quantity);
-
                 list.add(car);
             }
-
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách xe có tồn kho.", e);
         }
-
         return list;
     }
 
     public boolean updateCarQuantity(int carID, int newQuantity) {
-        // SỬA LỖI 1: Đảm bảo chỉ UPDATE Quantity và LastUpdated
         String sql = "UPDATE carstock SET Quantity = ?, LastUpdated = NOW() WHERE CarID = ?";
-
-        // Thêm kiểm tra số lượng >= 0
         if (newQuantity < 0) {
             LOGGER.log(Level.WARNING, "Không thể cập nhật số lượng tồn kho âm cho CarID: " + carID);
             return false;
         }
 
         try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql)) {
-
             ps.setInt(1, newQuantity);
             ps.setInt(2, carID);
-
             int rowsAffected = ps.executeUpdate();
-
             if (rowsAffected > 0) {
                 System.out.println("✅ [DAO] Cập nhật Quantity thành công cho CarID=" + carID + ". Số lượng mới: " + newQuantity);
                 return true;
             } else {
-                // Trường hợp CarID tồn tại trong bảng car nhưng chưa có trong carstock (cần INSERT)
-                // Tuy nhiên, để đơn giản và phù hợp với chức năng update/mua hàng, 
-                // ta chỉ cần đảm bảo logic gọi phương thức này đã kiểm tra sự tồn tại của stock.
                 System.out.println("ℹ️ [DAO] Update Quantity thất bại: Không tìm thấy tồn kho cho CarID=" + carID);
                 return false;
             }
-
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Lỗi khi cập nhật tồn kho cho CarID: " + carID, e);
             e.printStackTrace();
@@ -198,40 +161,35 @@ public class CarDAO {
         }
     }
 
-    // Trong CarDAO.java
     public Car getCarById(int carId) {
-        // KẾT HỢP: Lấy thông tin xe, tồn kho, tên hãng và URL ảnh chính trong 1 QUERY
         String sql = "SELECT c.CarID, c.CarName, c.Price, c.Color, c.Description, c.Status, "
-                + "s.Quantity, " // Lấy tồn kho
-                + "b.BrandName, b.BrandID, " // Lấy tên và ID hãng xe
-                + "ci.ImageURL AS MainImageURL " // Lấy ảnh chính
+                + "s.Quantity, "
+                + "b.BrandName, b.BrandID, "
+                + "ci.ImageURL AS MainImageURL "
                 + "FROM car c "
                 + "LEFT JOIN carstock s ON c.CarID = s.CarID "
-                + "JOIN brand b ON c.BrandID = b.BrandID " // Dùng JOIN thay vì chỉ lấy BrandID
+                + "JOIN brand b ON c.BrandID = b.BrandID "
                 + "LEFT JOIN carimage ci ON c.CarID = ci.CarID AND ci.IsMain = 1 "
                 + "WHERE c.CarID = ?";
 
         Car car = null;
         try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql)) {
-
             ps.setInt(1, carId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     car = new Car();
                     car.setCarID(rs.getInt("CarID"));
                     car.setCarName(rs.getString("CarName"));
-                    // CẬP NHẬT: Gán BrandName
                     car.setBrandID(rs.getInt("BrandID"));
                     car.setBrandName(rs.getString("BrandName"));
-                    // ---
                     car.setPrice(rs.getBigDecimal("Price"));
                     car.setColor(rs.getString("Color"));
                     car.setDescription(rs.getString("Description"));
                     car.setStatus(rs.getString("Status"));
                     car.setQuantity(rs.getInt("Quantity"));
-                    // CẬP NHẬT: Gán MainImageURL (đã có trong query JOIN)
                     String mainImage = rs.getString("MainImageURL");
                     if (mainImage != null && !mainImage.startsWith("uploads/")) {
+                        // Sửa lỗi logic đường dẫn ảnh (giữ nguyên logic gốc của bạn, nhưng cần đảm bảo nó khớp với mapResultSetToCar)
                         mainImage = mainImage;
                     }
                     car.setMainImageURL(mainImage);
@@ -240,26 +198,18 @@ public class CarDAO {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Lỗi khi lấy chi tiết xe CarID: " + carId, e);
         }
-        // Bỏ khối finally rườm rà vì try-with-resources đã tự đóng connection
-
         return car;
     }
 
-    // // 🔹 Cập nhật thông tin xe, tồn kho, và ảnh
     public boolean updateCarWithStock(Car car, int quantity) {
         System.out.println(">>> [DAO] Đang cập nhật xe: " + car.getCarID() + " - " + car.getCarName());
         System.out.println(">>> [DAO] Số lượng tồn: " + quantity);
 
         String carQuery = "UPDATE car SET CarName=?, BrandID=?, Price=?, Color=?, Description=?, Status=? WHERE CarID=?";
-
-        // SỬA LỖI 1: Thay GETDATE() bằng NOW() cho MySQL/Hỗ trợ chung
         String stockQuery = "UPDATE carstock SET Quantity=?, LastUpdated=NOW() WHERE CarID=?";
         String insertStock = "INSERT INTO carstock (BrandID, CarID, Quantity, LastUpdated) VALUES (?, ?, ?, NOW())";
-
         String imageMainQuery = "UPDATE carimage SET ImageURL=? WHERE CarID=? AND IsMain=1";
-        // Query INSERT ảnh chính nếu UPDATE thất bại (Đã thêm biến mới)
         String insertMainImage = "INSERT INTO carimage (CarID, ImageURL, IsMain) VALUES (?, ?, 1)";
-
         String deleteThumbsQuery = "DELETE FROM carimage WHERE CarID=? AND IsMain=0";
         String insertThumbQuery = "INSERT INTO carimage (CarID, ImageURL, IsMain) VALUES (?, ?, 0)";
 
@@ -269,7 +219,6 @@ public class CarDAO {
             con = Connect.getCon();
             con.setAutoCommit(false);
 
-            // 🟢 1. Cập nhật thông tin xe
             int carRows = 0;
             try (PreparedStatement carPs = con.prepareStatement(carQuery)) {
                 carPs.setString(1, car.getCarName());
@@ -282,13 +231,11 @@ public class CarDAO {
                 carRows = carPs.executeUpdate();
                 System.out.println(">>> [DAO] Cập nhật bảng car: " + carRows + " dòng.");
 
-                // NẾU carRows == 0 thì CarID không tồn tại, cần ROLLBACK ngay
                 if (carRows == 0) {
                     throw new Exception("Lỗi: Không tìm thấy CarID=" + car.getCarID() + " để cập nhật.");
                 }
             }
 
-            // 🟢 2. Cập nhật tồn kho (Stock)
             int affectedRows = 0;
             try (PreparedStatement stockPs = con.prepareStatement(stockQuery)) {
                 stockPs.setInt(1, quantity);
@@ -298,7 +245,6 @@ public class CarDAO {
             }
 
             if (affectedRows == 0) {
-                // Nếu UPDATE không thành công (chưa có tồn kho), thì INSERT mới
                 try (PreparedStatement insertPs = con.prepareStatement(insertStock)) {
                     insertPs.setInt(1, car.getBrandID());
                     insertPs.setInt(2, car.getCarID());
@@ -308,7 +254,6 @@ public class CarDAO {
                 }
             }
 
-            // 🟢 3. SỬA LỖI 2: Cập nhật hoặc Thêm mới ảnh chính
             if (car.getMainImageURL() != null && !car.getMainImageURL().isEmpty()) {
                 String imgName = car.getMainImageURL();
                 if (imgName.startsWith("uploads/")) {
@@ -330,8 +275,6 @@ public class CarDAO {
                 }
             }
 
-            // 🟢 4. Ảnh mô tả (Thumbs)
-            // 🟢 4. Ảnh mô tả (Thumbs)
             if (car.getThumbs() != null) {
                 try (PreparedStatement delPs = con.prepareStatement(deleteThumbsQuery)) {
                     delPs.setInt(1, car.getCarID());
@@ -358,7 +301,6 @@ public class CarDAO {
             return true;
 
         } catch (Exception e) {
-            // Lỗi ở đây sẽ in ra chi tiết SQLException, giúp bạn debug chính xác hơn
             e.printStackTrace();
             if (con != null) try {
                 con.rollback();
@@ -368,7 +310,7 @@ public class CarDAO {
             return false;
         } finally {
             if (con != null) try {
-                con.setAutoCommit(true); // Quan trọng: Đưa về trạng thái AutoCommit ban đầu
+                con.setAutoCommit(true);
                 con.close();
             } catch (Exception ignore) {
             }
@@ -386,31 +328,25 @@ public class CarDAO {
             return false;
         }
     }
-    // Thêm vào lớp dao.CarDAO.java
 
     public boolean deleteCar(int carID) {
         System.out.println(">>> [DAO] Chuẩn bị xóa xe CarID=" + carID);
 
-        // Xóa tất cả bản ghi liên quan trước khi xóa bản ghi chính
         String deleteImageQuery = "DELETE FROM carimage WHERE CarID=?";
         String deleteStockQuery = "DELETE FROM carstock WHERE CarID=?";
         String deleteCarQuery = "DELETE FROM car WHERE CarID=?";
-
-        // Query kiểm tra sự tồn tại trong orderdetail
         String checkOrderQuery = "SELECT 1 FROM orderdetail WHERE CarID=? LIMIT 1";
 
         Connection con = null;
 
         try {
             con = Connect.getCon();
-            con.setAutoCommit(false); // Bắt đầu Transaction
+            con.setAutoCommit(false);
 
-            // 0. Kiểm tra OrderDetail (Nếu có, không được xóa)
             try (PreparedStatement checkPs = con.prepareStatement(checkOrderQuery)) {
                 checkPs.setInt(1, carID);
                 try (ResultSet rs = checkPs.executeQuery()) {
                     if (rs.next()) {
-                        // Nếu xe đã được đặt hàng, KHÔNG xóa
                         System.err.println("❌ [DAO] Xóa thất bại: CarID=" + carID + " đã có trong OrderDetail.");
                         con.rollback();
                         return false;
@@ -418,21 +354,18 @@ public class CarDAO {
                 }
             }
 
-            // 1. Xóa trong carimage
             try (PreparedStatement imagePs = con.prepareStatement(deleteImageQuery)) {
                 imagePs.setInt(1, carID);
                 int rows = imagePs.executeUpdate();
                 System.out.println(">>> [DAO] Đã xóa " + rows + " ảnh liên quan.");
             }
 
-            // 2. Xóa trong carstock
             try (PreparedStatement stockPs = con.prepareStatement(deleteStockQuery)) {
                 stockPs.setInt(1, carID);
                 int rows = stockPs.executeUpdate();
                 System.out.println(">>> [DAO] Đã xóa " + rows + " tồn kho liên quan.");
             }
 
-            // 3. Xóa trong car (Bản ghi chính)
             int carRows;
             try (PreparedStatement carPs = con.prepareStatement(deleteCarQuery)) {
                 carPs.setInt(1, carID);
@@ -441,11 +374,11 @@ public class CarDAO {
             }
 
             if (carRows > 0) {
-                con.commit(); // Hoàn tất Transaction
+                con.commit();
                 System.out.println("✅ [DAO] Xóa cứng thành công CarID=" + carID);
                 return true;
             } else {
-                con.rollback(); // Nếu không xóa được bản ghi chính (CarID không tồn tại)
+                con.rollback();
                 System.err.println("❌ [DAO] Xóa thất bại: Không tìm thấy CarID=" + carID + ".");
                 return false;
             }
@@ -454,7 +387,7 @@ public class CarDAO {
             LOGGER.log(Level.SEVERE, "Lỗi khi xóa xe. Tiến hành Rollback.", e);
             if (con != null) {
                 try {
-                    con.rollback(); // Hoàn tác nếu có lỗi SQL
+                    con.rollback();
                 } catch (SQLException rbEx) {
                     LOGGER.log(Level.SEVERE, "Lỗi khi rollback.", rbEx);
                 }
@@ -474,16 +407,14 @@ public class CarDAO {
 
     public List<Brand> getAllBrands() {
         List<Brand> brands = new ArrayList<>();
-        // Giả định tên bảng là 'brand' và có các cột BrandID, BrandName, LogoURL
         String sql = "SELECT BrandID, BrandName, LogoURL FROM brand ORDER BY BrandName";
 
         try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
             while (rs.next()) {
                 Brand brand = new Brand();
                 brand.setBrandID(rs.getInt("BrandID"));
                 brand.setBrandName(rs.getString("BrandName"));
-                brand.setLogoURL(rs.getString("LogoURL")); // Giả định tên cột là LogoURL
+                brand.setLogoURL(rs.getString("LogoURL"));
                 brands.add(brand);
             }
         } catch (Exception e) {
@@ -493,44 +424,33 @@ public class CarDAO {
     }
 
     public Map<Brand, List<Car>> getCarsGroupedByBrand() {
-        // LinkedHashMap để đảm bảo thứ tự các hãng xe được giữ nguyên (nếu cần)
         Map<Brand, List<Car>> groupedCars = new LinkedHashMap<>();
-
-        // Query kết hợp 3 bảng: car, carimage (để lấy ảnh chính), và brand
         String sql = "SELECT b.BrandID, b.BrandName, b.LogoURL, "
                 + "c.CarID, c.CarName, c.Price, "
                 + "ci.ImageURL AS MainImageURL "
                 + "FROM car c "
                 + "JOIN brand b ON c.BrandID = b.BrandID "
                 + "LEFT JOIN carimage ci ON c.CarID = ci.CarID AND ci.IsMain = 1 "
-                + "WHERE c.Status = 'Available' " // Chỉ lấy xe đang bán
+                + "WHERE c.Status = 'Available' "
                 + "ORDER BY b.BrandName, c.CarName";
 
         try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
             while (rs.next()) {
-                // Lấy thông tin Brand
                 int brandID = rs.getInt("BrandID");
                 String brandName = rs.getString("BrandName");
                 String logoURL = rs.getString("LogoURL");
                 Brand brand = new Brand(brandID, brandName, logoURL);
 
-                // Lấy thông tin Car
                 Car car = new Car();
                 car.setCarID(rs.getInt("CarID"));
                 car.setCarName(rs.getString("CarName"));
                 car.setBrandID(brandID);
                 car.setPrice(rs.getBigDecimal("Price"));
-                car.setMainImageURL(rs.getString("MainImageURL")); // Lấy từ JOIN
+                car.setMainImageURL(rs.getString("MainImageURL"));
 
-                // Tìm Brand trong Map, nếu chưa có thì thêm mới. Sau đó thêm Car vào List.
-                // Dùng Brand ID/tên làm key sẽ tiện hơn, nhưng dùng object Brand làm key để lấy LogoURL tiện hơn.
-                // Để đảm bảo Brand object là duy nhất (vì BrandID là khóa chính), ta cần một cách so sánh (equals/hashCode)
-                // Tối ưu hóa: Thay vì dùng object Brand làm Key, ta có thể dùng Brand Name (String) làm Key
                 List<Car> carList = groupedCars.computeIfAbsent(brand, k -> new ArrayList<>());
                 carList.add(car);
             }
-
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách xe theo hãng.", e);
         }
@@ -539,11 +459,8 @@ public class CarDAO {
 
     public List<String> getCarThumbs(int carID) {
         List<String> thumbs = new ArrayList<>();
-        // Lấy tất cả ảnh không phải ảnh chính (IsMain = 0)
         String sql = "SELECT ImageURL FROM carimage WHERE CarID = ? AND IsMain = 0";
-
         try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql)) {
-
             ps.setInt(1, carID);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -560,4 +477,366 @@ public class CarDAO {
         return thumbs;
     }
 
+    // ========== PHƯƠNG THỨC QUAN TRỌNG CHO TÌM KIẾM ==========
+    /**
+     * Lấy danh sách thương hiệu CÓ SẴN - Nếu không có filter: trả về tất cả
+     * brand từ bảng brand - Nếu có filter: trả về brand có xe phù hợp với
+     * filter
+     */
+    public List<String> getAvailableBrands(String keyword, String[] colors, Double minPrice, Double maxPrice) {
+        // Kiểm tra xem có filter active không
+        boolean hasActiveFilter = (keyword != null && !keyword.trim().isEmpty())
+                || (colors != null && colors.length > 0)
+                || (minPrice != null) || (maxPrice != null);
+
+        // Nếu không có filter, trả về tất cả brand từ bảng brand
+        if (!hasActiveFilter) {
+            List<String> brands = new ArrayList<>();
+            String sql = "SELECT BrandName FROM brand ORDER BY BrandName";
+
+            try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    brands.add(rs.getString("BrandName"));
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách thương hiệu", e);
+            }
+            System.out.println("✅ [DAO] Không có filter - Trả về tất cả brand: " + brands);
+            return brands;
+        }
+
+        // Nếu có filter, thực hiện query với filter
+        List<String> brands = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+
+        sql.append("SELECT DISTINCT b.BrandName ");
+        sql.append("FROM car c ");
+        sql.append("JOIN brand b ON c.BrandID = b.BrandID ");
+        sql.append("WHERE c.Status = 'Available' ");
+
+        // Áp dụng các bộ lọc hiện tại
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (c.CarName LIKE ? OR b.BrandName LIKE ? OR c.Description LIKE ?) ");
+            String searchPattern = "%" + keyword.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+
+        if (colors != null && colors.length > 0) {
+            sql.append("AND (");
+            for (int i = 0; i < colors.length; i++) {
+                if (i > 0) {
+                    sql.append(" OR ");
+                }
+                sql.append("c.Color = ?");
+                params.add(colors[i]);
+            }
+            sql.append(") ");
+        }
+
+        if (minPrice != null) {
+            sql.append("AND c.Price >= ? ");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null) {
+            sql.append("AND c.Price <= ? ");
+            params.add(maxPrice);
+        }
+
+        sql.append("ORDER BY b.BrandName");
+
+        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    brands.add(rs.getString("BrandName"));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách thương hiệu có sẵn", e);
+        }
+
+        // Nếu không tìm thấy brand nào (do filter quá chặt), vẫn trả về tất cả brand
+        if (brands.isEmpty() && hasActiveFilter) {
+            return getAvailableBrands(null, null, null, null);
+        }
+
+        System.out.println("✅ [DAO] Có filter - Trả về brand phù hợp: " + brands);
+        return brands;
+    }
+
+    /**
+     * Lấy danh sách màu sắc CÓ SẴN
+     */
+    public List<String> getAvailableColors(String keyword, String[] brands, Double minPrice, Double maxPrice) {
+        // Kiểm tra xem có filter active không
+        boolean hasActiveFilter = (keyword != null && !keyword.trim().isEmpty())
+                || (brands != null && brands.length > 0)
+                || (minPrice != null) || (maxPrice != null);
+
+        // Nếu không có filter, trả về tất cả màu từ xe available
+        if (!hasActiveFilter) {
+            List<String> colors = new ArrayList<>();
+            String sql = "SELECT DISTINCT Color FROM car WHERE Color IS NOT NULL AND Color != '' AND Status = 'Available' ORDER BY Color";
+
+            try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    colors.add(rs.getString("Color"));
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách màu sắc", e);
+            }
+            return colors;
+        }
+
+        // Nếu có filter, thực hiện query với filter
+        List<String> colors = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+
+        sql.append("SELECT DISTINCT c.Color ");
+        sql.append("FROM car c ");
+        sql.append("JOIN brand b ON c.BrandID = b.BrandID ");
+        sql.append("WHERE c.Status = 'Available' AND c.Color IS NOT NULL AND c.Color != '' ");
+
+        // Áp dụng các bộ lọc hiện tại
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (c.CarName LIKE ? OR b.BrandName LIKE ? OR c.Description LIKE ?) ");
+            String searchPattern = "%" + keyword.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+
+        if (brands != null && brands.length > 0) {
+            sql.append("AND (");
+            for (int i = 0; i < brands.length; i++) {
+                if (i > 0) {
+                    sql.append(" OR ");
+                }
+                sql.append("b.BrandName = ?");
+                params.add(brands[i]);
+            }
+            sql.append(") ");
+        }
+
+        if (minPrice != null) {
+            sql.append("AND c.Price >= ? ");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null) {
+            sql.append("AND c.Price <= ? ");
+            params.add(maxPrice);
+        }
+
+        sql.append("ORDER BY c.Color");
+
+        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    colors.add(rs.getString("Color"));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách màu sắc có sẵn", e);
+        }
+
+        // Nếu không tìm thấy màu nào (do filter quá chặt), vẫn trả về tất cả màu
+        if (colors.isEmpty() && hasActiveFilter) {
+            return getAvailableColors(null, null, null, null);
+        }
+
+        return colors;
+    }
+
+    /**
+     * Lấy giá cao nhất trong hệ thống (cho filter giá)
+     */
+    public double getMaxPrice() {
+        String sql = "SELECT MAX(Price) as MaxPrice FROM car WHERE Status = 'Available'";
+        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDouble("MaxPrice");
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy giá cao nhất", e);
+        }
+        return 10000000000.0;
+    }
+
+    /**
+     * Helper method để map ResultSet thành Car object
+     */
+    private Car mapResultSetToCar(ResultSet rs) throws SQLException {
+        Car car = new Car();
+        car.setCarID(rs.getInt("CarID"));
+        car.setCarName(rs.getString("CarName"));
+        // Đã sửa: Ép kiểu BigDecimal cho Price để khớp với model Car
+        Object priceObj = rs.getObject("Price");
+        if (priceObj instanceof BigDecimal) {
+            car.setPrice((BigDecimal) priceObj);
+        } else if (priceObj != null) {
+            car.setPrice(new BigDecimal(priceObj.toString()));
+        } else {
+            car.setPrice(BigDecimal.ZERO);
+        }
+
+        car.setColor(rs.getString("Color"));
+        car.setDescription(rs.getString("Description"));
+        car.setStatus(rs.getString("Status"));
+        car.setBrandID(rs.getInt("BrandID"));
+        car.setBrandName(rs.getString("BrandName"));
+        car.setQuantity(rs.getInt("Quantity"));
+
+        // Xử lý MainImageURL
+        String mainImage = rs.getString("MainImageURL");
+        if (mainImage != null && !mainImage.isEmpty()) {
+            // Chỉ thêm tiền tố "uploads/" nếu nó chưa có (và không phải là ảnh mặc định)
+            if (!mainImage.startsWith("uploads/") && !mainImage.startsWith("image/")) {
+                mainImage = "uploads/" + mainImage;
+            }
+        } else {
+            mainImage = "image/default-car.jpg";
+        }
+        car.setMainImageURL(mainImage);
+
+        return car;
+    }
+
+    /**
+     * Tìm kiếm xe với bộ lọc HOÀN CHỈNH
+     */
+    public List<Car> searchCarsWithFilters(String keyword, List<String> brands, List<String> colors,
+            Double minPrice, Double maxPrice, String sortBy, String sortOrder) {
+        List<Car> result = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+
+        sql.append("SELECT DISTINCT c.CarID, c.CarName, c.Price, c.Color, c.Description, c.Status, ")
+                .append("b.BrandName, b.BrandID, ")
+                .append("ci.ImageURL AS MainImageURL, ")
+                .append("s.Quantity ")
+                .append("FROM car c ")
+                .append("JOIN brand b ON c.BrandID = b.BrandID ")
+                .append("LEFT JOIN carimage ci ON c.CarID = ci.CarID AND ci.IsMain = 1 ")
+                .append("LEFT JOIN carstock s ON c.CarID = s.CarID ")
+                .append("WHERE c.Status = 'Available' ");
+
+        // Lọc theo từ khóa
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (c.CarName LIKE ? OR b.BrandName LIKE ? OR c.Description LIKE ?) ");
+            String searchPattern = "%" + keyword.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+
+        // Lọc theo hãng xe
+        if (brands != null && !brands.isEmpty()) {
+            sql.append("AND b.BrandName IN ("); // SỬA: Dùng IN thay cho chuỗi OR dài
+            for (int i = 0; i < brands.size(); i++) {
+                sql.append("?");
+                if (i < brands.size() - 1) {
+                    sql.append(", ");
+                }
+                params.add(brands.get(i));
+            }
+            sql.append(") ");
+        }
+
+        // Lọc theo màu sắc
+        if (colors != null && !colors.isEmpty()) {
+            sql.append("AND c.Color IN ("); // SỬA: Dùng IN thay cho chuỗi OR dài
+            for (int i = 0; i < colors.size(); i++) {
+                sql.append("?");
+                if (i < colors.size() - 1) {
+                    sql.append(", ");
+                }
+                params.add(colors.get(i));
+            }
+            sql.append(") ");
+        }
+
+        // Lọc theo giá
+        if (minPrice != null) {
+            sql.append("AND c.Price >= ? ");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null) {
+            sql.append("AND c.Price <= ? ");
+            params.add(maxPrice);
+        }
+
+        // Sắp xếp
+        if (sortBy != null && !sortBy.isEmpty()) {
+            switch (sortBy) {
+                case "price":
+                    sql.append("ORDER BY c.Price ");
+                    break;
+                case "name":
+                    sql.append("ORDER BY c.CarName ");
+                    break;
+                case "brand":
+                    sql.append("ORDER BY b.BrandName ");
+                    break;
+                case "newest":
+                default:
+                    sql.append("ORDER BY c.CarID ");
+                    break; // SỬA: Thêm DESC/ASC vào phần sau
+            }
+
+            if ("desc".equalsIgnoreCase(sortOrder)) {
+                sql.append("DESC ");
+            } else {
+                sql.append("ASC ");
+            }
+        } else {
+            sql.append("ORDER BY c.CarID DESC ");
+        }
+
+        System.out.println("SQL: " + sql.toString());
+        System.out.println("Params: " + params);
+
+        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                // SỬA LỖI QUAN TRỌNG: Phải sử dụng phương thức set phù hợp với kiểu dữ liệu
+                Object param = params.get(i);
+                if (param instanceof String) {
+                    ps.setString(i + 1, (String) param);
+                } else if (param instanceof Double) {
+                    ps.setDouble(i + 1, (Double) param);
+                } else if (param instanceof Integer) {
+                    ps.setInt(i + 1, (Integer) param);
+                } else if (param instanceof BigDecimal) {
+                    ps.setBigDecimal(i + 1, (BigDecimal) param);
+                } else {
+                    ps.setObject(i + 1, param);
+                }
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.add(mapResultSetToCar(rs));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi tìm kiếm xe với bộ lọc: " + sql.toString(), e);
+            e.printStackTrace();
+        }
+        return result;
+    }
 }
