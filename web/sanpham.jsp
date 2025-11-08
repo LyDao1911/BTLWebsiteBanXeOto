@@ -9,6 +9,187 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
+<style>
+/* ==================================
+   CSS CHUNG CHO TRANG QUẢN TRỊ (sanpham.jsp)
+   ================================== */
+
+.admin-page-container {
+    padding: 30px 20px;
+    min-height: 80vh; /* Đảm bảo trang có chiều cao tối thiểu */
+    background-color: #f8f9fa; /* Nền trang nhẹ nhàng */
+}
+
+.admin-page-container .right-panel {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem; /* Khoảng cách dưới */
+}
+
+/* ==================================
+   2. CSS BẢNG (TABLE)
+   ================================== */
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+
+/* Thead (Tiêu đề cột) */
+.table-dark th {
+    background-color: #343a40; /* Màu nền đen đậm */
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #454d55;
+    font-weight: 600;
+}
+
+/* Thân bảng (Body) */
+.table tbody td {
+    padding: 10px 15px;
+    border: 1px solid #dee2e6;
+    vertical-align: middle; /* Căn giữa nội dung theo chiều dọc */
+}
+
+/* Hiệu ứng Hover và Dòng được chọn */
+.table tbody tr:hover {
+    background-color: #f1f1f1; /* Nền nhạt khi rê chuột */
+    cursor: pointer;
+}
+
+.table tbody tr.selected-row {
+    background-color: #fff3cd; /* Nền màu vàng nhạt khi được chọn (Cảnh báo/Highlight) */
+    border: 2px solid #ffc107;
+}
+
+/* Định dạng Checkbox */
+.table input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #d1121d; /* Đổi màu checkbox thành màu đỏ chủ đạo */
+    cursor: pointer;
+}
+
+/* ==================================
+   3. CSS NÚT HÀNH ĐỘNG (ACTION BUTTONS)
+   ================================== */
+
+.table-action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: flex-end; /* Đẩy các nút sang phải */
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+/* Nút THÊM (Màu Xanh lá) */
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Nút SỬA (Màu Vàng/Cam) */
+.btn-warning {
+    background-color: #ffc107;
+    color: #343a40;
+}
+.btn-warning:hover {
+    background-color: #e0a800;
+}
+
+/* Nút XÓA (Màu Đỏ) */
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+/* --- CSS CHO MÀU SẮC (RADIO BUTTON - CÓ DẤU TÍCH) --- */
+
+/* Style chung cho label chứa màu */
+.color-item {
+    position: relative;
+    display: inline-block;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+/* Style cho vòng tròn màu (span) */
+.color-item span {
+    display: block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: all 0.2s ease-in-out;
+    opacity: 0.7;
+    filter: grayscale(30%);
+}
+
+/* ⭐ BỎ COMMENT DÒNG NÀY ĐỂ ẨN NÚT RADIO ⭐ */
+.color-item input[type="radio"] {
+    display: none; /* Quan trọng: Phải bỏ comment dòng này */
+}
+
+/* ⭐ Làm MỜ các màu KHÁC khi CÓ MỘT MÀU được chọn ⭐ */
+/* (Đặt luật làm mờ này LÊN TRÊN) */
+.color-palette:has(input[type="radio"]:checked) .color-item span {
+    opacity: 0.4;
+    filter: grayscale(60%);
+    transform: scale(0.95);
+}
+
+/* ⭐ Style KHI MÀU ĐƯỢC CHỌN (Vòng tròn màu) ⭐ */
+/* (Đặt luật làm sáng này Ở DƯỚI) */
+.color-palette .color-item input[type="radio"]:checked + span {
+    border-color: #000;
+    box-shadow: 0 0 8px yellowgreen;
+    transform: scale(1.1);
+    opacity: 1;
+    filter: grayscale(0%);
+}
+
+/* ⭐ THÊM DẤU TÍCH KHI MÀU ĐƯỢC CHỌN ⭐ */
+/* (Đặt luật dấu tích này Ở DƯỚI CÙNG) */
+.color-item input[type="radio"]:checked + span::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 14px;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+}
+</style>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Quản lý xe - Velyra Aero</title>

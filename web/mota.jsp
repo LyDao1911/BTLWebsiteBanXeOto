@@ -3,7 +3,148 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %> 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <% Car car = (Car) request.getAttribute("car");%> 
+<style>
+/* === PHẦN HIỂN THỊ CHI TIẾT SẢN PHẨM (mota.jsp) === */
 
+/* Tổng khung chứa ảnh và thông tin */
+.product-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Khung ảnh bên trái */
+.product-images {
+    flex: 1;
+    min-width: 350px;
+}
+
+/* Ảnh chính */
+.main-image img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+/* Ảnh mô tả nhỏ */
+.thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 15px;
+}
+.thumbs img {
+    width: 100px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: transform 0.3s ease, border-color 0.2s ease;
+}
+.thumbs img:hover {
+    transform: scale(1.05);
+    border-color: #999;
+}
+
+/* Thông tin sản phẩm */
+.product-details {
+    flex: 1;
+    min-width: 350px;
+}
+
+/* Tiêu đề sản phẩm */
+.product-details h1 {
+    font-size: 26px;
+    margin-bottom: 10px;
+}
+
+/* Giá */
+.product-details .price {
+    font-size: 22px;
+    color: #c00;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+/* Nút hành động */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+.action-buttons button {
+    flex: 1;
+    padding: 10px 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.action-buttons .buy-now {
+    background-color: #c00;
+    color: #fff;
+}
+.action-buttons .add-to-cart {
+    background-color: #eee;
+    color: #333;
+}
+.action-buttons button:hover {
+    opacity: 0.9;
+}
+
+/* Phần mô tả sản phẩm */
+.product-description {
+    max-width: 1200px;
+    margin: 30px auto 60px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 5px;
+}
+.product-description h2 {
+    text-transform: uppercase;
+    font-size: 22px;
+    font-weight: 700;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+.product-description p {
+    line-height: 1.7;
+    font-size: 16px;
+}
+
+.thumb-image:hover {
+    border: 2px solid #007bff;
+    transform: scale(1.05);
+    transition: 0.2s;
+}
+.main-image img {
+    transition: 0.3s;
+}
+
+.thumbs img {
+    width:100px;
+    height:60px;
+    object-fit:cover;
+}
+.main-image img {
+    width:100%;
+    height:auto;
+    max-height:480px;
+    object-fit:contain;
+}
+</style>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -36,7 +177,7 @@
                     </div>
                 </div>
 
-                <div class="product-details">
+                        <div class="product-details">
                     <h1>${car.carName}</h1> 
 
                     <div class="price">

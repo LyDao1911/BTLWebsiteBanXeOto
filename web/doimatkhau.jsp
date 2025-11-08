@@ -7,6 +7,97 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<style>
+/*Trang hồ so và trang đổi mật khẩu*/
+
+.profile-container {
+    display: flex;
+    width: 80%;
+    margin: 50px auto;
+    background-color: rgba(255, 255, 255, 0.3); /* màu trắng trong suốt */
+
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #444;
+}
+
+/* Cột Menu bên trái */
+.profile-menu {
+    width: 25%;
+    background-color:rgba(34, 34, 34, 0.7); /* Màu đậm hơn */
+    padding: 20px;
+    border-right: 1px solid #444;
+}
+.profile-menu .user-avatar {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.profile-menu .user-avatar img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+.profile-menu .user-avatar p {
+    font-weight: bold;
+    margin-top: 10px;
+}
+.profile-menu ul {
+    list-style-type: none;
+    padding: 0;
+}
+.profile-menu ul li a {
+    display: block;
+    padding: 15px;
+    text-decoration: none;
+    color: #ccc;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+.profile-menu ul li a.active,
+.profile-menu ul li a:hover {
+    background-color: #f39c12; /* Màu cam */
+    color: #111;
+}
+
+/* Cột Form bên phải */
+.profile-content {
+    width: 75%;
+    padding: 40px;
+    background: url('image/tt.jpg') no-repeat center center; /* Ảnh nền mờ */
+    background-size: cover;
+}
+.profile-form {
+    max-width: 450px;
+    margin: 0 auto; /* căn giữa ngang */
+}
+.profile-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #ccc;
+    font-weight: bold;
+}
+.profile-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    background-color: #fff; /* Nền trắng như thiết kế */
+    border: 1px solid #777;
+    color: #333;
+    border-radius: 5px;
+}
+.profile-form input[type="submit"] {
+    background-color: #f39c12;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+.message {
+    color: lightgreen;
+}
+.errorMessage {
+    color: red;
+}
+</style>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">

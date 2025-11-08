@@ -1,119 +1,143 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.SupportRequestDAO;
-import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import model.UserAccount;
 
-/**
- *
- * @author Admin
- */
+import java.io.IOException;
+
 @WebServlet(name = "RespondSupportServlet", urlPatterns = {"/RespondSupportServlet"})
 public class RespondSupportServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet RespondSupportServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet RespondSupportServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
+    private static final String ADMIN_SUPPORT_LIST = "AdminSupportServlet";
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            // Lấy tham số từ request
-            int supportID = Integer.parseInt(request.getParameter("supportID"));
-            String responseText = request.getParameter("response");
 
-            // Kiểm tra dữ liệu đầu vào
-            if (responseText == null || responseText.trim().isEmpty()) {
-                request.setAttribute("message", "❌ Nội dung phản hồi không được để trống!");
-                request.getRequestDispatcher("AdminHotroServlet").forward(request, response);
-                return;
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
+        
+        HttpSession session = request.getSession();
+
+        String supportIDStr = request.getParameter("supportID");
+        String responseText = request.getParameter("response");
+        String newStatus = request.getParameter("status");
+
+        // ⭐ KIỂM TRA DỮ LIỆU ĐẦU VÀO
+        if (supportIDStr == null || supportIDStr.trim().isEmpty() ||
+            responseText == null || responseText.trim().isEmpty() ||
+            newStatus == null || newStatus.trim().isEmpty()) {
+            
+            session.setAttribute("errorMessage", "❌ Thiếu thông tin bắt buộc. Vui lòng kiểm tra lại.");
+            response.sendRedirect(ADMIN_SUPPORT_LIST);
+            return;
+        }
+
+        // 1. LẤY ADMIN ID TỪ SESSION - XỬ LÝ LINH HOẠT HƠN
+        int adminID = 0;
+        UserAccount adminUser = (UserAccount) session.getAttribute("admin");
+        
+        // ⭐ THÊM KIỂM TRA CHO USER THƯỜNG HOẶC ADMIN
+        if (adminUser == null) {
+            // Thử lấy từ attribute user thường (nếu có)
+            adminUser = (UserAccount) session.getAttribute("user");
+        }
+
+        if (adminUser != null) {
+            adminID = adminUser.getUserID();
+            System.out.println("🔍 DEBUG - Admin/User ID: " + adminID);
+        } else {
+            // ⭐ FALLBACK: Sử dụng admin mặc định nếu không có session
+            adminID = 1; // Hoặc giá trị mặc định của admin
+            System.out.println("⚠️ WARNING - Sử dụng Admin ID mặc định: " + adminID);
+        }
+
+        int supportID = -1;
+
+        try {
+            supportID = Integer.parseInt(supportIDStr.trim());
+            
+            // ⭐ KIỂM TRA GIÁ TRỊ HỢP LỆ
+            if (supportID <= 0) {
+                throw new NumberFormatException("ID yêu cầu không hợp lệ");
             }
 
             SupportRequestDAO dao = new SupportRequestDAO();
-            boolean success = dao.updateResponse(supportID, responseText);
-
-            if (success) {
-                request.setAttribute("message", "✅ Đã phản hồi yêu cầu #" + supportID);
-            } else {
-                request.setAttribute("message", "❌ Phản hồi thất bại!");
+            
+            // ⭐ KIỂM TRA YÊU CẦU CÓ TỒN TẠI TRƯỚC KHI CẬP NHẬT
+            if (dao.getSupportRequestById(supportID) == null) {
+                session.setAttribute("errorMessage", "❌ Yêu cầu hỗ trợ #" + supportID + " không tồn tại.");
+                response.sendRedirect(ADMIN_SUPPORT_LIST);
+                return;
             }
 
-            // Quay lại danh sách yêu cầu hỗ trợ
-            request.getRequestDispatcher("AdminSupportServlet").forward(request, response);
-            
+            System.out.println("🔍 DEBUG - Cập nhật SupportRequest:");
+            System.out.println("  - SupportID: " + supportID);
+            System.out.println("  - Response: " + responseText.substring(0, Math.min(50, responseText.length())) + "...");
+            System.out.println("  - Status: " + newStatus);
+            System.out.println("  - AdminID: " + adminID);
+
+            boolean updated = dao.respondToSupportRequest(supportID, responseText, newStatus, adminID);
+
+            if (updated) {
+                String successMsg = "✅ Yêu cầu #" + supportID + " đã được phản hồi và cập nhật trạng thái thành: " + getStatusVietnamese(newStatus);
+                session.setAttribute("successMessage", successMsg);
+                System.out.println("✅ SUCCESS - " + successMsg);
+            } else {
+                String errorMsg = "❌ Không thể cập nhật yêu cầu #" + supportID + ". Có thể do lỗi CSDL.";
+                session.setAttribute("errorMessage", errorMsg);
+                System.out.println("❌ ERROR - " + errorMsg);
+            }
+
         } catch (NumberFormatException e) {
-            request.setAttribute("message", "❌ ID yêu cầu hỗ trợ không hợp lệ!");
-            request.getRequestDispatcher("AdminHotroServlet").forward(request, response);
+            String errorMsg = "❌ ID yêu cầu không hợp lệ: " + supportIDStr;
+            session.setAttribute("errorMessage", errorMsg);
+            System.out.println("❌ ERROR - " + errorMsg);
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("message", "❌ Đã xảy ra lỗi hệ thống!");
-            request.getRequestDispatcher("AdminHotroServlet").forward(request, response);
+            String errorMsg = "❌ Lỗi hệ thống: " + e.getMessage();
+            session.setAttribute("errorMessage", errorMsg);
+            System.out.println("❌ ERROR - " + errorMsg);
+        }
+
+        // ⭐ SỬ DỤNG REDIRECT TƯƠNG ĐỐI ĐỂ TRÁNH LỖI CONTEXT PATH
+        response.sendRedirect(ADMIN_SUPPORT_LIST);
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // ⭐ CHUYỂN HƯỚNG GET VỀ TRANG PHẢN HỒI VỚI THAM SỐ
+        String supportID = request.getParameter("supportID");
+        if (supportID != null && !supportID.trim().isEmpty()) {
+            response.sendRedirect("admin-respond.jsp?supportID=" + supportID);
+        } else {
+            response.sendRedirect(ADMIN_SUPPORT_LIST);
         }
     }
 
     /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
+     * ⭐ PHƯƠNG THỨC HIỆN THỊ TRẠNG THÁI TIẾNG VIỆT
      */
+    private String getStatusVietnamese(String status) {
+        switch (status) {
+            case "Pending": return "Chờ xử lý";
+            case "Responded": return "Đã phản hồi";
+            case "Resolved": return "Đã giải quyết";
+            case "Closed": return "Đã đóng";
+            default: return status;
+        }
+    }
+
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Xử lý phản hồi yêu cầu hỗ trợ từ Admin";
+    }
 }

@@ -1,145 +1,171 @@
 package controller;
 
+import dao.Connect;
 import dao.CustomerDAO;
-import dao.SupportRequestDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.time.LocalDateTime;
-import model.SupportRequest;
-import model.Customer;
 import model.UserAccount;
+import model.Customer;
 
 @WebServlet(name = "HotroServlet", urlPatterns = {"/HotroServlet"})
 public class HotroServlet extends HttpServlet {
-    
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet HotroServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet HotroServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        request.getRequestDispatcher("hotro.jsp").forward(request, response);
-    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
 
-        String hoten = request.getParameter("hoten");
-        String email = request.getParameter("email");
-        String sdt = request.getParameter("sdt");
-        String diachi = request.getParameter("diachi");
-        String noidung = request.getParameter("noidung");
-
-        System.out.println("🔍 DEBUG - Dữ liệu nhận được:");
-        System.out.println("Họ tên: " + hoten);
-        System.out.println("Email: " + email);
-        System.out.println("SĐT: " + sdt);
-        System.out.println("Địa chỉ: " + diachi);
-        System.out.println("Nội dung: " + noidung);
-
-        try {
-            HttpSession session = request.getSession();
-            UserAccount loggedInUser = (UserAccount) session.getAttribute("user");
-            int customerID = 0;
-            String username = "";
-
-            if (loggedInUser != null) {
-                // Nếu user đã đăng nhập
-                customerID = loggedInUser.getUserID();
-                username = loggedInUser.getUsername();
-                System.out.println("✅ Sử dụng user đã đăng nhập ID: " + customerID);
-            } else {
-                // Nếu chưa đăng nhập, tìm hoặc tạo customer
-                CustomerDAO cdao = new CustomerDAO();
-                Customer existingCustomer = cdao.getCustomerByEmail(email);
-
-                if (existingCustomer != null) {
-                    customerID = existingCustomer.getCustomerID();
-                    username = existingCustomer.getUserName();
-                    System.out.println("✅ Tìm thấy customer có ID: " + customerID);
-                } else {
-                    // Tạo customer mới
-                    Customer newCustomer = new Customer();
-                    newCustomer.setFullName(hoten);
-                    newCustomer.setEmail(email);
-                    newCustomer.setPhoneNumber(sdt);
-                    newCustomer.setAddress(diachi);
-                    newCustomer.setUserName(email);
-                    
-                    customerID = cdao.insertCustomer(newCustomer);
-                    username = email;
-                    
-                    if (customerID != -1) {
-                        System.out.println("✅ Tạo mới customer có ID: " + customerID);
-                    } else {
-                        System.out.println("❌ Tạo mới customer thất bại");
-                    }
-                }
+        // === DEBUG CHI TIẾT SESSION ===
+        HttpSession session = request.getSession(false);
+        System.out.println("=== DEBUG SESSION IN HOTROSERVLET ===");
+        System.out.println("Session object: " + session);
+        
+        if (session != null) {
+            System.out.println("Session ID: " + session.getId());
+            System.out.println("All session attributes:");
+            
+            java.util.Enumeration<String> attributeNames = session.getAttributeNames();
+            while (attributeNames.hasMoreElements()) {
+                String name = attributeNames.nextElement();
+                Object value = session.getAttribute(name);
+                System.out.println(" - " + name + " = " + value);
             }
-
-            if (customerID == -1) {
-                request.setAttribute("message", "❌ Không thể lưu thông tin khách hàng!");
-                request.getRequestDispatcher("hotro.jsp").forward(request, response);
-                return;
-            }
-
-            // Tạo yêu cầu hỗ trợ
-            SupportRequest sr = new SupportRequest();
-            sr.setCustomerID(customerID);
-            sr.setFullName(hoten);
-            sr.setEmail(email);
-            sr.setPhoneNumber(sdt);
-            sr.setAddress(diachi);
-            sr.setSubject("Yêu cầu hỗ trợ từ: " + hoten);
-            sr.setMessage(noidung);
-            sr.setCreatedAt(LocalDateTime.now());
-            sr.setStatus("Pending");
-            sr.setResponse("");
-            sr.setRespondentID(0);
-
-            SupportRequestDAO sdao = new SupportRequestDAO();
-            boolean success = sdao.insertSupportRequest(sr);
-
-            System.out.println("🔍 DEBUG - Kết quả insert SupportRequest: " + success);
-
-            if (success) {
-                request.setAttribute("message", "✅ Yêu cầu của bạn đã được gửi thành công! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.");
-            } else {
-                request.setAttribute("message", "❌ Gửi yêu cầu thất bại. Vui lòng thử lại.");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("❌ Lỗi trong HotroServlet: " + e.getMessage());
-            request.setAttribute("message", "❌ Đã xảy ra lỗi hệ thống: " + e.getMessage());
+        } else {
+            System.out.println("No session found!");
         }
 
-        request.getRequestDispatcher("hotro.jsp").forward(request, response);
+        // === KIỂM TRA ĐĂNG NHẬP - SỬA LẠI ===
+        // Kiểm tra userAccount từ session đăng nhập
+        UserAccount userAccount = (session != null) ? (UserAccount) session.getAttribute("userAccount") : null;
+        
+        if (userAccount == null) {
+            System.out.println("ACCESS DENIED: User is not logged in. Redirecting to login page.");
+            response.sendRedirect("dangnhap.jsp?error=Vui lòng đăng nhập để gửi yêu cầu hỗ trợ."); 
+            return; 
+        }
+
+        // Lấy thông tin Customer từ database dựa trên username
+        CustomerDAO customerDAO = new CustomerDAO();
+        Customer customer = customerDAO.getCustomerByUsername(userAccount.getUsername());
+        
+        if (customer == null) {
+            System.out.println("ERROR: Customer not found for username: " + userAccount.getUsername());
+            response.sendRedirect("hotro.jsp?message=error&detail=Không tìm thấy thông tin khách hàng");
+            return;
+        }
+
+        System.out.println("Found customer: " + customer);
+
+        // Lấy thông tin từ form
+        String fullName = request.getParameter("hoten");
+        String email = request.getParameter("email");
+        String phone = request.getParameter("sdt");
+        String address = request.getParameter("diachi");
+        String subject = request.getParameter("subject");
+        String messageContent = request.getParameter("noidung");
+
+        System.out.println("=== DEBUG SUPPORT REQUEST ===");
+        System.out.println("CustomerID: " + customer.getCustomerID());
+        System.out.println("Username: " + userAccount.getUsername());
+        System.out.println("FullName: " + fullName);
+        System.out.println("Email: " + email);
+        System.out.println("Phone: " + phone);
+        System.out.println("Subject: " + subject);
+
+        // Validation cơ bản
+        if (fullName == null || fullName.trim().isEmpty()
+                || email == null || email.trim().isEmpty()
+                || phone == null || phone.trim().isEmpty()
+                || subject == null || subject.trim().isEmpty()
+                || messageContent == null || messageContent.trim().isEmpty()) {
+
+            System.out.println("VALIDATION FAILED: Missing required fields");
+            response.sendRedirect("hotro.jsp?message=validation_error");
+            return;
+        }
+
+        // Clean data
+        fullName = fullName.trim();
+        email = email.trim();
+        phone = phone.trim();
+        subject = subject.trim();
+        messageContent = messageContent.trim();
+        address = address != null ? address.trim() : "";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        boolean success = false;
+        String errorMessage = "";
+
+        try {
+            conn = Connect.getCon();
+            if (conn == null) {
+                System.out.println("DATABASE CONNECTION FAILED");
+                errorMessage = "Database connection failed";
+                throw new Exception("Cannot connect to database");
+            }
+            System.out.println("Database connected successfully");
+
+            // SQL sử dụng CustomerID từ bảng Customer
+            String sql = "INSERT INTO supportrequest (CustomerID, FullName, Email, PhoneNumber, Address, Subject, Message, CreatedAt, Status) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending')";
+
+            System.out.println("SQL: " + sql);
+
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, customer.getCustomerID()); // Sử dụng CustomerID từ bảng Customer
+            pstmt.setString(2, fullName);
+            pstmt.setString(3, email);
+            pstmt.setString(4, phone);
+            pstmt.setString(5, address);
+            pstmt.setString(6, subject);
+            pstmt.setString(7, messageContent);
+            pstmt.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
+
+            System.out.println("Executing update...");
+            int rows = pstmt.executeUpdate();
+            success = rows > 0;
+            System.out.println("Rows affected: " + rows);
+
+        } catch (Exception e) {
+            System.out.println("ERROR: " + e.getMessage());
+            e.printStackTrace();
+            success = false;
+            errorMessage = e.getMessage().contains("Duplicate entry") 
+                ? "Lỗi hệ thống: Yêu cầu hỗ trợ đã được gửi gần đây. Vui lòng thử lại sau." 
+                : "Lỗi hệ thống: " + e.getMessage();
+        } finally {
+            try {
+                if (pstmt != null) pstmt.close();
+                if (conn != null) conn.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        if (success) {
+            System.out.println("SUCCESS - Redirecting to success page");
+            response.sendRedirect("hotro.jsp?message=success");
+        } else {
+            System.out.println("FAILED - Redirecting to error page");
+            response.sendRedirect("hotro.jsp?message=error&detail=" + java.net.URLEncoder.encode(errorMessage, "UTF-8"));
+        }
     }
 
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Servlet xử lý yêu cầu hỗ trợ khách hàng";
     }
 }

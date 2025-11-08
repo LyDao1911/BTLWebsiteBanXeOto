@@ -8,51 +8,408 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Quản lý phiếu nhập hàng - Velyra Aero</title>
+        <title>Quản lý phiếu nhập hàng | VELYRA AERO</title>
         <link rel="stylesheet" href="style.css" />
-        <!-- Font Awesome --> 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
         <style>
-            .selected-row {
-                background-color: #e3f2fd !important;
-                font-weight: bold;
+            /* ================================================= */
+            /* 🚗 PURCHASE INVOICE MANAGEMENT - LUXURY STYLE */
+            /* ================================================= */
+
+            body {
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                min-height: 100vh;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 0;
             }
-            .table-action-buttons {
-                margin-top: 20px;
+
+            .admin-page-container {
+                max-width: 1600px;
+                margin: 120px auto 60px;
+                padding: 0 40px;
+            }
+
+            /* Header sang trọng */
+            .text-center {
+                text-align: center;
+                margin-bottom: 50px;
+                position: relative;
+            }
+
+            .text-center h3 {
+                font-size: 2.8rem;
+                font-weight: 300;
+                color: #1a1a1a;
+                margin-bottom: 15px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+            }
+
+            .text-center::after {
+                content: '';
+                display: block;
+                width: 100px;
+                height: 3px;
+                background: linear-gradient(90deg, #e52b2b, #b30000);
+                margin: 20px auto;
+                border-radius: 2px;
+            }
+
+            /* Section Cards */
+            .supplier-section, .invoice-detail-section {
+                background: #fff;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+                padding: 40px;
+                border: 1px solid rgba(229, 43, 43, 0.1);
+                margin-bottom: 40px;
+            }
+
+            .section-title {
                 display: flex;
-                gap: 10px;
+                align-items: center;
+                gap: 15px;
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #f0f0f0;
+                background: linear-gradient(135deg, #e52b2b 0%, #b30000 100%) !important;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 12px;
+                font-size: 1.3rem;
+                font-weight: 600;
             }
+
+            .section-title i {
+                font-size: 1.5rem;
+            }
+
+            /* Supplier Table */
+            .supplier-details-table .table {
+                width: 100%;
+                border-collapse: collapse;
+                background: #fff;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            }
+
+            .supplier-details-table thead {
+                background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            }
+
+            .supplier-details-table th {
+                padding: 20px 15px;
+                color: #fff;
+                font-weight: 500;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                border-bottom: 3px solid #e52b2b;
+                text-align: left;
+            }
+
+            .supplier-details-table td {
+                padding: 18px 15px;
+                color: #555;
+                font-size: 0.95rem;
+                line-height: 1.6;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+            }
+
+            .supplier-details-table tbody tr {
+                transition: all 0.3s ease;
+            }
+
+            .supplier-details-table tbody tr:hover {
+                background: linear-gradient(90deg, #fff 0%, #fafafa 50%, #fff 100%);
+            }
+
+            /* Invoice Detail Table */
             .table-container {
-                max-height: 400px;
+                max-height: 600px;
                 overflow-y: auto;
                 margin-bottom: 30px;
+                border-radius: 15px;
+                border: 1px solid rgba(0, 0, 0, 0.05);
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
             }
-            .section-title {
-                background: linear-gradient(#e52b2b, #731919, #0b0b0b);
+
+            .table-container .table {
+                width: 100%;
+                border-collapse: collapse;
+                background: #fff;
+            }
+
+            .table-container thead {
+                background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+                position: sticky;
+                top: 0;
+                z-index: 10;
+            }
+
+            .table-container th {
+                padding: 20px 15px;
+                color: #fff;
+                font-weight: 500;
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                border-bottom: 3px solid #e52b2b;
+                text-align: left;
+            }
+
+            .table-container td {
+                padding: 18px 15px;
+                color: #555;
+                font-size: 0.9rem;
+                line-height: 1.6;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+                vertical-align: middle;
+            }
+
+            .table-container tbody tr {
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .table-container tbody tr:hover {
+                background: linear-gradient(90deg, #fff 0%, #fafafa 50%, #fff 100%);
+                transform: translateY(-1px);
+            }
+
+            .table-container tbody tr::after {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                height: 100%;
+                width: 4px;
+                background: #e52b2b;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .table-container tbody tr:hover::after {
+                opacity: 1;
+            }
+
+            /* Selected Row */
+            .selected-row {
+                background: linear-gradient(90deg, #e3f2fd 0%, #bbdefb 100%) !important;
+                font-weight: 600;
+                border-left: 4px solid #2196f3;
+            }
+
+            /* Checkbox Styling */
+            input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                border: 2px solid #ddd;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            input[type="checkbox"]:checked {
+                background: #e52b2b;
+                border-color: #e52b2b;
+            }
+
+            /* Buttons */
+            .table-action-buttons {
+                display: flex;
+                gap: 15px;
+                margin-top: 30px;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                padding: 15px 25px;
+                border: none;
+                border-radius: 12px;
+                font-size: 0.9rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                transition: left 0.5s;
+            }
+
+            .btn:hover::before {
+                left: 100%;
+            }
+
+            .btn-success {
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
                 color: white;
+            }
+
+            .btn-danger {
+                background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+                color: white;
+            }
+
+            .btn-outline-danger {
+                background: transparent;
+                color: #dc3545;
+                border: 2px solid #dc3545;
+            }
+
+            .btn-outline-danger:hover {
+                background: #dc3545;
+                color: white;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn-sm {
                 padding: 10px 15px;
-                border-radius: 5px;
-                margin: 20px 0 15px 0;
+                font-size: 0.8rem;
+                border-radius: 8px;
             }
-            .supplier-info {
 
-                padding: 15px;
-                border-radius: 5px;
-
-                margin-bottom: 20px;
+            /* Price Styling */
+            .table-container td:nth-child(6),
+            .table-container td:nth-child(7) {
+                font-weight: 600;
+                color: #e52b2b;
+                font-family: 'Courier New', monospace;
             }
-            .supplier-details-table {
-                margin-top: 15px;
+
+            /* ID Badges */
+            .table-container td:nth-child(2),
+            .table-container td:nth-child(3),
+            .table-container td:nth-child(4) {
+                font-family: 'Courier New', monospace;
+                font-weight: 600;
+                color: #333;
+            }
+
+            /* Empty State */
+            .text-center {
+                color: #666;
+                font-style: italic;
+            }
+
+            /* Responsive */
+            @media (max-width: 1400px) {
+                .admin-page-container {
+                    margin: 100px auto 40px;
+                    padding: 0 30px;
+                }
+
+                .text-center h3 {
+                    font-size: 2.5rem;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .admin-page-container {
+                    margin: 100px auto 40px;
+                    padding: 0 20px;
+                }
+
+                .supplier-section, .invoice-detail-section {
+                    padding: 25px;
+                    border-radius: 15px;
+                }
+
+                .text-center h3 {
+                    font-size: 2rem;
+                    letter-spacing: 2px;
+                }
+
+                .table-container {
+                    max-height: 400px;
+                }
+
+                .table-container th,
+                .table-container td {
+                    padding: 12px 8px;
+                    font-size: 0.8rem;
+                }
+
+                .table-action-buttons {
+                    flex-direction: column;
+                }
+
+                .btn {
+                    justify-content: center;
+                }
+            }
+
+            /* Animation */
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .supplier-section, .invoice-detail-section {
+                animation: fadeInUp 0.6s ease;
+            }
+
+            .table-container tbody tr {
+                animation: fadeInUp 0.6s ease forwards;
+                opacity: 0;
+            }
+
+            .table-container tbody tr:nth-child(1) {
+                animation-delay: 0.1s;
+            }
+            .table-container tbody tr:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+            .table-container tbody tr:nth-child(3) {
+                animation-delay: 0.3s;
+            }
+            .table-container tbody tr:nth-child(4) {
+                animation-delay: 0.4s;
+            }
+            .table-container tbody tr:nth-child(5) {
+                animation-delay: 0.5s;
+            }
+
+            /* Hover Effects */
+            .table-container tbody tr:hover {
+                background: linear-gradient(90deg, #fff 0%, #f8f9fa 50%, #fff 100%);
             }
         </style>
     </head>
     <body>
-
         <jsp:include page="header.jsp" />
         <main class="admin-page-container container">
-
             <div class="right-panel">
-                <h3 class="text-center mb-4">Quản lý phiếu nhập hàng</h3>
+                <div class="text-center">
+                    <h3>Quản lý phiếu nhập hàng</h3>
+                </div>
 
                 <!-- Phần thông tin nhà cung cấp -->
                 <div class="supplier-section">
@@ -61,7 +418,6 @@
                     </h4>
 
                     <div class="supplier-info">
-                        <!-- Hiển thị thông tin nhà cung cấp cố định -->
                         <div class="supplier-details-table">
                             <table class="table table-bordered">
                                 <thead class="table-secondary">
@@ -169,9 +525,9 @@
         </main>
 
         <script>
+            // JavaScript giữ nguyên hoàn toàn
             let selectedDetailIds = [];
 
-            // === XỬ LÝ CHỌN CHI TIẾT PHIẾU NHẬP ===
             document.querySelectorAll('#invoiceDetailTableBody input[type="checkbox"]').forEach(checkbox => {
                 checkbox.addEventListener('change', function () {
                     const currentRow = this.closest('tr');
@@ -190,7 +546,6 @@
                 });
             });
 
-            // === CLICK VÀO DÒNG ===
             document.querySelectorAll('#invoiceDetailTableBody tr').forEach(row => {
                 row.addEventListener('click', function (e) {
                     if (!e.target.classList.contains('btn-delete-detail') && !e.target.classList.contains('fa-trash')) {
@@ -201,30 +556,23 @@
                 });
             });
 
-            // === XÓA TỪNG CHI TIẾT (nút xóa trên từng dòng) ===
             document.querySelectorAll('.btn-delete-detail').forEach(btn => {
                 btn.addEventListener('click', function (e) {
                     e.stopPropagation();
                     const detailId = this.dataset.detailid;
                     if (confirm('Bạn có chắc chắn muốn xóa chi tiết này không?')) {
-                        // Gọi servlet xóa từng chi tiết
                         window.location.href = 'XoaChiTietPhieuNhapServlet?detailId=' + detailId;
                     }
                 });
             });
 
-            // === XỬ LÝ NÚT THAO TÁC ===
-
-            // Thêm chi tiết - Chuyển đến NhapHangServlet
             document.getElementById('btnAddDetail').addEventListener('click', function () {
                 window.location.href = 'NhapHangServlet';
             });
 
-            // Xóa nhiều chi tiết (nút xóa đã chọn)
             document.getElementById('btnDeleteSelected').addEventListener('click', function () {
                 if (selectedDetailIds.length > 0) {
                     if (confirm(`Bạn có chắc chắn muốn xóa ${selectedDetailIds.length} chi tiết phiếu nhập đã chọn không?`)) {
-                        // Gọi servlet xóa nhiều chi tiết
                         const detailIdsParam = selectedDetailIds.join(',');
                         window.location.href = 'XoaNhieuChiTietPhieuNhapServlet?detailIds=' + detailIdsParam;
                     }
@@ -233,7 +581,6 @@
                 }
             });
 
-            // === XỬ LÝ HIỆU ỨNG HOVER ===
             document.querySelectorAll('#invoiceDetailTableBody tr').forEach(row => {
                 row.addEventListener('mouseenter', function () {
                     if (!this.classList.contains('selected-row')) {
@@ -248,9 +595,7 @@
                 });
             });
 
-            // === KIỂM TRA TRẠNG THÁI KHI TẢI TRANG ===
             document.addEventListener('DOMContentLoaded', function () {
-                // Tự động chọn các checkbox đã được chọn trước đó (nếu có)
                 document.querySelectorAll('#invoiceDetailTableBody input[type="checkbox"]').forEach(checkbox => {
                     if (checkbox.checked) {
                         selectedDetailIds.push(checkbox.value);
@@ -258,9 +603,8 @@
                     }
                 });
             });
-
-
         </script>
+
         <jsp:include page="footer.jsp" />
     </body>
 </html>

@@ -9,9 +9,130 @@
 
 <!DOCTYPE html>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<style>
+/* 📝 FORM THÊM SẢN PHẨM */
+.container {
+    max-width: 1200px;
+    margin: 100px auto 60px; /* ✅ cách top 100px để không bị dính header */
+    padding: 30px 40px;      /* ✅ tạo khoảng cách hai bên */
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #d60000;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+.top {
+    display: flex;
+    gap: 50px;
+    flex-wrap: wrap;
+}
+
+.left {
+    flex: 1;
+    min-width: 350px;
+}
+
+.right {
+    flex: 1;
+    min-width: 350px;
+}
+
+/* ✅ Ảnh chính */
+.product-image img {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+/* ✅ Ảnh mô tả */
+.thumbs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.thumbs img {
+    width: 90px;
+    height: 60px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* ✅ Input và Label */
+.label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+}
+
+.input, textarea, select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+textarea {
+    resize: none;
+}
+
+.qty {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.qty button {
+    padding: 5px 10px;
+    background: #d60000;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 5px;
+}
+
+.qty button:hover {
+    background: #a00000;
+}
+
+/* ✅ Nút submit */
+.btn-submit {
+    display: block;
+    margin-top: 20px;
+    background: #d60000;
+    color: #fff;
+    padding: 12px;
+    border: none;
+    width: 100%;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-submit:hover {
+    background: #a00000;
+}
 
 
-
+</style>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">

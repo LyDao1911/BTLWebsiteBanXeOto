@@ -170,6 +170,11 @@ public class DatHangServlet extends HttpServlet {
         String receiverAddress = request.getParameter("address");
         String paymentMethod = request.getParameter("paymentMethod");
 
+        // THÊM: Lấy thông tin phụ phí
+        String insuranceFeeStr = request.getParameter("insuranceFee");
+        String fixedFeeStr = request.getParameter("fixedFee");
+        String totalAmountStr = request.getParameter("totalAmount");
+
         String[] carIDsStr = request.getParameterValues("carID");
         String[] quantitiesStr = request.getParameterValues("quantity");
         String[] idsToClearStr = request.getParameterValues("idsToClear");
@@ -220,156 +225,193 @@ public class DatHangServlet extends HttpServlet {
 
                         itemsToCheckout.add(checkoutCar);
                     }
-                    if (!hasError) {
-                        BigDecimal taxRate = new BigDecimal("0.10"); // Thuế 10%
-                        BigDecimal taxAmount = finalTotalAmount.multiply(taxRate);
-                        finalTotalAmount = finalTotalAmount.add(taxAmount);}
 
-                    }catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     System.out.println("DEBUG: LỖI định dạng số ID hoặc Quantity.");
                     e.printStackTrace();
                     hasError = true;
                 }
-                }
-            }else {
+            }
+        } else {
             hasError = true;
             stockErrorMessage = "Thông tin sản phẩm không hợp lệ.";
         }
 
-            // 2. Bắt lỗi Validation (FORWARD)
-            if (itemsToCheckout.isEmpty() || hasError) {
-                String message = stockErrorMessage != null ? stockErrorMessage : "Không có sản phẩm nào hợp lệ để đặt hàng.";
-                request.setAttribute("errorMessage", message);
+        // THÊM: TÍNH TOÁN PHỤ PHÍ
+        BigDecimal taxRate = new BigDecimal("0.10"); // Thuế 10%
+        BigDecimal taxAmount = finalTotalAmount.multiply(taxRate);
 
-                // Cần set lại các thuộc tính để dathang.jsp hiển thị lại
-                request.setAttribute("itemsToCheckout", itemsToCheckout);
-                request.setAttribute("customer", customer);
-                request.setAttribute("idsToClear", idsToClearStr != null ? Arrays.asList(idsToClearStr) : new ArrayList<>());
-
-                request.getRequestDispatcher("dathang.jsp").forward(request, response);
-                return;
-            }
-
-            // Kiểm tra thiếu thông tin người nhận
-            if (receiverName == null || receiverName.trim().isEmpty()
-                    || receiverAddress == null || receiverAddress.trim().isEmpty()
-                    || receiverPhone == null || receiverPhone.trim().isEmpty()) {
-
-                request.setAttribute("errorMessage", "Vui lòng nhập đầy đủ Họ tên, Địa chỉ và Số điện thoại.");
-
-                request.setAttribute("itemsToCheckout", itemsToCheckout);
-                request.setAttribute("customer", customer);
-                request.setAttribute("idsToClear", idsToClearStr != null ? Arrays.asList(idsToClearStr) : new ArrayList<>());
-
-                request.getRequestDispatcher("dathang.jsp").forward(request, response);
-                return;
-            }
-
-            // CHUYỂN ĐỔI List<Car> SANG List<OrderDetail>
-            List<OrderDetail> orderDetails = new ArrayList<>();
-            for (Car car : itemsToCheckout) {
-                OrderDetail detail = new OrderDetail();
-                detail.setCarID(car.getCarID());
-                detail.setQuantity(car.getQuantity());
-                detail.setPrice(car.getPrice());
-
-                BigDecimal subtotal = car.getPrice().multiply(new BigDecimal(car.getQuantity()));
-                detail.setSubtotal(subtotal);
-                detail.setUserName(username);
-
-                orderDetails.add(detail);
-            }
-
-            // 3. Tiến hành tạo Order
+        // Phí cố định (mặc định 12 triệu)
+        BigDecimal fixedFee = new BigDecimal("12000000");
+        if (fixedFeeStr != null && !fixedFeeStr.trim().isEmpty()) {
             try {
-                String noteContent = String.format(
-                        "PTTT: %s | Người nhận: %s | SĐT: %s | Địa chỉ: %s",
-                        paymentMethod, receiverName, receiverPhone, receiverAddress
-                );
+                fixedFee = new BigDecimal(fixedFeeStr.trim().replaceAll("[^\\d]", ""));
+            } catch (NumberFormatException e) {
+                System.out.println("DEBUG: Lỗi định dạng fixedFee, sử dụng mặc định 12,000,000");
+            }
+        }
 
-                Order order = new Order();
-                order.setCustomerID(customer.getCustomerID());
-                order.setOrderDate(LocalDateTime.now());
-                order.setTotalAmount(finalTotalAmount);
-                order.setPaymentStatus("Chưa thanh toán");
-                order.setDeliveryStatus("Chờ xử lý");
-                order.setNote(noteContent);
+        // Bảo hiểm vật chất (3.5% giá trị xe)
+        BigDecimal insuranceAmount = BigDecimal.ZERO;
+        boolean hasInsurance = "true".equals(insuranceFeeStr);
+        if (hasInsurance) {
+            BigDecimal insuranceRate = new BigDecimal("0.035"); // 3.5%
+            insuranceAmount = finalTotalAmount.multiply(insuranceRate);
+        }
 
-                System.out.println("DEBUG: Đang gọi OrderDAO.createOrderWithDetails...");
-                int newOrderId = orderDAO.createOrderWithDetails(order, orderDetails);
+        // Tổng phụ phí
+        BigDecimal extraFees = fixedFee.add(insuranceAmount);
 
-                if (newOrderId > 0) {
-                    System.out.println("DEBUG: Tạo Order ID #" + newOrderId + " thành công.");
+        // Tổng tiền cuối cùng = Giá sản phẩm + Thuế + Phụ phí
+        finalTotalAmount = finalTotalAmount.add(taxAmount).add(extraFees);
 
-                    // 4. CẬP NHẬT SỐ LƯỢNG TỒN KHO
-                    boolean stockUpdated = true;
-                    for (Car car : itemsToCheckout) {
-                        boolean updated = carDAO.updateCarQuantity(car.getCarID(), car.getQuantity());
-                        if (!updated) {
-                            stockUpdated = false;
-                            System.err.println("Lỗi cập nhật tồn kho cho sản phẩm ID: " + car.getCarID());
-                        }
+        // 2. Bắt lỗi Validation (FORWARD)
+        if (itemsToCheckout.isEmpty() || hasError) {
+            String message = stockErrorMessage != null ? stockErrorMessage : "Không có sản phẩm nào hợp lệ để đặt hàng.";
+            request.setAttribute("errorMessage", message);
+
+            // Cần set lại các thuộc tính để dathang.jsp hiển thị lại
+            request.setAttribute("itemsToCheckout", itemsToCheckout);
+            request.setAttribute("customer", customer);
+            request.setAttribute("idsToClear", idsToClearStr != null ? Arrays.asList(idsToClearStr) : new ArrayList<>());
+
+            request.getRequestDispatcher("dathang.jsp").forward(request, response);
+            return;
+        }
+
+        // Kiểm tra thiếu thông tin người nhận
+        if (receiverName == null || receiverName.trim().isEmpty()
+                || receiverAddress == null || receiverAddress.trim().isEmpty()
+                || receiverPhone == null || receiverPhone.trim().isEmpty()) {
+
+            request.setAttribute("errorMessage", "Vui lòng nhập đầy đủ Họ tên, Địa chỉ và Số điện thoại.");
+
+            request.setAttribute("itemsToCheckout", itemsToCheckout);
+            request.setAttribute("customer", customer);
+            request.setAttribute("idsToClear", idsToClearStr != null ? Arrays.asList(idsToClearStr) : new ArrayList<>());
+
+            request.getRequestDispatcher("dathang.jsp").forward(request, response);
+            return;
+        }
+
+        // CHUYỂN ĐỔI List<Car> SANG List<OrderDetail>
+        List<OrderDetail> orderDetails = new ArrayList<>();
+        for (Car car : itemsToCheckout) {
+            OrderDetail detail = new OrderDetail();
+            detail.setCarID(car.getCarID());
+            detail.setQuantity(car.getQuantity());
+            detail.setPrice(car.getPrice());
+
+            BigDecimal subtotal = car.getPrice().multiply(new BigDecimal(car.getQuantity()));
+            detail.setSubtotal(subtotal);
+            detail.setUserName(username);
+
+            orderDetails.add(detail);
+        }
+
+        // 3. Tiến hành tạo Order
+        try {
+            // THÊM: Ghi chú chi tiết về phụ phí
+            String noteContent = String.format(
+                    "PTTT: %s | Người nhận: %s | SĐT: %s | Địa chỉ: %s | Phí trước bạ: %s | Bảo hiểm: %s",
+                    paymentMethod, receiverName, receiverPhone, receiverAddress,
+                    formatCurrency(fixedFee),
+                    hasInsurance ? formatCurrency(insuranceAmount) : "Không"
+            );
+
+            Order order = new Order();
+            order.setCustomerID(customer.getCustomerID());
+            order.setOrderDate(LocalDateTime.now());
+            order.setTotalAmount(finalTotalAmount);
+            order.setPaymentStatus("Chưa thanh toán");
+            order.setDeliveryStatus("Chờ xử lý");
+            order.setNote(noteContent);
+
+            System.out.println("DEBUG: Đang gọi OrderDAO.createOrderWithDetails...");
+            System.out.println("DEBUG: Tổng tiền: " + finalTotalAmount);
+            System.out.println("DEBUG: Phí cố định: " + fixedFee);
+            System.out.println("DEBUG: Bảo hiểm: " + (hasInsurance ? insuranceAmount : "Không có"));
+
+            int newOrderId = orderDAO.createOrderWithDetails(order, orderDetails);
+
+            if (newOrderId > 0) {
+                System.out.println("DEBUG: Tạo Order ID #" + newOrderId + " thành công.");
+
+                // 4. CẬP NHẬT SỐ LƯỢNG TỒN KHO
+                boolean stockUpdated = true;
+                for (Car car : itemsToCheckout) {
+                    boolean updated = carDAO.updateCarQuantity(car.getCarID(), car.getQuantity());
+                    if (!updated) {
+                        stockUpdated = false;
+                        System.err.println("Lỗi cập nhật tồn kho cho sản phẩm ID: " + car.getCarID());
                     }
-
-                    if (!stockUpdated) {
-                        System.err.println("CẢNH BÁO: Có lỗi khi cập nhật tồn kho cho đơn hàng #" + newOrderId);
-                    }
-
-                    // 5. Xóa các sản phẩm đã mua khỏi giỏ hàng
-                    Map<Integer, Integer> cartQuantityMap = (Map<Integer, Integer>) session.getAttribute("cartQuantityMap");
-                    if (cartQuantityMap != null && idsToClearStr != null) {
-                        for (String idStr : idsToClearStr) {
-                            try {
-                                int carID = Integer.parseInt(idStr.trim());
-                                cartQuantityMap.remove(carID);
-                            } catch (NumberFormatException ignored) {
-                            }
-                        }
-                        session.setAttribute("cartQuantityMap", cartQuantityMap);
-                    }
-
-                    // 6. Sinh OTP và chuyển sang trang xác nhận OTP
-                    String generatedOtp = String.format("%06d", (int) (Math.random() * 1000000));
-                    long expireTime = System.currentTimeMillis() + (5 * 60 * 1000);
-                    session.setAttribute("amount", finalTotalAmount);
-                    session.setAttribute("generatedOtp", generatedOtp);
-                    session.setAttribute("otp_verificationExpireTime", expireTime);
-                    session.setAttribute("pendingOrderId", newOrderId);
-
-                    // ✅ SỬA LỖI: Không cần set attribute vì sẽ forward
-                    System.out.println("DEBUG: Chuyển hướng đến otp_verification.jsp. OTP là: " + generatedOtp);
-                    request.setAttribute("pendingOrderId", newOrderId);
-                    // ✅ SỬA LỖI: Dùng forward thay vì redirect để giữ session attributes
-                    RequestDispatcher rd = request.getRequestDispatcher("otp_verification.jsp");
-                    rd.forward(request, response);
-                    return;
-                } else {
-                    System.err.println("DEBUG: Đặt hàng thất bại. OrderDAO.createOrderWithDetails trả về 0.");
-                    request.setAttribute("errorMessage", "Đặt hàng thất bại. Đã xảy ra lỗi trong quá trình ghi vào Database.");
-                    request.setAttribute("itemsToCheckout", itemsToCheckout);
-                    request.setAttribute("customer", customer);
-                    request.getRequestDispatcher("dathang.jsp").forward(request, response);
-                    return;
                 }
 
-            } catch (Exception e) {
-                System.err.println("LỖI HỆ THỐNG KHI TẠO ĐƠN HÀNG: " + e.getMessage());
-                e.printStackTrace();
+                if (!stockUpdated) {
+                    System.err.println("CẢNH BÁO: Có lỗi khi cập nhật tồn kho cho đơn hàng #" + newOrderId);
+                }
 
-                request.setAttribute("errorMessage", "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau: " + e.getMessage());
+                // 5. Xóa các sản phẩm đã mua khỏi giỏ hàng
+                Map<Integer, Integer> cartQuantityMap = (Map<Integer, Integer>) session.getAttribute("cartQuantityMap");
+                if (cartQuantityMap != null && idsToClearStr != null) {
+                    for (String idStr : idsToClearStr) {
+                        try {
+                            int carID = Integer.parseInt(idStr.trim());
+                            cartQuantityMap.remove(carID);
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                    session.setAttribute("cartQuantityMap", cartQuantityMap);
+                }
+
+                // 6. Sinh OTP và chuyển sang trang xác nhận OTP
+                String generatedOtp = String.format("%06d", (int) (Math.random() * 1000000));
+                long expireTime = System.currentTimeMillis() + (5 * 60 * 1000);
+                session.setAttribute("amount", finalTotalAmount);
+                session.setAttribute("generatedOtp", generatedOtp);
+                session.setAttribute("otp_verificationExpireTime", expireTime);
+                session.setAttribute("pendingOrderId", newOrderId);
+
+                // ✅ SỬA LỖI: Không cần set attribute vì sẽ forward
+                System.out.println("DEBUG: Chuyển hướng đến otp_verification.jsp. OTP là: " + generatedOtp);
+                request.setAttribute("pendingOrderId", newOrderId);
+                // ✅ SỬA LỖI: Dùng forward thay vì redirect để giữ session attributes
+                RequestDispatcher rd = request.getRequestDispatcher("otp_verification.jsp");
+                rd.forward(request, response);
+                return;
+            } else {
+                System.err.println("DEBUG: Đặt hàng thất bại. OrderDAO.createOrderWithDetails trả về 0.");
+                request.setAttribute("errorMessage", "Đặt hàng thất bại. Đã xảy ra lỗi trong quá trình ghi vào Database.");
                 request.setAttribute("itemsToCheckout", itemsToCheckout);
                 request.setAttribute("customer", customer);
-                request.setAttribute("idsToClear", idsToClearStr != null ? Arrays.asList(idsToClearStr) : new ArrayList<>());
-
                 request.getRequestDispatcher("dathang.jsp").forward(request, response);
                 return;
             }
-        }
 
-        @Override
-        public String getServletInfo
-        
-            () {
-        return "Xử lý đặt hàng";
+        } catch (Exception e) {
+            System.err.println("LỖI HỆ THỐNG KHI TẠO ĐƠN HÀNG: " + e.getMessage());
+            e.printStackTrace();
+
+            request.setAttribute("errorMessage", "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau: " + e.getMessage());
+            request.setAttribute("itemsToCheckout", itemsToCheckout);
+            request.setAttribute("customer", customer);
+            request.setAttribute("idsToClear", idsToClearStr != null ? Arrays.asList(idsToClearStr) : new ArrayList<>());
+
+            request.getRequestDispatcher("dathang.jsp").forward(request, response);
+            return;
         }
     }
+
+    // THÊM: Hàm định dạng tiền tệ cho ghi chú
+    private String formatCurrency(BigDecimal amount) {
+        if (amount == null) {
+            return "0đ";
+        }
+        return String.format("%,dđ", amount.longValue());
+    }
+
+    @Override
+    public String getServletInfo() {
+        return "Xử lý đặt hàng";
+    }
+}

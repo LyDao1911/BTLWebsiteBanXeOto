@@ -24,9 +24,81 @@
     }
 %>
 
+ <style>
+            /* ========== FORM ĐĂNG KÝ ========== */
+            .register-section {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background: url("image/dki.png");
+                padding: 40px 20px 60px;
+
+            }
+
+
+
+
+            .register-form {
+                background: rgba(255, 255, 255, 0.95);
+                padding: 30px 40px;
+                border-radius: 20px;
+                display: flex;
+                flex-direction: column;
+                width: 400px;
+                box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+            }
+
+            .register-form label {
+                margin-top: 10px;
+                margin-bottom: 4px;
+                font-weight: bold;
+                color: #111;
+            }
+
+            .register-form input {
+                padding: 10px;
+                margin-bottom: 10px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+                width: 100%;
+                display: block;
+                font-size: 14px;
+            }
+
+            .btn-register {
+                margin-top: 10px;
+                background-color: #d20000;
+                color: #fff;
+                border: none;
+                padding: 12px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 16px;
+                transition: background 0.3s;
+            }
+
+            .btn-register:hover {
+                background-color: #a80000;
+            }
+
+            .login-link {
+                margin-top: 15px;
+                color: #fff;
+                text-align: center;
+            }
+
+            .login-link a {
+                color: #ffeb3b;
+                text-decoration: underline;
+            }
+        </style>
+        
 <html>
     <head>
-
+        
+       
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Đăng ký - Velyra Aero</title>
         <link rel="stylesheet" href="style.css" />
@@ -44,10 +116,7 @@
             </div>
 
 
-            <div class="search-box">
-                <input type="text" placeholder="Tìm kiếm xe..." />
-                <button><i class="fa-solid fa-magnifying-glass"></i></button>
-            </div>
+            
 
             <nav class="menu">
                 <a href="hotro.jsp">Hỗ trợ</a>

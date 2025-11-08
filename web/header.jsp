@@ -1,4 +1,9 @@
-<%-- header.jsp --%>
+<%--
+    Document   : header
+    Created on : Nov 9, 2025, 1:08:30 AM
+    Author     : Admin
+--%>
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.Map"%>
@@ -8,11 +13,14 @@
     Map<Integer, Integer> cartQuantityMap = (Map<Integer, Integer>) session.getAttribute("cartQuantityMap");
     int totalItemsInCart = 0;
     if (cartQuantityMap != null) {
-        // ⭐ ĐÃ SỬA: Đếm TỔNG số lượng sản phẩm (ví dụ: 2 chiếc A4 + 1 chiếc A6 = 3)
+        // Đếm TỔNG số lượng sản phẩm
         for (Integer quantity : cartQuantityMap.values()) {
             totalItemsInCart += quantity;
         }
     }
+    // Gán username vào scope để dễ dàng sử dụng trong EL/JSTL
+    session.setAttribute("currentUsername", (String) session.getAttribute("username"));
+    // Lưu ý: Dùng sessionScope.username thay cho biến local username trong JSTL/EL
 %>
 <header class="navbar">
     <div class="logo">
@@ -23,98 +31,128 @@
     </div>
 
     <nav class="menu">
-       
+        <%-- Kiểm tra đã đăng nhập chưa --%>
+        <c:choose>
+            <c:when test="${not empty sessionScope.currentUsername}">
+                <%-- Đã đăng nhập --%>
+                <c:choose>
+                    <c:when test="${sessionScope.currentUsername eq 'admin'}">
+                        <%-- ✅ Nếu là ADMIN - KHÔNG có tìm kiếm và giỏ hàng --%>
+                        <div class="admin-menu account-menu">
+                            <span class="admin-name account-name">
+                                Quản lý hỗ trợ <i class="fa-solid fa-caret-down"></i>
+                            </span>
+                            <ul class="dropdown">
+                                <li><a href="AdminSupportServlet">Quản Lý Danh Sách Hỗ trợ</a></li>
+                            </ul>
+                        </div>
+                        <div class="admin-menu account-menu">
+                            <span class="admin-name account-name">
+                                Quản trị <i class="fa-solid fa-caret-down"></i>
+                            </span>
+                            <ul class="dropdown">
+                                <li><a href="BrandServlet">Quản lý Hãng xe</a></li>
+                                <li><a href="SanPhamServlet">Quản lý Xe</a></li>
+                                <li><a href="SupplierServlet">Quản lý Nhà Cung Cấp</a></li>
+                                <li><a href="NhapHangServlet">Tạo Phiếu Nhập Hàng</a></li>
+                                <li><a href="DanhSachPhieuNhapServlet">Quản Lý Phiếu Nhập</a></li>
+                            </ul>
+                        </div>
+                        <div class="account-menu">
+                            <span class="account-name">
+                                ${sessionScope.currentUsername} <i class="fa-solid fa-caret-down"></i>
+                            </span>
+                            <ul class="dropdown">
+                                <li><a href="ChangePasswordServlet">Đổi mật khẩu</a></li>
+                                <li><a href="dangxuat.jsp">Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <%-- ✅ Nếu là NGƯỜI DÙNG THƯỜNG - CÓ tìm kiếm và giỏ hàng --%>
+                        <div class="search-icon-wrapper">
+                            <button class="search-icon-btn" id="searchToggle">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <div class="search-box-mini" id="searchBoxMini">
+                                <form action="TimKiemServlet" method="GET" class="search-form-mini">
+                                    <input type="text"
+                                           name="keyword"
+                                           placeholder="Tìm kiếm xe..."
+                                           class="search-input-mini"
+                                           value="${param.keyword}"
+                                           id="searchInput">
+                                    <button type="submit" class="search-submit-mini">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
 
-        <!-- Biểu tượng tìm kiếm nhỏ -->
-        <div class="search-icon-wrapper">
-            <button class="search-icon-btn" id="searchToggle">
-                <i class="fas fa-search"></i>
-            </button>
-            <div class="search-box-mini" id="searchBoxMini">
-                <form action="TimKiemServlet" method="GET" class="search-form-mini">
-                    <input type="text" 
-                           name="keyword" 
-                           placeholder="Tìm kiếm xe..." 
-                           class="search-input-mini"
-                           value="${param.keyword}"
-                           id="searchInput">
-                    <button type="submit" class="search-submit-mini">
-                        <i class="fas fa-arrow-right"></i>
+                        <div class="cart-icon-wrapper">
+                            <a href="GioHangServlet" class="cart-link">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                                <span id="cart-item-count" class="badge">
+                                    <%= totalItemsInCart%>
+                                </span>
+                            </a>
+                        </div>
+
+                        <div class="admin-menu account-menu">
+                            <span class="admin-name account-name">
+                                Hỗ trợ <i class="fa-solid fa-caret-down"></i>
+                            </span>
+                            <ul class="dropdown">
+                                <li><a href="hotro.jsp">Gửi yêu cầu hỗ trợ</a></li>
+                                <li><a href="MySupportServlet"> Yêu Cầu Hỗ Trợ Của Tôi</a></li>
+                            </ul>
+                        </div>
+                        <div class="account-menu">
+                            <span class="account-name">
+                                ${sessionScope.currentUsername} <i class="fa-solid fa-caret-down"></i>
+                            </span>
+                            <ul class="dropdown">
+                                <li><a href="ProfileServlet">Thông tin cá nhân</a></li>
+                                <li><a href="DonMuaServlet">Đơn mua</a></li>
+                                <li><a href="dangxuat.jsp">Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </c:when>
+            <c:otherwise>
+                <%-- Chưa đăng nhập: Hiển thị tìm kiếm, Giỏ hàng và nút Đăng nhập/Đăng ký --%>
+                <div class="search-icon-wrapper">
+                    <button class="search-icon-btn" id="searchToggle">
+                        <i class="fas fa-search"></i>
                     </button>
-                </form>
-            </div>
-        </div>
+                    <div class="search-box-mini" id="searchBoxMini">
+                        <form action="TimKiemServlet" method="GET" class="search-form-mini">
+                            <input type="text"
+                                   name="keyword"
+                                   placeholder="Tìm kiếm xe..."
+                                   class="search-input-mini"
+                                   value="${param.keyword}"
+                                   id="searchInput">
+                            <button type="submit" class="search-submit-mini">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
 
-        <% String username = (String) session.getAttribute("username"); %>
-
-        <% if (username != null) {%>
-
-        <div class="cart-icon-wrapper">
-            <a href="GioHangServlet" class="cart-link">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span id="cart-item-count" class="badge">
-                    <%= totalItemsInCart%>
-                </span>
-            </a>
-        </div>
-
-        <%-- ... (Phần hiển thị Admin/User menu giữ nguyên) ... --%>
-        <% if ("admin".equals(username)) {%>
-         <a href="AdminHotroServlet">Phản hồi hỗ trợ</a>
-        <div class="admin-menu account-menu">
-             
-            <span class="admin-name account-name">
-                Quản trị <i class="fa-solid fa-caret-down"></i>
-            </span>
-            <ul class="dropdown">
-                <li><a href="BrandServlet">Quản lý Hãng xe</a></li>
-                <li><a href="SanPhamServlet">Quản lý Xe</a></li>
-                <li><a href="SupplierServlet">Quản lý Nhà Cung Cấp</a></li>
-                <li><a href="NhapHangServlet">Tạo Phiếu Nhập Hàng</a></li>
-                <li><a href="DanhSachPhieuNhapServlet">Quản Lý Phiếu Nhập</a></li>
-            </ul>
-        </div>
-
-        <div class="account-menu">
-            <span class="account-name">
-                👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
-            </span>
-            <ul class="dropdown">
-                <li><a href="ChangePasswordServlet">Đổi mật khẩu</a></li>
-                <li><a href="dangxuat.jsp">Đăng xuất</a></li>
-            </ul>
-        </div>
-
-        <% } else {%>
-        <%-- ✅ Nếu là NGƯỜI DÙNG THƯỜNG --%>
-         <a href="hotro.jsp">Hỗ trợ</a>
-        <div class="account-menu">
-            
-            <span class="account-name">
-                👋 <%= username%> <i class="fa-solid fa-caret-down"></i>
-            </span>
-            <ul class="dropdown">
-                <li><a href="ProfileServlet">Thông tin cá nhân</a></li>
-                <li><a href="DonMuaServlet">Đơn mua</a></li>
-                <li><a href="dangxuat.jsp">Đăng xuất</a></li>
-            </ul>
-        </div>
-        <% } %>
-
-        <% } else {%>
-        <div class="cart-icon-wrapper">
-            <a href="GioHangServlet" class="cart-link">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span id="cart-item-count" class="badge">
-                    <%= totalItemsInCart%>
-                </span>
-            </a>
-        </div>
-
-        <%-- ✅ Nếu chưa đăng nhập --%>
-        <a href="dangnhap.jsp">Đăng nhập</a>
-        <a href="dangky.jsp">Đăng ký</a>
-        <% }%>
+                <div class="cart-icon-wrapper">
+                    <a href="GioHangServlet" class="cart-link">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span id="cart-item-count" class="badge">
+                            <%= totalItemsInCart%>
+                        </span>
+                    </a>
+                </div>
+                <a href="dangnhap.jsp">Đăng nhập</a>
+                <a href="dangky.jsp">Đăng ký</a>
+            </c:otherwise>
+        </c:choose>
     </nav>
 </header>
 
@@ -142,6 +180,7 @@
         min-width: 12px;
         text-align: center;
         z-index: 10;
+        margin-right: 20px;
     }
 
     /* CSS cho biểu tượng tìm kiếm nhỏ */
@@ -152,7 +191,7 @@
     .search-icon-btn {
         background: none;
         border: none;
-        color: #333;
+        color: #fff;
         font-size: 16px;
         padding: 8px 12px;
         cursor: pointer;
@@ -214,6 +253,31 @@
             width: 250px;
         }
     }
+    .search-box {
+        display: flex;
+        align-items: center;
+        background-color: #fff;
+        border-radius: 20px;
+        padding: 5px 10px;
+        margin-right: 20px;
+    }
+
+    .search-box input {
+        border: none;
+        outline: none;
+        padding: 6px 10px;
+        font-size: 14px;
+        border-radius: 20px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .search-box button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #e52b2b;
+        font-size: 16px;
+    }
 </style>
 
 <script>
@@ -224,42 +288,45 @@
         const searchInput = document.getElementById('searchInput');
         const searchForm = document.querySelector('.search-form-mini');
 
-        // Mở/đóng thanh tìm kiếm khi click icon
-        searchToggle.addEventListener('click', function (e) {
-            e.stopPropagation();
-            searchBoxMini.classList.toggle('active');
-            if (searchBoxMini.classList.contains('active')) {
+        // Chỉ xử lý nếu các phần tử tồn tại (tránh lỗi khi admin đăng nhập)
+        if (searchToggle && searchBoxMini && searchInput && searchForm) {
+            // Mở/đóng thanh tìm kiếm khi click icon
+            searchToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                searchBoxMini.classList.toggle('active');
+                if (searchBoxMini.classList.contains('active')) {
+                    setTimeout(() => {
+                        searchInput.focus();
+                    }, 100);
+                }
+            });
+
+            // Đóng thanh tìm kiếm khi click ra ngoài
+            document.addEventListener('click', function (e) {
+                if (!searchBoxMini.contains(e.target) && e.target !== searchToggle) {
+                    searchBoxMini.classList.remove('active');
+                }
+            });
+
+            // Ngăn đóng khi click trong thanh tìm kiếm
+            searchBoxMini.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+
+            // Submit form khi nhấn Enter
+            searchInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    searchForm.submit();
+                }
+            });
+
+            // Tự động focus vào input khi mở
+            searchToggle.addEventListener('click', function () {
                 setTimeout(() => {
-                    searchInput.focus();
+                    if (searchInput)
+                        searchInput.focus();
                 }, 100);
-            }
-        });
-
-        // Đóng thanh tìm kiếm khi click ra ngoài
-        document.addEventListener('click', function (e) {
-            if (!searchBoxMini.contains(e.target) && e.target !== searchToggle) {
-                searchBoxMini.classList.remove('active');
-            }
-        });
-
-        // Ngăn đóng khi click trong thanh tìm kiếm
-        searchBoxMini.addEventListener('click', function (e) {
-            e.stopPropagation();
-        });
-
-        // Submit form khi nhấn Enter
-        searchInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                searchForm.submit();
-            }
-        });
-
-        // Tự động focus vào input khi mở
-        searchToggle.addEventListener('click', function () {
-            setTimeout(() => {
-                if (searchInput)
-                    searchInput.focus();
-            }, 100);
-        });
+            });
+        }
     });
 </script>

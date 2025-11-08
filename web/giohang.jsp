@@ -2,8 +2,124 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
+<style>
+/* ==========================
+GIỎ HÀNG (giohang.jsp)
+========================== */
+.cart-container {
+    width: 85%;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px 40px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.cart-header, .cart-item {
+    display: grid;
+    grid-template-columns: 60px 2fr 1fr 1fr 1fr 0.7fr;
+    align-items: center;
+    text-align: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+.cart-header {
+    font-weight: bold;
+    color: #444;
+    border-bottom: 2px solid #ccc;
+}
+.brand {
+    color: #c00;
+    font-weight: bold;
+    margin-top: 25px;
+    margin-bottom: 8px;
+    font-size: 17px;
+}
+.cart-item img {
+    width: 110px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-right: 10px;
+}
+.product-info {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+}
+.product-info span {
+    font-size: 15px;
+}
+.qty-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+}
+.qty-control button {
+    border: 1px solid #aaa;
+    background: #fff;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+.qty-control button:hover {
+    background: #f2f2f2;
+}
+.qty-control input {
+    width: 45px;
+    text-align: center;
+    border: 1px solid #ccc;
+    height: 32px;
+    border-radius: 4px;
+    font-size: 16px;
+}
+.price {
+    color: #333;
+    font-weight: bold;
+    font-size: 16px;
+}
+.remove {
+    color: red;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.cart-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 25px;
+    font-size: 18px;
+}
+.total {
+    margin-right: 20px;
+    font-weight: bold;
+}
+.buy-btn {
+    background-color: orange;
+    color: #fff;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.buy-btn:hover {
+    background-color: #e69500;
+}
+input[type="checkbox"] {
+    transform: scale(1.3);
+    cursor: pointer;
+}
+
+</style>
 <html>
+   
     <head>
+       
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Giỏ hàng - Velyra Aero</title>
         <link rel="stylesheet" href="style.css" />

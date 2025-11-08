@@ -1,16 +1,19 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
+
 import java.time.LocalDateTime;
-/**
- *
- * @author Hong Ly
- */
+
 public class SupportRequest {
+    // Thuộc tính
     private int supportID;
-    private int customerID;     // Người tạo yêu cầu
+    private int customerID;      // Người tạo yêu cầu
+    
+    // THUỘC TÍNH ĐÃ THÊM VÀ SỬA LỖI
+    private String fullName;
+    private String email;
+    private String phoneNumber;
+    private String address;
+    // END: THUỘC TÍNH ĐÃ THÊM
+    
     private String subject;
     private String message;
     private LocalDateTime createdAt; // Sử dụng LocalDateTime
@@ -21,9 +24,14 @@ public class SupportRequest {
     public SupportRequest() {
     }
 
-    public SupportRequest(int supportID, int customerID, String subject, String message, LocalDateTime createdAt, String status, String response, int respondentID) {
+    // Constructor đầy đủ
+    public SupportRequest(int supportID, int customerID, String fullName, String email, String phoneNumber, String address, String subject, String message, LocalDateTime createdAt, String status, String response, int respondentID) {
         this.supportID = supportID;
         this.customerID = customerID;
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
         this.subject = subject;
         this.message = message;
         this.createdAt = createdAt;
@@ -31,74 +39,52 @@ public class SupportRequest {
         this.response = response;
         this.respondentID = respondentID;
     }
+    
+    // Getters và Setters Đã Sửa Lỗi
 
-    public int getSupportID() {
-        return supportID;
-    }
+    // FullName
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
 
-    public void setSupportID(int supportID) {
-        this.supportID = supportID;
-    }
+    // Email
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public int getCustomerID() {
-        return customerID;
-    }
+    // PhoneNumber
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public void setCustomerID(int customerID) {
-        this.customerID = customerID;
-    }
+    // Address
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+    
+    // Các Getters/Setters khác (Giữ nguyên)
+    public int getSupportID() { return supportID; }
+    public void setSupportID(int supportID) { this.supportID = supportID; }
 
-    public String getSubject() {
-        return subject;
-    }
+    public int getCustomerID() { return customerID; }
+    public void setCustomerID(int customerID) { this.customerID = customerID; }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
+    public String getSubject() { return subject; }
+    public void setSubject(String subject) { this.subject = subject; }
 
-    public String getMessage() {
-        return message;
-    }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    public String getResponse() { return response; }
+    public void setResponse(String response) { this.response = response; }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getResponse() {
-        return response;
-    }
-
-    public void setResponse(String response) {
-        this.response = response;
-    }
-
-    public int getRespondentID() {
-        return respondentID;
-    }
-
-    public void setRespondentID(int respondentID) {
-        this.respondentID = respondentID;
-    }
+    public int getRespondentID() { return respondentID; }
+    public void setRespondentID(int respondentID) { this.respondentID = respondentID; }
 
     @Override
     public String toString() {
-        return "SupportRequest{" + "supportID=" + supportID + ", customerID=" + customerID + ", subject=" + subject + ", message=" + message + ", createdAt=" + createdAt + ", status=" + status + ", response=" + response + ", respondentID=" + respondentID + '}';
+        return "SupportRequest{" + "supportID=" + supportID + ", customerID=" + customerID + ", fullName=" + fullName + ", email=" + email + ", phoneNumber=" + phoneNumber + ", address=" + address + ", subject=" + subject + ", message=" + message + ", createdAt=" + createdAt + ", status=" + status + ", response=" + response + ", respondentID=" + respondentID + '}';
     }
-    
 }

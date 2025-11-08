@@ -33,6 +33,156 @@
                 text-align: center;
                 font-weight: bold;
             }
+            /* ==========================
+ĐƠN MUA (giohang.jsp) và ĐÃ THANH TOÁN
+========================== */
+            .order-page {
+                width: 80%;
+                max-width: 1100px;
+                margin: 0 auto;
+            }
+
+            .tabs {
+                display: flex;
+                justify-content: space-between;
+                border-bottom: 1px solid #ddd;
+                margin-bottom: 30px;
+                background: #fafafa;
+                border-radius: 6px;
+            }
+
+            .tab {
+                flex: 1;
+                padding: 14px 0;
+                text-align: center;
+                text-decoration: none;       /* bỏ gạch chân của <a> */
+                color: #000;                 /* màu chữ */
+                font-weight: 600;
+                font-size: 15px;
+                cursor: pointer;
+                transition: 0.3s;
+                background: none;
+                border: none;
+            }
+
+            .tab:hover {
+                background-color: #f0f0f0;
+            }
+
+            .tab.active {
+                background-color: #fff;
+                color: #d60000;
+                border-bottom: 3px solid #d60000;
+            }
+
+
+            .brand-section {
+                background: #fff;
+                border: 1px solid #eee;
+                border-radius: 8px;
+                padding: 20px 25px;
+                margin-bottom: 40px;
+            }
+
+            .brand-name {
+                font-weight: bold;
+                font-size: 16px;
+                color: #222;
+                margin-bottom: 15px;
+            }
+
+            .product-list {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .product-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: #fafafa;
+                padding: 15px;
+                border-radius: 6px;
+            }
+
+            .product-item img {
+                width: 120px;
+                border-radius: 6px;
+            }
+
+            .prod-info {
+                flex: 1;
+                margin-left: 20px;
+            }
+
+            .prod-name {
+                font-size: 16px;
+                font-weight: 600;
+                color: #111;
+            }
+
+            .prod-qty {
+                font-size: 14px;
+                color: #777;
+                margin-top: 3px;
+            }
+
+            .prod-price {
+                font-weight: bold;
+                color: #111;
+            }
+
+            .brand-footer {
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                margin-top: 15px;
+                gap: 20px;
+            }
+
+            .brand-total {
+                font-weight: 600;
+                font-size: 15px;
+                color: #111;
+            }
+
+            .brand-total span {
+                font-weight: bold;
+                color: #000;
+            }
+
+            .btn-pay {
+                background-color: #d25c00;
+                color: white;
+                border: none;
+                padding: 10px 22px;
+                border-radius: 6px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background 0.3s;
+            }
+
+            .btn-pay:hover {
+                background-color: #a84300;
+            }
+
+            /* Style riêng cho trang đã thanh toán */
+            .btn-success {
+                background-color: #f37a20;
+                color: white;
+                border: none;
+                padding: 10px 22px;
+                border-radius: 6px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background 0.3s;
+            }
+
+            .btn-success:hover {
+                background-color: #c05f14;
+            }
+
         </style>
 
         <script>
