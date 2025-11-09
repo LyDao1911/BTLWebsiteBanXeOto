@@ -18,54 +18,37 @@ public class ResendOtpServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         response.setContentType("text/html;charset=UTF-8");
-        request.setCharacterEncoding("UTF-8");
-
         HttpSession session = request.getSession();
-        
-        // ✅ Lấy orderId từ parameter HOẶC từ session
-        String orderId = request.getParameter("orderId");
-        String amount = request.getParameter("amount");
-        
-        // Nếu không có orderId từ parameter, thử lấy từ session
-        if (orderId == null || orderId.isEmpty()) {
-            orderId = (String) session.getAttribute("currentOrderId");
-        }
-        if (amount == null || amount.isEmpty() || "null".equals(amount)) {
-            Object amountObj = session.getAttribute("currentAmount");
-            amount = (amountObj != null) ? amountObj.toString() : "";
-        }
 
-        // Debug
-        System.out.println("ResendOtpServlet - orderId: " + orderId);
-        System.out.println("ResendOtpServlet - amount: " + amount);
+        // LẤY THÔNG TIN TỪ SESSION
+        Integer pendingOrderId = (Integer) session.getAttribute("pendingOrderId");
+        String amount = (String) session.getAttribute("amount");
 
-        if (orderId == null || orderId.isEmpty()) {
-            request.setAttribute("error", "Không tìm thấy mã đơn hàng để gửi lại OTP!");
-            request.getRequestDispatcher("otp_verification.jsp").forward(request, response);
+        System.out.println("=== RESEND OTP ===");
+        System.out.println("PendingOrderId: " + pendingOrderId);
+        System.out.println("Amount: " + amount);
+
+        if (pendingOrderId == null) {
+            System.out.println("ERROR: No pending order in session");
+            response.sendRedirect(request.getContextPath() + "/DonMuaServlet");
             return;
         }
 
-        String newOtp = generateOtp();
+        // TẠO OTP MỚI
+        String newOtp = String.format("%06d", new Random().nextInt(999999));
+        long newExpireTime = System.currentTimeMillis() + (5 * 60 * 1000);
 
-        // ✅ XÁC ĐỊNH LOẠI GIAO DỊCH
-        boolean isPayment = (amount != null && !amount.isEmpty() && !amount.equals("null"));
-        
-        // ✅ CẬP NHẬT SESSION VỚI OTP MỚI
+        // CẬP NHẬT SESSION
         session.setAttribute("generatedOtp", newOtp);
-        session.setAttribute("otp_verificationExpireTime", System.currentTimeMillis() + 5 * 60 * 1000); // 5 phút
+        session.setAttribute("otp_verificationExpireTime", newExpireTime);
 
-        // ✅ THÔNG BÁO OTP
-        String message = "✅ Mã OTP mới đã được tạo thành công.";
+        System.out.println("New OTP generated: " + newOtp);
 
-        // Đặt thông tin để hiển thị trên JSP
+        // CHUYỂN VỀ TRANG OTP
+        request.setAttribute("info", "Mã OTP mới đã được gửi!");
         request.setAttribute("generatedOtp", newOtp);
-        request.setAttribute("orderId", orderId);
-        request.setAttribute("amount", amount);
-        request.setAttribute("info", message);
-        request.setAttribute("isPayment", isPayment);
-
         request.getRequestDispatcher("otp_verification.jsp").forward(request, response);
     }
 

@@ -132,49 +132,53 @@
     /* ✅ Palette màu sắc */
     .color-palette {
         display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
+        gap: 8px;
+        flex-wrap: nowrap;
         margin-top: 5px;
+        overflow-x: auto;
+        padding: 5px 0;
     }
 
     .color-item {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 5px;
+        gap: 3px;
         cursor: pointer;
         padding: 5px;
-        border-radius: 5px;
+        border-radius: 6px;
         transition: all 0.3s ease;
+        flex-shrink: 0;
     }
 
     .color-item:hover {
-        background: #f0f0f0;
+        background: #f5f5f5;
     }
 
+    /* Màu khi KHÔNG được chọn - mờ đi */
+    .color-item:not(.selected) {
+        opacity: 0.4;
+        filter: grayscale(60%);
+    }
+
+    /* Màu khi ĐƯỢC CHỌN - nổi bật */
     .color-item.selected {
-        background: #e0e0e0;
-        border: 1px solid #d60000;
+        opacity: 1;
+        filter: grayscale(0%);
+        transform: scale(1.05);
+        background: #f8f9fa;
     }
 
     .color-item input[type="radio"] {
-        display: none; /* Ẩn radio button gốc */
+        display: none;
     }
 
     .color-item span {
         display: inline-block;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        border: 2px solid #ddd;
+        width: 25px;
+        height: 25px;
+        border-radius: 4px;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    /* Hiệu ứng khi được chọn */
-    .color-item input[type="radio"]:checked + span {
-        border: 2px solid #d60000;
-        transform: scale(1.1);
-        box-shadow: 0 0 8px rgba(214, 0, 0, 0.5);
     }
 
     /* Màu sắc cụ thể */
@@ -186,21 +190,38 @@
     } /* Yellow */
     .color-item span[style*="background:#ff8ad9"] {
         background: #ff8ad9;
-    } /* Pink */
-    .color-item span[style*="background:#00c1d4"] {
-        background: #00c1d4;
-    } /* Blue */
+    }  /* Blue */
     .color-item span[style*="background:#2a7f2a"] {
         background: #2a7f2a;
     } /* Green */
-    .color-item span[style*="background:#d2691e"] {
-        background: #d2691e;
-    } /* Brown */
-.color-name {
-    font-size: 12px;
-    color: #333;
-    font-weight: 500;
-}
+    .color-item span[style*="background:#000000"] {
+        background: #000000;
+    } /* Black */
+    .color-item span[style*="background:#fff"] {
+        background: #fff;
+        border: 1px solid #ddd;
+    } /* White */
+    .color-item span[style*="background:#ccc"] {
+        background: #ccc;
+    }
+
+    .color-name {
+        font-size: 10px;
+        color: #666;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    /* Màu chữ mờ đi khi không chọn */
+    .color-item:not(.selected) .color-name {
+        color: #bbb;
+    }
+
+    /* Màu chữ đậm lên khi chọn */
+    .color-item.selected .color-name {
+        color: #d60000;
+        font-weight: 600;
+    }
 </style>
 <html>
     <head>
@@ -215,9 +236,10 @@
         <!-- 🧭 HEADER -->
 
         <jsp:include page="header.jsp" />
-        <h3 class="title">Sửa sản phẩm</h3> 
+
         <div class="container">
 
+            <h2 class="title">Sửa sản phẩm</h2>
 
             <form action="SuaXeServlet" method="post" enctype="multipart/form-data">
 

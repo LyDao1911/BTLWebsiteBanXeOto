@@ -3,12 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/controller/MySupportServlet.java</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/controller/DangNhapServlet.java</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/model/Customer.java</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/controller/DonMuaServlet.java</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/web/mySupport.jsp</file>
-            <file>file:/D:/BTLWebsiteBanXeOto/src/java/model/UserAccount.java</file>
+            <file>file:/F:/BTLWebsiteBanXeOto/web/trangchu.jsp</file>
+            <file>file:/F:/BTLWebsiteBanXeOto/src/java/controller/PaymentProcessingServlet.java</file>
+            <file>file:/F:/BTLWebsiteBanXeOto/web/header.jsp</file>
+            <file>file:/F:/BTLWebsiteBanXeOto/src/java/controller/ResendOtpServlet.java</file>
+            <file>file:/F:/BTLWebsiteBanXeOto/src/java/controller/DatHangServlet.java</file>
+            <file>file:/F:/BTLWebsiteBanXeOto/src/java/controller/OrderProcessingServlet.java</file>
+            <file>file:/F:/BTLWebsiteBanXeOto/web/otp_verification.jsp</file>
+            <file>file:/F:/BTLWebsiteBanXeOto/web/themsanpham.jsp</file>
+            <file>file:/F:/BTLWebsiteBanXeOto/web/dathang.jsp</file>
         </group>
     </open-files>
 </project-private>

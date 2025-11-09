@@ -1,4 +1,5 @@
 package controller;
+
 import dao.CarDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -21,14 +22,16 @@ public class GioHangServlet extends HttpServlet {
     private final CarDAO carDAO = new CarDAO();
 
     // Giữ nguyên processRequest
-
     /**
-     * Handles the HTTP <code>GET</code> method.
-     * Hiển thị nội dung giỏ hàng từ Session.
+     * Handles the HTTP <code>GET</code> method. Hiển thị nội dung giỏ hàng từ
+     * Session.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+        response.setHeader("Pragma", "no-cache"); // HTTP 1.0.
+        response.setDateHeader("Expires", 0); // Proxies.
         HttpSession session = request.getSession();
 
         Map<Integer, Integer> cartQuantityMap
@@ -57,8 +60,8 @@ public class GioHangServlet extends HttpServlet {
     }
 
     /**
-     * Handles the HTTP <code>POST</code> method.
-     * Xử lý cả hai trường hợp: THÊM mới (từ trang chi tiết) và CẬP NHẬT (từ giohang.jsp qua AJAX).
+     * Handles the HTTP <code>POST</code> method. Xử lý cả hai trường hợp: THÊM
+     * mới (từ trang chi tiết) và CẬP NHẬT (từ giohang.jsp qua AJAX).
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -66,10 +69,9 @@ public class GioHangServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         HttpSession session = request.getSession();
 
-
         String carIDParam = request.getParameter("carID");
         String quantityParam = request.getParameter("quantity");
-        String action = request.getParameter("action");    
+        String action = request.getParameter("action");
 
         if (carIDParam == null || quantityParam == null) {
             response.sendRedirect("HomeServlet");
@@ -83,10 +85,10 @@ public class GioHangServlet extends HttpServlet {
 
         try {
             int carID = Integer.parseInt(carIDParam);
-            int quantityValue = Integer.parseInt(quantityParam); 
+            int quantityValue = Integer.parseInt(quantityParam);
 
-            Map<Integer, Integer> cartQuantityMap = 
-                    (Map<Integer, Integer>) session.getAttribute("cartQuantityMap");
+            Map<Integer, Integer> cartQuantityMap
+                    = (Map<Integer, Integer>) session.getAttribute("cartQuantityMap");
 
             if (cartQuantityMap == null) {
                 cartQuantityMap = new HashMap<>();
@@ -103,10 +105,10 @@ public class GioHangServlet extends HttpServlet {
 
             int finalQuantity;
             String message = "";
-            
+
             // === Xử lý CẬP NHẬT GIỎ HÀNG (AJAX từ giohang.jsp) ===
-            if ("update".equals(action)) { 
-                finalQuantity = quantityValue; 
+            if ("update".equals(action)) {
+                finalQuantity = quantityValue;
 
                 if (finalQuantity <= 0) {
                     cartQuantityMap.remove(carID);
@@ -124,16 +126,14 @@ public class GioHangServlet extends HttpServlet {
                 session.setAttribute("cartQuantityMap", cartQuantityMap);
 
                 // ⭐ THÊM totalItems cho các request UPDATE
-                int totalItemsInCart = cartQuantityMap.size(); 
-                
+                int totalItemsInCart = cartQuantityMap.size();
+
                 // Trả về JSON cho AJAX
                 out.print("{\"success\": true, \"quantity\": " + finalQuantity + ", \"message\": \"" + message + "\", \"totalItems\": " + totalItemsInCart + "}");
                 out.flush();
                 return; // Dừng lại ở đây cho AJAX
-            } 
-
-            // === Xử lý THÊM MỚI SẢN PHẨM VÀO GIỎ (Từ trang chi tiết) ===
-            else { 
+            } // === Xử lý THÊM MỚI SẢN PHẨM VÀO GIỎ (Từ trang chi tiết) ===
+            else {
                 int quantityToAdd = quantityValue;
                 int currentQuantityInCart = cartQuantityMap.getOrDefault(carID, 0);
                 int newQuantity = currentQuantityInCart + quantityToAdd;
@@ -149,7 +149,7 @@ public class GioHangServlet extends HttpServlet {
                 }
 
                 session.setAttribute("cartQuantityMap", cartQuantityMap);
-                
+
                 // ⭐ THAY THẾ REDIRECT BẰNG JSON RESPONSE
                 int totalItemsInCart = cartQuantityMap.size();
                 out.print("{\"success\": true, \"message\": \"" + message + "\", \"totalItems\": " + totalItemsInCart + "}");
@@ -168,8 +168,6 @@ public class GioHangServlet extends HttpServlet {
             out.flush();
         }
     }
-
-   
 
     @Override
     public String getServletInfo() {

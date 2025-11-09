@@ -15,6 +15,15 @@ public class Order {
     private String paymentStatus;
     private String deliveryStatus;
     private String note;
+    private String customerName;
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
     
     // ⭐ BỔ SUNG: Thuộc tính chứa danh sách chi tiết đơn hàng
     private List<OrderDetail> orderDetails; 

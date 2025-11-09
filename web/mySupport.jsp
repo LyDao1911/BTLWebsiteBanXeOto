@@ -238,7 +238,7 @@
         content: '"';
         font-size: 3rem;
         color: #e52b2b;
-        opacity: 0.3;
+        opacity: 0;
         position: absolute;
         top: 5px;
         left: 10px;

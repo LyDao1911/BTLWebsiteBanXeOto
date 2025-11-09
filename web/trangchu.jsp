@@ -10,6 +10,85 @@
 
 <!DOCTYPE html>
 <style>
+    .car-list {
+        /* Sử dụng Grid để sắp xếp tốt hơn */
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Tăng từ 250px lên 300px */
+        gap: 40px; /* Tăng khoảng cách giữa các card */
+        padding: 40px 20px; /* Thêm padding cho đẹp */
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .car-card {
+        text-align: center;
+        /* Loại bỏ width cố định: width: 250px; */
+    }
+
+    .car-card a {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .car-card img {
+        width: 100%;
+        height: 220px; /* Thêm chiều cao cố định để đồng đều */
+        object-fit: cover; /* Đảm bảo ảnh không bị méo */
+        border-radius: 12px; /* Tăng bo góc */
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); /* Tăng đổ bóng */
+        transition: transform 0.3s;
+    }
+
+    .car-card img:hover {
+        transform: scale(1.05);
+    }
+
+    .car-name {
+        font-size: 18px; /* Tăng từ 16px */
+        font-weight: 600;
+        margin-top: 15px; /* Tăng khoảng cách */
+    }
+
+    .car-price {
+        color: #d60000;
+        font-weight: bold;
+        margin-top: 8px; /* Tăng khoảng cách */
+        font-size: 20px; /* Tăng từ 18px */
+    }
+
+    /* Responsive cho màn hình nhỏ */
+    @media (max-width: 768px) {
+        .car-list {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Giảm chút trên tablet */
+            gap: 30px;
+            padding: 30px 15px;
+        }
+
+        .car-card img {
+            height: 200px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .car-list {
+            grid-template-columns: 1fr; /* 1 cột trên mobile */
+            gap: 25px;
+            padding: 25px 10px;
+        }
+
+        .car-card img {
+            height: 180px;
+        }
+
+        .car-name {
+            font-size: 16px;
+        }
+
+        .car-price {
+            font-size: 18px;
+        }
+    
     /* Thêm vào file style.css */
     .video-navigation {
         position: absolute; /* Đặt tương đối với .hero */
@@ -152,7 +231,7 @@
         </c:choose>
 
         <jsp:include page="footer.jsp" />
-        <jsp:include page="footer.jsp" />
+
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {

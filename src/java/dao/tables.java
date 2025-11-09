@@ -115,7 +115,7 @@ public class tables {
                     + "SupportID INT AUTO_INCREMENT PRIMARY KEY,"
                     + "CustomerID INT NOT NULL,"
                     + "FullName VARCHAR(200),"
-                    + "Email VARCHAR(200) UNIQUE,"
+                    + "Email VARCHAR(200) "
                     + "PhoneNumber VARCHAR(15),"
                     + "Address VARCHAR(255),"
                     + "Subject VARCHAR(255),"

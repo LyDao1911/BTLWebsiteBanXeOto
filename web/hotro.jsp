@@ -321,23 +321,7 @@
             <div class="contact-form">
                 <h2>GỬI YÊU CẦU HỖ TRỢ</h2>
 
-                <!-- Hiển thị trạng thái đăng nhập -->
-                <div class="<%= isLoggedIn ? "user-info" : "login-prompt"%>">
-                    <%
-                        if (isLoggedIn) {
-                    %>
-                        <strong>✅ Đã đăng nhập:</strong> <%= username != null ? username : "User" %> 
-                        <% if (customer != null) { %>
-                            (CustomerID: <%= customer.getCustomerID() %>)
-                        <% } %>
-                    <%
-                        } else {
-                    %>
-                        <strong>🔐 Vui lòng đăng nhập:</strong> Bạn cần <a href="dangnhap.jsp">đăng nhập</a> để gửi yêu cầu hỗ trợ.
-                    <%
-                        }
-                    %>
-                </div>
+              
 
                 <% if (!message.isEmpty()) {%>
                 <div class="message <%= messageType%>">
@@ -390,7 +374,7 @@
                             <option value="Khiếu nại dịch vụ">Khiếu nại dịch vụ</option>
                             <option value="Hỗ trợ kỹ thuật">Hỗ trợ kỹ thuật</option>
                             <option value="Bảo hành, bảo trì">Bảo hành, bảo trì</option>
-                            <option value="Hợp tác kinh doanh">Hợp tác kinh doanh</option>
+                            <option value="Hẹn lịch lấy ">Hợp tác kinh doanh</option>
                             <option value="Khác">Khác</option>
                         </select>
                     </div>

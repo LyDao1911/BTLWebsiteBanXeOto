@@ -3,6 +3,7 @@
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <!DOCTYPE html>
+
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
@@ -800,6 +801,7 @@
                     </div>
 
                     <!-- Car List -->
+                    <!-- Car List - CÁCH ĐƠN GIẢN -->
                     <div class="car-list" id="carList">
                         <c:choose>
                             <c:when test="${empty searchResults}">
@@ -814,18 +816,30 @@
                                     <a href="${pageContext.request.contextPath}/MotaServlet?carID=${car.carID}">
                                         <div class="car-item ${car.quantity <= 0 ? 'out-of-stock' : ''}">
                                             <div class="car-image-container">
+                                                <%-- ⭐ CÁCH ĐƠN GIẢN: Logic xử lý ảnh trực tiếp --%>
                                                 <c:choose>
-                                                    <%-- TRƯỜNG HỢP 1: NẾU car.mainImageURL BỊ NULL/RỖNG (Lỗi từ DAO) --%>
                                                     <c:when test="${empty car.mainImageURL}">
+                                                        <%-- Ảnh mặc định --%>
                                                         <img src="${pageContext.request.contextPath}/image/default-car.jpg" 
-                                                             alt="${fn:escapeXml(car.carName)} (No Image)">
+                                                             alt="${fn:escapeXml(car.carName)}">
                                                     </c:when>
-
-                                                    <%-- TRƯỜNG HỢP 2: NẾU CÓ mainImageURL, thử tải nó --%>
+                                                    <c:when test="${car.mainImageURL.startsWith('http') or car.mainImageURL.startsWith('/')}">
+                                                        <%-- Ảnh từ URL tuyệt đối --%>
+                                                        <img src="${car.mainImageURL}" 
+                                                             alt="${fn:escapeXml(car.carName)}"
+                                                             onerror="this.src='${pageContext.request.contextPath}/image/default-car.jpg'">
+                                                    </c:when>
+                                                    <c:when test="${car.mainImageURL.startsWith('uploads/') or car.mainImageURL.startsWith('image/')}">
+                                                        <%-- Ảnh có đường dẫn tương đối đúng --%>
+                                                        <img src="${pageContext.request.contextPath}/${car.mainImageURL}" 
+                                                             alt="${fn:escapeXml(car.carName)}"
+                                                             onerror="this.src='${pageContext.request.contextPath}/image/default-car.jpg'">
+                                                    </c:when>
                                                     <c:otherwise>
+                                                        <%-- Chỉ có tên file - thêm uploads/ --%>
                                                         <img src="${pageContext.request.contextPath}/uploads/${car.mainImageURL}" 
                                                              alt="${fn:escapeXml(car.carName)}"
-                                                             onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/image/default-car.jpg'">
+                                                             onerror="this.src='${pageContext.request.contextPath}/image/default-car.jpg'">
                                                     </c:otherwise>
                                                 </c:choose>
 

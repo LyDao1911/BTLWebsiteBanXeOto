@@ -38,14 +38,7 @@
                 <c:choose>
                     <c:when test="${sessionScope.currentUsername eq 'admin'}">
                         <%-- ✅ Nếu là ADMIN - KHÔNG có tìm kiếm và giỏ hàng --%>
-                        <div class="admin-menu account-menu">
-                            <span class="admin-name account-name">
-                                Quản lý hỗ trợ <i class="fa-solid fa-caret-down"></i>
-                            </span>
-                            <ul class="dropdown">
-                                <li><a href="AdminSupportServlet">Quản Lý Danh Sách Hỗ trợ</a></li>
-                            </ul>
-                        </div>
+                        
                         <div class="admin-menu account-menu">
                             <span class="admin-name account-name">
                                 Quản trị <i class="fa-solid fa-caret-down"></i>
@@ -54,8 +47,9 @@
                                 <li><a href="BrandServlet">Quản lý Hãng xe</a></li>
                                 <li><a href="SanPhamServlet">Quản lý Xe</a></li>
                                 <li><a href="SupplierServlet">Quản lý Nhà Cung Cấp</a></li>
-                                <li><a href="NhapHangServlet">Tạo Phiếu Nhập Hàng</a></li>
+                               <li><a href="AdminOrderServlet">Quản Lý Đơn Hàng</a></li>
                                 <li><a href="DanhSachPhieuNhapServlet">Quản Lý Phiếu Nhập</a></li>
+                                <li><a href="AdminSupportServlet">Quản Lý Danh Sách Hỗ trợ</a></li>
                                 <li><a href="ReportServlet">Báo Cáo Thống Kê</a></li>
                             </ul>
                         </div>

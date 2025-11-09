@@ -16,10 +16,7 @@
         <link rel="stylesheet" href="style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
         <style>
-            /* ================================================= */
-            /* 🚗 PURCHASE ORDER - LUXURY CAR DEALER STYLE */
-            /* ================================================= */
-            
+           
             body {
                 background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
                 min-height: 100vh;

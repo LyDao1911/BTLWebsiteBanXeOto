@@ -4,146 +4,279 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <% Car car = (Car) request.getAttribute("car");%> 
 <style>
-/* === PHẦN HIỂN THỊ CHI TIẾT SẢN PHẨM (mota.jsp) === */
+    /* Tổng khung chứa ảnh và thông tin */
+    .product-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 30px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
 
-/* Tổng khung chứa ảnh và thông tin */
-.product-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 40px;
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
+    /* Khung ảnh bên trái */
+    .product-images {
+        flex: 1;
+        min-width: 400px;
+    }
 
-/* Khung ảnh bên trái */
-.product-images {
-    flex: 1;
-    min-width: 350px;
-}
+    /* Ảnh chính */
+    .main-image {
+        position: relative;
+        overflow: hidden;
+        border-radius: 10px;
+        background: #f8f9fa;
+        padding: 15px;
+    }
 
-/* Ảnh chính */
-.main-image img {
-    width: 100%;
-    height: 400px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-}
+    .main-image img {
+        width: 100%;
+        height: 400px;
+        object-fit: contain;
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
 
-/* Ảnh mô tả nhỏ */
-.thumbs {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 10px;
-    margin-top: 15px;
-}
-.thumbs img {
-    width: 100px;
-    height: 70px;
-    object-fit: cover;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    transition: transform 0.3s ease, border-color 0.2s ease;
-}
-.thumbs img:hover {
-    transform: scale(1.05);
-    border-color: #999;
-}
+    .main-image:hover img {
+        transform: scale(1.02);
+    }
 
-/* Thông tin sản phẩm */
-.product-details {
-    flex: 1;
-    min-width: 350px;
-}
+    /* Ảnh mô tả nhỏ - CHỈNH SỬA QUAN TRỌNG */
+    .thumbs {
+        display: flex;
+        flex-wrap: nowrap; /* Không xuống dòng */
+        justify-content: space-between; /* Chia đều khoảng cách */
+        gap: 10px;
+        margin-top: 20px;
+        width: 100%; /* Bằng chiều rộng ảnh chính */
+    }
 
-/* Tiêu đề sản phẩm */
-.product-details h1 {
-    font-size: 26px;
-    margin-bottom: 10px;
-}
+    .thumbs img {
+        flex: 1; /* Mỗi ảnh chiếm không gian bằng nhau */
+        min-width: 0; /* Quan trọng để flex hoạt động */
+        height: 80px; /* Tăng chiều cao cho cân đối */
+        object-fit: cover;
+        border-radius: 6px;
+        border: 2px solid #e0e0e0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
 
-/* Giá */
-.product-details .price {
-    font-size: 22px;
-    color: #c00;
-    font-weight: bold;
-    margin: 15px 0;
-}
+    .thumbs img:hover {
+        transform: translateY(-2px);
+        border-color: #333;
+    }
 
-/* Nút hành động */
-.action-buttons {
-    display: flex;
-    gap: 15px;
-    margin-top: 20px;
-}
-.action-buttons button {
-    flex: 1;
-    padding: 10px 15px;
-    font-weight: 600;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-.action-buttons .buy-now {
-    background-color: #c00;
-    color: #fff;
-}
-.action-buttons .add-to-cart {
-    background-color: #eee;
-    color: #333;
-}
-.action-buttons button:hover {
-    opacity: 0.9;
-}
+    /* Thông tin sản phẩm */
+    .product-details {
+        flex: 1;
+        min-width: 400px;
+        padding: 10px;
+    }
 
-/* Phần mô tả sản phẩm */
-.product-description {
-    max-width: 1200px;
-    margin: 30px auto 60px auto;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    border-radius: 5px;
-}
-.product-description h2 {
-    text-transform: uppercase;
-    font-size: 22px;
-    font-weight: 700;
-    border-bottom: 2px solid #ccc;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
-.product-description p {
-    line-height: 1.7;
-    font-size: 16px;
-}
+    /* Tiêu đề sản phẩm */
+    .product-details h1 {
+        font-size: 28px;
+        margin-bottom: 15px;
+        color: #333;
+        font-weight: 600;
+        line-height: 1.3;
+    }
 
-.thumb-image:hover {
-    border: 2px solid #007bff;
-    transform: scale(1.05);
-    transition: 0.2s;
-}
-.main-image img {
-    transition: 0.3s;
-}
+    /* Giá */
+    .product-details .price {
+        font-size: 24px;
+        color: #333;
+        font-weight: 600;
+        margin: 20px 0;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+    }
 
-.thumbs img {
-    width:100px;
-    height:60px;
-    object-fit:cover;
-}
-.main-image img {
-    width:100%;
-    height:auto;
-    max-height:480px;
-    object-fit:contain;
-}
+    /* Màu sắc */
+   
+
+    .color-label {
+        font-weight: 500;
+        color: #333;
+        margin-right: 10px;
+        font-size: 14px;
+    }
+
+    .color-swatch {
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: inline-block;
+        border: 2px solid #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        vertical-align: middle;
+    }
+
+    /* Số lượng */
+   
+
+    .quantity-label {
+        font-weight: 500;
+        color: #000000;
+        margin-right: 15px;
+        font-size: 14px;
+    }
+
+    .quantity-controls {
+        display: inline-flex;
+        align-items: center;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-right: 10px;
+    }
+
+    .quantity-selector button {
+        width: 35px;
+        height: 35px;
+        border: none;
+        background: #f8f9fa;
+        color: #333;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quantity-selector button:hover {
+        background: #e9ecef;
+    }
+
+    .quantity-selector input {
+        width: 50px;
+        height: 35px;
+        text-align: center;
+        border: none;
+        border-left: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        font-size: 14px;
+        font-weight: 500;
+        background: #fff;
+    }
+
+    .quantity-selector span {
+        color: #000000;
+        font-size: 13px;
+    }
+    /* Nút hành động */
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .action-buttons button {
+        flex: 1;
+        padding: 16px 20px;
+        font-weight: 600;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    /* Nút MUA NGAY - ombre đỏ đen */
+    .action-buttons .buy-now {
+        background: linear-gradient(135deg, #ff0000 0%, #8b0000 50%, #000000 100%);
+        color: #fff;
+       
+    }
+
+
+    .action-buttons .buy-now:hover::before {
+        left: 100%;
+    }
+
+    /* Nút THÊM VÀO GIỎ - đơn giản tinh tế */
+    .action-buttons .add-to-cart {
+        background:#777
+            color: black;
+
+    }
+
+    .action-buttons .add-to-cart:hover {
+        background: #777;
+        transform: translateY(-2px);
+    }
+
+    /* Phần mô tả sản phẩm */
+    .product-description {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 30px;
+        background: #ffffff;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+    }
+
+    .product-description h2 {
+        font-size: 20px;
+        font-weight: 600;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .product-description p {
+        line-height: 1.7;
+        font-size: 15px;
+        color: #555;
+        text-align: justify;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .product-container {
+            flex-direction: column;
+            gap: 25px;
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .product-images,
+        .product-details {
+            min-width: 100%;
+        }
+
+        .main-image img {
+            height: 300px;
+        }
+
+        .thumbs {
+            flex-wrap: wrap; /* Trên mobile cho phép xuống dòng */
+        }
+
+        .thumbs img {
+            flex: 0 0 calc(33.333% - 10px); /* 3 ảnh trên 1 hàng */
+            height: 70px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .product-details h1 {
+            font-size: 22px;
+        }
+
+        .product-details .price {
+            font-size: 20px;
+        }
+    }
 </style>
 <html>
     <head>
@@ -177,7 +310,7 @@
                     </div>
                 </div>
 
-                        <div class="product-details">
+                <div class="product-details">
                     <h1>${car.carName}</h1> 
 
                     <div class="price">
@@ -191,13 +324,14 @@
                              width:20px;height:20px;border-radius:50%;display:inline-block;">
                         </div>
                     </div>
-
+                             <br><br>
                     <div class="quantity-selector">
                         <span class="quantity-label">SỐ LƯỢNG:</span>
-                        <button type="button" onclick="decrementQuantity()">-</button>
-                        <input type="number" id="quantity" value="1" min="1" max="${car.quantity}">
-                        <button type="button" onclick="incrementQuantity()">+</button>
-
+                        <div class="quantity-controls">
+                            <button type="button" onclick="decrementQuantity()">-</button>
+                            <input type="number" id="quantity" value="1" min="1" max="${car.quantity}">
+                            <button type="button" onclick="incrementQuantity()">+</button>
+                        </div>
                         <span>(Còn ${car.quantity} sản phẩm)</span> 
                     </div>
 

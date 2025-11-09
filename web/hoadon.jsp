@@ -370,7 +370,7 @@
 
             <div class="info-section">
                 <p><b>Mã hóa đơn:</b> <%= order != null ? order.getOrderID() : "N/A"%></p>
-                <p><b>Thông tin khách hàng</b> --------------</p>
+                <p><b>Thông tin khách hàng</b>/p>
                 <p><b>Họ và tên:</b> <%= customer != null ? customer.getFullName() : "N/A"%></p>
                 <p><b>Địa chỉ:</b> <%= customer != null ? customer.getAddress() : "N/A"%></p>
                 <p><b>Số điện thoại:</b> <%= customer != null ? customer.getPhoneNumber() : "N/A"%></p>

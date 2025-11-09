@@ -211,6 +211,7 @@
         background: #f8f8f8;
         border-left: 4px solid #b30000;
     }
+    
 </style>
 <script>
 // Hàm tính toán tổng tiền tự động
@@ -400,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <div class="fee-description">Bảo hiểm toàn diện cho thân vỏ và động cơ</div>
                                 </div>
                                 <div class="fee-amount" data-fee="insurance">
-                                    <fmt:formatNumber value="${subtotalPrice * 0.035}" pattern="#,##0" />đ
+                                    <!-- <fmt:formatNumber value="${subtotalPrice * 0.035}" pattern="#,##0" />đ -->  
                                 </div>
                             </div>
                         </label>

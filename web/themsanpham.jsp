@@ -133,49 +133,53 @@
     /* ✅ Palette màu sắc */
     .color-palette {
         display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
+        gap: 8px;
+        flex-wrap: nowrap;
         margin-top: 5px;
+        overflow-x: auto;
+        padding: 5px 0;
     }
 
     .color-item {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 5px;
+        gap: 3px;
         cursor: pointer;
         padding: 5px;
-        border-radius: 5px;
+        border-radius: 6px;
         transition: all 0.3s ease;
+        flex-shrink: 0;
     }
 
     .color-item:hover {
-        background: #f0f0f0;
+        background: #f5f5f5;
     }
 
+    /* Màu khi KHÔNG được chọn - mờ đi */
+    .color-item:not(.selected) {
+        opacity: 0.4;
+        filter: grayscale(60%);
+    }
+
+    /* Màu khi ĐƯỢC CHỌN - nổi bật */
     .color-item.selected {
-        background: #e0e0e0;
-        border: 1px solid #d60000;
+        opacity: 1;
+        filter: grayscale(0%);
+        transform: scale(1.05);
+        background: #f8f9fa;
     }
 
     .color-item input[type="radio"] {
-        display: none; /* Ẩn radio button gốc */
+        display: none;
     }
 
     .color-item span {
         display: inline-block;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        border: 2px solid #ddd;
+        width: 25px;
+        height: 25px;
+        border-radius: 4px;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    /* Hiệu ứng khi được chọn */
-    .color-item input[type="radio"]:checked + span {
-        border: 2px solid #d60000;
-        transform: scale(1.1);
-        box-shadow: 0 0 8px rgba(214, 0, 0, 0.5);
     }
 
     /* Màu sắc cụ thể */
@@ -187,10 +191,7 @@
     } /* Yellow */
     .color-item span[style*="background:#ff8ad9"] {
         background: #ff8ad9;
-    } /* Pink */
-    .color-item span[style*="background:#00c1d4"] {
-        background: #00c1d4;
-    } /* Blue */
+    }  /* Blue */
     .color-item span[style*="background:#2a7f2a"] {
         background: #2a7f2a;
     } /* Green */
@@ -199,14 +200,28 @@
     } /* Black */
     .color-item span[style*="background:#fff"] {
         background: #fff;
+        border: 1px solid #ddd;
     } /* White */
     .color-item span[style*="background:#ccc"] {
         background: #ccc;
     }
+
     .color-name {
-        font-size: 12px;
-        color: #333;
+        font-size: 10px;
+        color: #666;
         font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    /* Màu chữ mờ đi khi không chọn */
+    .color-item:not(.selected) .color-name {
+        color: #bbb;
+    }
+
+    /* Màu chữ đậm lên khi chọn */
+    .color-item.selected .color-name {
+        color: #d60000;
+        font-weight: 600;
     }
 </style>
 <html>
@@ -273,10 +288,7 @@
                                 <input type="radio" name="color" value="Yellow" id="color_yellow"> <%-- Thêm id --%>
                                 <span style="background:#ffd966;"></span>
                             </label>
-                            <label class="color-item" for="color_pink"> <%-- Thêm for --%>
-                                <input type="radio" name="color" value="Pink" id="color_pink"> <%-- Thêm id --%>
-                                <span style="background:#ff8ad9;"></span>
-                            </label>
+
                             <label class="color-item" for="color_blue"> <%-- Thêm for --%>
                                 <input type="radio" name="color" value="Blue" id="color_blue"> <%-- Thêm id --%>
                                 <span style="background:#00c1d4;"></span>
@@ -293,12 +305,12 @@
                                 <input type="radio" name="color" value="White" id="color_white"> <%-- Thêm id --%>
                                 <span style="background:#fff;"></span>
                             </label>
-                                <label class="color-item" for="color_gray"> <%-- Thêm for --%>
+                            <label class="color-item" for="color_gray"> <%-- Thêm for --%>
                                 <input type="radio" name="color" value="Gray" id="color_gray"> <%-- Thêm id --%>
                                 <span style="background:#ccc;"></span>
                             </label>
                             <%-- Nhớ thêm id/for nếu thêm màu mới --%>
-                        </div><br><br>
+                        </div>
 
                         <label class="label">Số lượng</label>
                         <div class="qty">
