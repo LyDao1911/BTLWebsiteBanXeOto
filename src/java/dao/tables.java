@@ -64,7 +64,7 @@ public class tables {
                     + ")";
 
             // 6. CARSTOCK TABLE (Tham chiếu BrandID và CarID)
-String carStockTable = "CREATE TABLE IF NOT EXISTS carstock ("
+            String carStockTable = "CREATE TABLE IF NOT EXISTS carstock ("
                     + "StockID INT AUTO_INCREMENT PRIMARY KEY,"
                     + "BrandID INT NOT NULL,"
                     + "CarID INT NOT NULL UNIQUE,"
@@ -117,7 +117,7 @@ String carStockTable = "CREATE TABLE IF NOT EXISTS carstock ("
                     + "FullName VARCHAR(200),"
                     + "Email VARCHAR(200) UNIQUE,"
                     + "PhoneNumber VARCHAR(15),"
-+ "Address VARCHAR(255),"
+                    + "Address VARCHAR(255),"
                     + "Subject VARCHAR(255),"
                     + "Message TEXT,"
                     + "CreatedAt DATETIME NOT NULL,"
@@ -166,7 +166,7 @@ String carStockTable = "CREATE TABLE IF NOT EXISTS carstock ("
             DbOperations.setDataOrDelete(customerTable, "Bảng Customer đã được tạo thành công!");
 
             DbOperations.setDataOrDelete(carImageTable, "Bảng CarImage đã được tạo thành công!");
-DbOperations.setDataOrDelete(carStockTable, "Bảng CarStock đã được tạo thành công!");
+            DbOperations.setDataOrDelete(carStockTable, "Bảng CarStock đã được tạo thành công!");
             DbOperations.setDataOrDelete(orderTable, "Bảng Order đã được tạo thành công!");
             DbOperations.setDataOrDelete(orderDetailTable, "Bảng OrderDetail đã được tạo thành công!");
             DbOperations.setDataOrDelete(paymentTable, "Bảng Payment đã được tạo thành công!");

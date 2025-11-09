@@ -56,6 +56,7 @@
                                 <li><a href="SupplierServlet">Quản lý Nhà Cung Cấp</a></li>
                                 <li><a href="NhapHangServlet">Tạo Phiếu Nhập Hàng</a></li>
                                 <li><a href="DanhSachPhieuNhapServlet">Quản Lý Phiếu Nhập</a></li>
+                                <li><a href="ReportServlet">Báo Cáo Thống Kê</a></li>
                             </ul>
                         </div>
                         <div class="account-menu">

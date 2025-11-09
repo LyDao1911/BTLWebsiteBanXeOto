@@ -4,6 +4,7 @@
  */
 package dao;
 
+import com.mysql.cj.jdbc.result.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -483,323 +484,99 @@ public class CarDAO {
      * brand từ bảng brand - Nếu có filter: trả về brand có xe phù hợp với
      * filter
      */
-    public List<String> getAvailableBrands(String keyword, String[] colors, Double minPrice, Double maxPrice) {
-        // Kiểm tra xem có filter active không
-        boolean hasActiveFilter = (keyword != null && !keyword.trim().isEmpty())
-                || (colors != null && colors.length > 0)
-                || (minPrice != null) || (maxPrice != null);
-
-        // Nếu không có filter, trả về tất cả brand từ bảng brand
-        if (!hasActiveFilter) {
-            List<String> brands = new ArrayList<>();
-            String sql = "SELECT BrandName FROM brand ORDER BY BrandName";
-
-            try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
-                while (rs.next()) {
-                    brands.add(rs.getString("BrandName"));
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách thương hiệu", e);
-            }
-            System.out.println("✅ [DAO] Không có filter - Trả về tất cả brand: " + brands);
-            return brands;
-        }
-
-        // Nếu có filter, thực hiện query với filter
-        List<String> brands = new ArrayList<>();
-        StringBuilder sql = new StringBuilder();
-        List<Object> params = new ArrayList<>();
-
-        sql.append("SELECT DISTINCT b.BrandName ");
-        sql.append("FROM car c ");
-        sql.append("JOIN brand b ON c.BrandID = b.BrandID ");
-        sql.append("WHERE c.Status = 'Available' ");
-
-        // Áp dụng các bộ lọc hiện tại
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append("AND (c.CarName LIKE ? OR b.BrandName LIKE ? OR c.Description LIKE ?) ");
-            String searchPattern = "%" + keyword.trim() + "%";
-            params.add(searchPattern);
-            params.add(searchPattern);
-            params.add(searchPattern);
-        }
-
-        if (colors != null && colors.length > 0) {
-            sql.append("AND (");
-            for (int i = 0; i < colors.length; i++) {
-                if (i > 0) {
-                    sql.append(" OR ");
-                }
-                sql.append("c.Color = ?");
-                params.add(colors[i]);
-            }
-            sql.append(") ");
-        }
-
-        if (minPrice != null) {
-            sql.append("AND c.Price >= ? ");
-            params.add(minPrice);
-        }
-
-        if (maxPrice != null) {
-            sql.append("AND c.Price <= ? ");
-            params.add(maxPrice);
-        }
-
-        sql.append("ORDER BY b.BrandName");
-
-        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
-            for (int i = 0; i < params.size(); i++) {
-                ps.setObject(i + 1, params.get(i));
-            }
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    brands.add(rs.getString("BrandName"));
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách thương hiệu có sẵn", e);
-        }
-
-        // Nếu không tìm thấy brand nào (do filter quá chặt), vẫn trả về tất cả brand
-        if (brands.isEmpty() && hasActiveFilter) {
-            return getAvailableBrands(null, null, null, null);
-        }
-
-        System.out.println("✅ [DAO] Có filter - Trả về brand phù hợp: " + brands);
-        return brands;
-    }
-
-    /**
-     * Lấy danh sách màu sắc CÓ SẴN
-     */
-    public List<String> getAvailableColors(String keyword, String[] brands, Double minPrice, Double maxPrice) {
-        // Kiểm tra xem có filter active không
-        boolean hasActiveFilter = (keyword != null && !keyword.trim().isEmpty())
-                || (brands != null && brands.length > 0)
-                || (minPrice != null) || (maxPrice != null);
-
-        // Nếu không có filter, trả về tất cả màu từ xe available
-        if (!hasActiveFilter) {
-            List<String> colors = new ArrayList<>();
-            String sql = "SELECT DISTINCT Color FROM car WHERE Color IS NOT NULL AND Color != '' AND Status = 'Available' ORDER BY Color";
-
-            try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
-                while (rs.next()) {
-                    colors.add(rs.getString("Color"));
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách màu sắc", e);
-            }
-            return colors;
-        }
-
-        // Nếu có filter, thực hiện query với filter
-        List<String> colors = new ArrayList<>();
-        StringBuilder sql = new StringBuilder();
-        List<Object> params = new ArrayList<>();
-
-        sql.append("SELECT DISTINCT c.Color ");
-        sql.append("FROM car c ");
-        sql.append("JOIN brand b ON c.BrandID = b.BrandID ");
-        sql.append("WHERE c.Status = 'Available' AND c.Color IS NOT NULL AND c.Color != '' ");
-
-        // Áp dụng các bộ lọc hiện tại
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append("AND (c.CarName LIKE ? OR b.BrandName LIKE ? OR c.Description LIKE ?) ");
-            String searchPattern = "%" + keyword.trim() + "%";
-            params.add(searchPattern);
-            params.add(searchPattern);
-            params.add(searchPattern);
-        }
-
-        if (brands != null && brands.length > 0) {
-            sql.append("AND (");
-            for (int i = 0; i < brands.length; i++) {
-                if (i > 0) {
-                    sql.append(" OR ");
-                }
-                sql.append("b.BrandName = ?");
-                params.add(brands[i]);
-            }
-            sql.append(") ");
-        }
-
-        if (minPrice != null) {
-            sql.append("AND c.Price >= ? ");
-            params.add(minPrice);
-        }
-
-        if (maxPrice != null) {
-            sql.append("AND c.Price <= ? ");
-            params.add(maxPrice);
-        }
-
-        sql.append("ORDER BY c.Color");
-
-        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
-            for (int i = 0; i < params.size(); i++) {
-                ps.setObject(i + 1, params.get(i));
-            }
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    colors.add(rs.getString("Color"));
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách màu sắc có sẵn", e);
-        }
-
-        // Nếu không tìm thấy màu nào (do filter quá chặt), vẫn trả về tất cả màu
-        if (colors.isEmpty() && hasActiveFilter) {
-            return getAvailableColors(null, null, null, null);
-        }
-
-        return colors;
-    }
-
-    /**
-     * Lấy giá cao nhất trong hệ thống (cho filter giá)
-     */
-    public double getMaxPrice() {
-        String sql = "SELECT MAX(Price) as MaxPrice FROM car WHERE Status = 'Available'";
-        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getDouble("MaxPrice");
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Lỗi khi lấy giá cao nhất", e);
-        }
-        return 10000000000.0;
-    }
-
-    /**
-     * Helper method để map ResultSet thành Car object
-     */
-    private Car mapResultSetToCar(ResultSet rs) throws SQLException {
-        Car car = new Car();
-        car.setCarID(rs.getInt("CarID"));
-        car.setCarName(rs.getString("CarName"));
-        // Đã sửa: Ép kiểu BigDecimal cho Price để khớp với model Car
-        Object priceObj = rs.getObject("Price");
-        if (priceObj instanceof BigDecimal) {
-            car.setPrice((BigDecimal) priceObj);
-        } else if (priceObj != null) {
-            car.setPrice(new BigDecimal(priceObj.toString()));
-        } else {
-            car.setPrice(BigDecimal.ZERO);
-        }
-
-        car.setColor(rs.getString("Color"));
-        car.setDescription(rs.getString("Description"));
-        car.setStatus(rs.getString("Status"));
-        car.setBrandID(rs.getInt("BrandID"));
-        car.setBrandName(rs.getString("BrandName"));
-        car.setQuantity(rs.getInt("Quantity"));
-
-        // Xử lý MainImageURL
-        String mainImage = rs.getString("MainImageURL");
-        if (mainImage != null && !mainImage.isEmpty()) {
-            // Chỉ thêm tiền tố "uploads/" nếu nó chưa có (và không phải là ảnh mặc định)
-            if (!mainImage.startsWith("uploads/") && !mainImage.startsWith("image/")) {
-                mainImage = "uploads/" + mainImage;
-            }
-        } else {
-            mainImage = "image/default-car.jpg";
-        }
-        car.setMainImageURL(mainImage);
-
-        return car;
-    }
-
-    /**
-     * Tìm kiếm xe với bộ lọc HOÀN CHỈNH
-     */
     public List<Car> searchCarsWithFilters(String keyword, List<String> brands, List<String> colors,
             Double minPrice, Double maxPrice, String sortBy, String sortOrder) {
         List<Car> result = new ArrayList<>();
-        StringBuilder sql = new StringBuilder();
         List<Object> params = new ArrayList<>();
 
-        sql.append("SELECT DISTINCT c.CarID, c.CarName, c.Price, c.Color, c.Description, c.Status, ")
-                .append("b.BrandName, b.BrandID, ")
-                .append("ci.ImageURL AS MainImageURL, ")
-                .append("s.Quantity ")
-                .append("FROM car c ")
-                .append("JOIN brand b ON c.BrandID = b.BrandID ")
-                .append("LEFT JOIN carimage ci ON c.CarID = ci.CarID AND ci.IsMain = 1 ")
-                .append("LEFT JOIN carstock s ON c.CarID = s.CarID ")
-                .append("WHERE c.Status = 'Available' ");
+        // ⭐ SỬA LỖI 1: THÊM MainImageURL VÀ JOIN BẢNG carimage
+        StringBuilder sql = new StringBuilder(
+                "SELECT c.CarID, c.CarName, c.BrandID, c.Price, c.Color, "
+                + "c.Description, c.Status, s.Quantity, b.BrandName, "
+                + "MAX(ci.ImageURL) AS MainImageURL "
+                + // Dùng MAX để lấy 1 ảnh bất kỳ
+                "FROM car c "
+                + "JOIN brand b ON c.BrandID = b.BrandID "
+                + "LEFT JOIN carstock s ON c.CarID = s.CarID "
+                + "LEFT JOIN carimage ci ON c.CarID = ci.CarID AND ci.IsMain = 1 "
+                + "GROUP BY c.CarID, c.CarName, c.BrandID, c.Price, c.Color, "
+                + "c.Description, c.Status, s.Quantity, b.BrandName " // Group by tất cả cột không aggregate
+        );
 
-        // Lọc theo từ khóa
+        StringBuilder whereClause = new StringBuilder();
+
+        // 1. Keyword
         if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append("AND (c.CarName LIKE ? OR b.BrandName LIKE ? OR c.Description LIKE ?) ");
-            String searchPattern = "%" + keyword.trim() + "%";
-            params.add(searchPattern);
-            params.add(searchPattern);
-            params.add(searchPattern);
+            whereClause.append("c.CarName LIKE ? ");
+            params.add("%" + keyword + "%");
         }
 
-        // Lọc theo hãng xe
+        // 2. Brands
         if (brands != null && !brands.isEmpty()) {
-            sql.append("AND b.BrandName IN ("); // SỬA: Dùng IN thay cho chuỗi OR dài
+            if (whereClause.length() > 0) {
+                whereClause.append("AND ");
+            }
+            whereClause.append("b.BrandName IN (");
             for (int i = 0; i < brands.size(); i++) {
-                sql.append("?");
+                whereClause.append("?");
                 if (i < brands.size() - 1) {
-                    sql.append(", ");
+                    whereClause.append(",");
                 }
                 params.add(brands.get(i));
             }
-            sql.append(") ");
+            whereClause.append(") ");
         }
 
-        // Lọc theo màu sắc
+        // 3. Colors
         if (colors != null && !colors.isEmpty()) {
-            sql.append("AND c.Color IN ("); // SỬA: Dùng IN thay cho chuỗi OR dài
+            if (whereClause.length() > 0) {
+                whereClause.append("AND ");
+            }
+            whereClause.append("c.Color IN (");
             for (int i = 0; i < colors.size(); i++) {
-                sql.append("?");
+                whereClause.append("?");
                 if (i < colors.size() - 1) {
-                    sql.append(", ");
+                    whereClause.append(",");
                 }
                 params.add(colors.get(i));
             }
-            sql.append(") ");
+            whereClause.append(") ");
         }
 
-        // Lọc theo giá
+        // 4. Min Price
         if (minPrice != null) {
-            sql.append("AND c.Price >= ? ");
+            if (whereClause.length() > 0) {
+                whereClause.append("AND ");
+            }
+            whereClause.append("c.Price >= ? ");
             params.add(minPrice);
         }
 
+        // 5. Max Price
         if (maxPrice != null) {
-            sql.append("AND c.Price <= ? ");
+            if (whereClause.length() > 0) {
+                whereClause.append("AND ");
+            }
+            whereClause.append("c.Price <= ? ");
             params.add(maxPrice);
         }
 
-        // Sắp xếp
+        if (whereClause.length() > 0) {
+            sql.append("WHERE ").append(whereClause);
+        }
+
+        // 6. Sorting
         if (sortBy != null && !sortBy.isEmpty()) {
-            switch (sortBy) {
-                case "price":
-                    sql.append("ORDER BY c.Price ");
-                    break;
-                case "name":
-                    sql.append("ORDER BY c.CarName ");
-                    break;
-                case "brand":
-                    sql.append("ORDER BY b.BrandName ");
-                    break;
-                case "newest":
-                default:
-                    sql.append("ORDER BY c.CarID ");
-                    break; // SỬA: Thêm DESC/ASC vào phần sau
+            sql.append("ORDER BY ");
+            if ("price".equals(sortBy)) {
+                sql.append("c.Price ");
+            } else if ("newest".equals(sortBy)) {
+                sql.append("c.CarID "); // Giả sử CarID mới nhất là ID cao nhất
+            } else {
+                sql.append("c.CarID "); // Mặc định
             }
 
-            if ("desc".equalsIgnoreCase(sortOrder)) {
+            if ("desc".equals(sortOrder)) {
                 sql.append("DESC ");
             } else {
                 sql.append("ASC ");
@@ -813,7 +590,6 @@ public class CarDAO {
 
         try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
-                // SỬA LỖI QUAN TRỌNG: Phải sử dụng phương thức set phù hợp với kiểu dữ liệu
                 Object param = params.get(i);
                 if (param instanceof String) {
                     ps.setString(i + 1, (String) param);
@@ -834,9 +610,213 @@ public class CarDAO {
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Lỗi khi tìm kiếm xe với bộ lọc: " + sql.toString(), e);
+            LOGGER.log(Level.SEVERE, "Lỗi khi tìm kiếm xe với bộ lọc", e);
             e.printStackTrace();
         }
+
         return result;
+    }
+
+    /**
+     * Hàm trợ giúp map ResultSet to Car (An toàn)
+     */
+    private Car mapResultSetToCar(ResultSet rs) throws SQLException {
+        Car car = new Car();
+        car.setCarID(rs.getInt("CarID"));
+        car.setCarName(rs.getString("CarName"));
+        car.setBrandID(rs.getInt("BrandID"));
+        car.setPrice(rs.getBigDecimal("Price"));
+        car.setColor(rs.getString("Color"));
+        car.setDescription(rs.getString("Description"));
+        car.setStatus(rs.getString("Status"));
+
+        // ⭐ SỬA LỖI 2: THÊM CÁC CỘT TỪ JOIN VÀO MAPPER
+        // (Dùng hàm hasColumn để kiểm tra, phòng khi hàm này được gọi bởi 1 query khác)
+        if (hasColumn(rs, "Quantity")) {
+            car.setQuantity(rs.getInt("Quantity"));
+        }
+        if (hasColumn(rs, "BrandName")) {
+            car.setBrandName(rs.getString("BrandName"));
+        }
+        if (hasColumn(rs, "MainImageURL")) { // Thêm hàm set ảnh
+            car.setMainImageURL(rs.getString("MainImageURL"));
+        }
+
+        return car;
+    }
+
+    /**
+     * Hàm trợ giúp kiểm tra sự tồn tại của cột trong ResultSet
+     */
+    private boolean hasColumn(ResultSet rs, String columnName) throws SQLException {
+        ResultSetMetaData rsmd = (ResultSetMetaData) rs.getMetaData();
+        int columns = rsmd.getColumnCount();
+        for (int x = 1; x <= columns; x++) {
+            if (columnName.equalsIgnoreCase(rsmd.getColumnName(x))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Lấy các brand CÒN TỒN TẠI sau khi lọc (để làm mờ bộ lọc)
+    public List<String> getAvailableBrands(String keyword, String[] colors,
+            Double minPrice, Double maxPrice) {
+        List<String> result = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT DISTINCT b.BrandName "
+                + "FROM car c "
+                + "JOIN brand b ON c.BrandID = b.BrandID "
+        );
+        StringBuilder whereClause = new StringBuilder();
+
+        // Lọc theo Keyword, Color, Price (NHƯNG BỎ QUA BRAND)
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            whereClause.append("c.CarName LIKE ? ");
+            params.add("%" + keyword + "%");
+        }
+        if (colors != null && colors.length > 0) {
+            if (whereClause.length() > 0) {
+                whereClause.append("AND ");
+            }
+            whereClause.append("c.Color IN (");
+            for (int i = 0; i < colors.length; i++) {
+                whereClause.append("?");
+                if (i < colors.length - 1) {
+                    whereClause.append(",");
+                }
+                params.add(colors[i]);
+            }
+            whereClause.append(") ");
+        }
+        if (minPrice != null) {
+            if (whereClause.length() > 0) {
+                whereClause.append("AND ");
+            }
+            whereClause.append("c.Price >= ? ");
+            params.add(minPrice);
+        }
+        if (maxPrice != null) {
+            if (whereClause.length() > 0) {
+                whereClause.append("AND ");
+            }
+            whereClause.append("c.Price <= ? ");
+            params.add(maxPrice);
+        }
+
+        if (whereClause.length() > 0) {
+            sql.append("WHERE ").append(whereClause);
+        }
+        sql.append("ORDER BY b.BrandName");
+
+        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                Object param = params.get(i);
+                if (param instanceof String) {
+                    ps.setString(i + 1, (String) param);
+                } else if (param instanceof Double) {
+                    ps.setDouble(i + 1, (Double) param);
+                } else {
+                    ps.setObject(i + 1, param);
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.add(rs.getString("BrandName"));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy available brands", e);
+        }
+        return result;
+    }
+
+    // Lấy các color CÒN TỒN TẠI sau khi lọc
+    public List<String> getAvailableColors(String keyword, String[] brands,
+            Double minPrice, Double maxPrice) {
+        List<String> result = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT DISTINCT c.Color "
+                + "FROM car c "
+                + "JOIN brand b ON c.BrandID = b.BrandID "
+        );
+        StringBuilder whereClause = new StringBuilder();
+
+        // Lọc theo Keyword, Brand, Price (NHƯNG BỎ QUA COLOR)
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            whereClause.append("c.CarName LIKE ? ");
+            params.add("%" + keyword + "%");
+        }
+        if (brands != null && brands.length > 0) {
+            if (whereClause.length() > 0) {
+                whereClause.append("AND ");
+            }
+            whereClause.append("b.BrandName IN (");
+            for (int i = 0; i < brands.length; i++) {
+                whereClause.append("?");
+                if (i < brands.length - 1) {
+                    whereClause.append(",");
+                }
+                params.add(brands[i]);
+            }
+            whereClause.append(") ");
+        }
+        if (minPrice != null) {
+            if (whereClause.length() > 0) {
+                whereClause.append("AND ");
+            }
+            whereClause.append("c.Price >= ? ");
+            params.add(minPrice);
+        }
+        if (maxPrice != null) {
+            if (whereClause.length() > 0) {
+                whereClause.append("AND ");
+            }
+            whereClause.append("c.Price <= ? ");
+            params.add(maxPrice);
+        }
+
+        if (whereClause.length() > 0) {
+            sql.append("WHERE ").append(whereClause);
+        }
+        sql.append("ORDER BY c.Color");
+
+        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                Object param = params.get(i);
+                if (param instanceof String) {
+                    ps.setString(i + 1, (String) param);
+                } else if (param instanceof Double) {
+                    ps.setDouble(i + 1, (Double) param);
+                } else {
+                    ps.setObject(i + 1, param);
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.add(rs.getString("Color"));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy available colors", e);
+        }
+        return result;
+    }
+
+    // Lấy giá cao nhất trong hệ thống
+    public double getMaxPrice() {
+        String sql = "SELECT MAX(Price) FROM car";
+        try (Connection con = Connect.getCon(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy max price", e);
+        }
+        return 0; // Trả về 0 nếu có lỗi
     }
 }

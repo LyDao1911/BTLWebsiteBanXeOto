@@ -11,7 +11,7 @@
         <link rel="stylesheet" href="style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
         <style>
-            /* ===== Trang tìm kiếm ===== */
+            /* ===== RESET & BASE STYLES ===== */
             * {
                 margin: 0;
                 padding: 0;
@@ -20,9 +20,10 @@
             }
 
             body {
-                background-color: #f5f5f5;
+                background-color: #f8f9fa;
                 color: #333;
                 line-height: 1.6;
+                padding-top: 80px;
             }
 
             a {
@@ -33,30 +34,36 @@
             /* ===== LAYOUT STYLES ===== */
             .search-page {
                 display: flex;
-                gap: 20px;
-                max-width: 1200px;
-                margin: 20px auto;
-                padding: 0 15px;
+                gap: 25px;
+                max-width: 1400px;
+                margin: 25px auto;
+                padding: 0 20px;
+                align-items: flex-start;
             }
 
             /* ===== FILTER SIDEBAR ===== */
             .filter-box {
-                width: 280px;
+                width: 300px;
                 background: white;
                 padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                border-radius: 10px;
+                box-shadow: 0 2px 15px rgba(0,0,0,0.06);
                 height: fit-content;
                 position: sticky;
-                top: 20px;
+                top: 90px;
+                border: 1px solid #eaeaea;
             }
 
             .filter-box h3 {
                 margin-bottom: 20px;
-                color: #333;
+                color: #2c3e50;
                 border-bottom: 2px solid #e74c3c;
                 padding-bottom: 10px;
                 font-size: 1.2rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 8px;
             }
 
             .filter-group {
@@ -65,94 +72,172 @@
 
             .filter-group label {
                 display: block;
-                margin-bottom: 8px;
+                margin-bottom: 10px;
                 font-weight: 600;
-                color: #444;
+                color: #2c3e50;
+                font-size: 0.95rem;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            /* Keyword input */
+            #keyword {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
+                font-size: 0.9rem;
+                transition: all 0.3s ease;
+                background: #fafafa;
+            }
+
+            #keyword:focus {
+                outline: none;
+                border-color: #e74c3c;
+                background: white;
+                box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1);
             }
 
             /* Checkbox list styles */
             .checkbox-list {
-                max-height: 150px;
+                max-height: 180px;
                 overflow-y: auto;
-                padding: 10px;
-                border: 1px solid #e0e0e0;
-                border-radius: 4px;
-                background: #f9f9f9;
+                padding: 12px;
+                border: 1px solid #eaeaea;
+                border-radius: 6px;
+                background: #fafafa;
+                scrollbar-width: thin;
+                scrollbar-color: #e74c3c #f0f0f0;
+            }
+
+            .checkbox-list::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .checkbox-list::-webkit-scrollbar-track {
+                background: #f0f0f0;
+                border-radius: 3px;
+            }
+
+            .checkbox-list::-webkit-scrollbar-thumb {
+                background: #e74c3c;
+                border-radius: 3px;
             }
 
             .checkbox-list label {
                 display: flex;
                 align-items: center;
-                margin-bottom: 8px;
-                font-weight: normal;
+                margin-bottom: 10px;
+                font-weight: 500;
                 cursor: pointer;
                 white-space: nowrap;
+                padding: 4px 0;
+                transition: color 0.3s ease;
+                font-size: 0.9rem;
+            }
+
+            .checkbox-list label:hover {
+                color: #e74c3c;
             }
 
             .checkbox-list input[type="checkbox"] {
-                margin-right: 8px;
+                margin-right: 10px;
                 flex-shrink: 0;
+                width: 16px;
+                height: 16px;
+                accent-color: #e74c3c;
+                cursor: pointer;
             }
 
-            /* Price range styles */
+            /* Price range styles - FIXED ALIGNMENT */
             .price-inputs {
                 display: flex;
                 gap: 10px;
                 margin-bottom: 8px;
+                align-items: center;
             }
 
             .price-inputs input {
                 flex: 1;
-                padding: 8px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                box-sizing: border-box;
+                padding: 10px;
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
+                font-size: 0.9rem;
+                transition: all 0.3s ease;
+                background: #fafafa;
+                height: 42px;
+                min-width: 0;
+            }
+
+            .price-inputs input:focus {
+                outline: none;
+                border-color: #e74c3c;
+                background: white;
+                box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1);
+            }
+
+            .price-inputs::before {
+                content: "-";
+                color: #7f8c8d;
+                font-weight: 600;
+                flex-shrink: 0;
             }
 
             .filter-group small {
                 display: block;
                 text-align: right;
                 padding-right: 5px;
-                font-size: 0.85em;
-                color: #666;
+                font-size: 0.8em;
+                color: #7f8c8d;
+                font-weight: 500;
+                margin-top: 6px;
             }
 
             /* Button styles */
             .btn-filter-apply {
                 width: 100%;
                 padding: 12px;
-                background-color: #e74c3c;
+                background: linear-gradient(135deg, #e74c3c, #c0392b);
                 color: white;
                 border: none;
-                border-radius: 4px;
+                border-radius: 6px;
                 cursor: pointer;
-                font-size: 1em;
-                margin-top: 10px;
-                margin-bottom: 10px;
-                transition: background-color 0.3s;
+                font-size: 1rem;
+                font-weight: 600;
+                margin-top: 12px;
+                margin-bottom: 12px;
+                transition: all 0.3s ease;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 8px;
+                box-shadow: 0 2px 10px rgba(231, 76, 60, 0.3);
             }
 
             .btn-filter-apply:hover {
-                background-color: #c0392b;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+                background: linear-gradient(135deg, #c0392b, #a93226);
             }
 
             .reset-filters a {
                 display: block;
                 text-align: center;
-                color: #333;
-                text-decoration: underline;
+                color: #7f8c8d;
+                text-decoration: none;
                 font-size: 0.9em;
-                padding: 8px;
-                border-radius: 4px;
-                transition: background-color 0.3s;
+                padding: 10px;
+                border-radius: 6px;
+                transition: all 0.3s ease;
+                border: 1px solid #e0e0e0;
+                font-weight: 500;
             }
 
             .reset-filters a:hover {
-                background-color: #f0f0f0;
+                background-color: #f8f9fa;
+                border-color: #e74c3c;
+                color: #e74c3c;
             }
 
             /* ===== SORT BAR ===== */
@@ -164,7 +249,14 @@
                 padding: 15px;
                 background: white;
                 border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+                border: 1px solid #eaeaea;
+            }
+
+            .sort-bar > div:first-child {
+                font-weight: 600;
+                color: #2c3e50;
+                font-size: 1rem;
             }
 
             .sort-options {
@@ -173,28 +265,35 @@
             }
 
             .sort-btn {
-                padding: 8px 15px;
+                padding: 10px 16px;
                 background: white;
-                border: 1px solid #ddd;
-                border-radius: 4px;
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
                 cursor: pointer;
-                transition: all 0.3s;
-                font-size: 0.9em;
+                transition: all 0.3s ease;
+                font-size: 0.9rem;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 6px;
             }
 
             .sort-btn:hover {
-                background: #f0f0f0;
+                background: #f8f9fa;
+                border-color: #bdc3c7;
             }
 
             .sort-btn.active {
                 background: #e74c3c;
                 color: white;
                 border-color: #e74c3c;
+                box-shadow: 0 2px 10px rgba(231, 76, 60, 0.3);
             }
 
             /* ===== RESULTS SECTION ===== */
             .result-box {
                 flex: 1;
+                min-width: 0;
             }
 
             .search-info {
@@ -202,26 +301,36 @@
                 padding: 15px;
                 background: white;
                 border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+                border: 1px solid #eaeaea;
+                font-size: 1rem;
+                color: #2c3e50;
             }
 
+            .search-info strong {
+                color: #e74c3c;
+            }
+
+            /* ===== CARD SẢN PHẨM NHỎ GỌN ===== */
             .car-list {
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 20px;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 18px;
             }
 
             .car-item {
                 background: white;
                 border-radius: 8px;
                 overflow: hidden;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                transition: transform 0.3s, box-shadow 0.3s;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                transition: all 0.3s ease;
+                border: 1px solid #eaeaea;
+                position: relative;
             }
 
             .car-item:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+                transform: translateY(-3px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.12);
             }
 
             .car-item a {
@@ -230,37 +339,59 @@
                 color: inherit;
             }
 
+            /* Ảnh nhỏ gọn */
             .car-image-container {
                 position: relative;
-                height: 180px;
+                height: 120px;
                 overflow: hidden;
+                background-color: #f8f9fa;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .car-image-container img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                transition: transform 0.5s;
+                transition: transform 0.5s ease;
             }
 
             .car-item:hover .car-image-container img {
                 transform: scale(1.05);
             }
 
+            /* Placeholder khi ảnh không load được */
+            .car-image-container:after {
+                content: "No Image";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: #999;
+                font-size: 12px;
+                display: none;
+            }
+
+            .car-image-container img[src=""]:after,
+            .car-image-container:not(:has(img[src])):after {
+                display: block;
+            }
+
             .car-badge {
                 position: absolute;
-                top: 10px;
-                right: 10px;
-                background: rgba(231, 76, 60, 0.9);
+                top: 6px;
+                right: 6px;
+                background: rgba(231, 76, 60, 0.95);
                 color: white;
-                padding: 5px 10px;
+                padding: 3px 6px;
                 border-radius: 4px;
-                font-size: 0.8rem;
-                font-weight: bold;
+                font-size: 0.7rem;
+                font-weight: 600;
             }
 
             .out-of-stock {
-                opacity: 0.7;
+                opacity: 0.8;
             }
 
             .out-of-stock::after {
@@ -270,40 +401,48 @@
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: rgba(0,0,0,0.1);
+                background: rgba(0,0,0,0.05);
             }
 
+            /* Nội dung card nhỏ gọn */
             .car-details {
-                padding: 15px;
+                padding: 12px;
             }
 
             .product-brand {
-                font-size: 0.9rem;
-                color: #666;
+                font-size: 0.8rem;
+                color: #7f8c8d;
                 margin-bottom: 5px;
+                font-weight: 500;
             }
 
             .product-name {
-                font-size: 1.1rem;
+                font-size: 0.95rem;
                 font-weight: 600;
-                margin-bottom: 10px;
-                color: #333;
+                margin-bottom: 8px;
+                color: #2c3e50;
                 line-height: 1.3;
+                height: 2.4em;
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
             }
 
             .product-price {
-                font-size: 1.2rem;
-                font-weight: bold;
+                font-size: 1rem;
+                font-weight: 700;
                 color: #e74c3c;
-                margin-bottom: 8px;
+                margin-bottom: 6px;
             }
 
             .product-color {
-                font-size: 0.9rem;
-                color: #666;
+                font-size: 0.8rem;
+                color: #7f8c8d;
                 display: flex;
                 align-items: center;
                 gap: 5px;
+                font-weight: 500;
             }
 
             .product-color::before {
@@ -312,7 +451,7 @@
                 width: 12px;
                 height: 12px;
                 border-radius: 50%;
-                border: 1px solid #ddd;
+                border: 1px solid #e0e0e0;
             }
 
             .product-color[data-color="Brown"]::before {
@@ -322,59 +461,191 @@
                 background: #FFD700;
             }
             .product-color[data-color="Black"]::before {
-                background: #000000;
+                background: #2c3e50;
             }
             .product-color[data-color="White"]::before {
-                background: #FFFFFF;
+                background: #ecf0f1;
+                border-color: #bdc3c7;
             }
             .product-color[data-color="Red"]::before {
-                background: #FF0000;
+                background: #e74c3c;
             }
             .product-color[data-color="Blue"]::before {
-                background: #0000FF;
+                background: #3498db;
             }
             .product-color[data-color="Silver"]::before {
-                background: #C0C0C0;
+                background: #bdc3c7;
+            }
+            .product-color[data-color="Gray"]::before {
+                background: #7f8c8d;
+            }
+            .product-color[data-color="Green"]::before {
+                background: #27ae60;
+            }
+            .product-color[data-color="Orange"]::before {
+                background: #f39c12;
             }
 
             .no-results {
                 text-align: center;
-                padding: 40px;
-                color: #666;
+                padding: 50px 30px;
+                color: #7f8c8d;
                 font-size: 1.1rem;
                 background: white;
                 border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+                border: 1px solid #eaeaea;
+                grid-column: 1 / -1;
+            }
+
+            .no-results i {
+                font-size: 3rem;
+                margin-bottom: 15px;
+                color: #e0e0e0;
+            }
+
+            .no-results h3 {
+                color: #2c3e50;
+                margin-bottom: 10px;
+                font-size: 1.3rem;
             }
 
             .loading-spinner {
                 display: none;
                 text-align: center;
-                padding: 40px;
+                padding: 50px 30px;
+                grid-column: 1 / -1;
             }
 
             .loading-spinner i {
-                font-size: 2rem;
+                font-size: 2.5rem;
                 color: #e74c3c;
+                margin-bottom: 12px;
             }
 
-            /* Responsive */
-            @media (max-width: 768px) {
+            .loading-spinner p {
+                color: #7f8c8d;
+                font-size: 1rem;
+            }
+
+            /* ===== RESPONSIVE DESIGN ===== */
+            @media (max-width: 1200px) {
+                .search-page {
+                    max-width: 100%;
+                    padding: 0 15px;
+                }
+
+                .car-list {
+                    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                    gap: 15px;
+                }
+            }
+
+            @media (max-width: 992px) {
                 .search-page {
                     flex-direction: column;
+                    gap: 18px;
                 }
+
                 .filter-box {
                     width: 100%;
                     position: static;
                 }
+
+                .car-list {
+                    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                }
+            }
+
+            @media (max-width: 768px) {
+                body {
+                    padding-top: 70px;
+                }
+
+                .search-page {
+                    margin: 18px auto;
+                    padding: 0 10px;
+                }
+
+                .filter-box {
+                    padding: 18px;
+                }
+
                 .sort-bar {
                     flex-direction: column;
-                    gap: 10px;
+                    gap: 12px;
                     align-items: flex-start;
+                    padding: 12px;
                 }
+
                 .sort-options {
                     width: 100%;
-                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                }
+
+                .sort-btn {
+                    flex: 1;
+                    min-width: 130px;
+                    justify-content: center;
+                    padding: 8px 12px;
+                    font-size: 0.85rem;
+                }
+
+                .car-list {
+                    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                    gap: 12px;
+                }
+
+                .car-image-container {
+                    height: 110px;
+                }
+
+                .price-inputs {
+                    flex-direction: row;
+                    gap: 8px;
+                }
+
+                .price-inputs::before {
+                    content: "-";
+                    margin: 0 4px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .filter-box {
+                    padding: 15px;
+                }
+
+                .price-inputs {
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .price-inputs::before {
+                    display: none;
+                }
+
+                .sort-btn {
+                    min-width: 110px;
+                    font-size: 0.8rem;
+                }
+
+                .product-name {
+                    font-size: 0.9rem;
+                }
+
+                .product-price {
+                    font-size: 0.95rem;
+                }
+
+                .car-image-container {
+                    height: 100px;
+                }
+
+                .car-list {
+                    grid-template-columns: 1fr;
+                    gap: 10px;
                 }
             }
         </style>
@@ -393,8 +664,7 @@
                             <label for="keyword"><i class="fas fa-search"></i> Từ khóa</label>
                             <input type="text" id="keyword" name="keyword" 
                                    value="${fn:escapeXml(param.keyword)}" 
-                                   placeholder="Nhập tên xe, model..." 
-                                   style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px;">
+                                   placeholder="Nhập tên xe, model..." >
                         </div>
 
                         <!-- Brand filter with checkboxes -->
@@ -412,7 +682,6 @@
                                         </c:forEach>
                                     </c:when>
                                     <c:otherwise>
-                                        <!-- Default brands if none from database -->
                                         <label><input type="checkbox" name="brand" value="Audi"> Audi</label>
                                         <label><input type="checkbox" name="brand" value="BMW"> BMW</label>
                                         <label><input type="checkbox" name="brand" value="Mercedes"> Mercedes</label>
@@ -438,7 +707,6 @@
                                         </c:forEach>
                                     </c:when>
                                     <c:otherwise>
-                                        <!-- Default colors if none from database -->
                                         <label><input type="checkbox" name="color" value="Brown"> Brown</label>
                                         <label><input type="checkbox" name="color" value="Yellow"> Yellow</label>
                                         <label><input type="checkbox" name="color" value="Black"> Black</label>
@@ -455,9 +723,9 @@
                         <div class="filter-group">
                             <label><i class="fas fa-tag"></i> Khoảng giá (VNĐ)</label>
                             <div class="price-inputs">
-                                <input type="number" name="minPrice" placeholder="Giá thấp nhất" 
+                                <input type="number" name="minPrice" placeholder="Từ" 
                                        value="${fn:escapeXml(param.minPrice)}" min="0">
-                                <input type="number" name="maxPrice" placeholder="Giá cao nhất" 
+                                <input type="number" name="maxPrice" placeholder="Đến" 
                                        value="${fn:escapeXml(param.maxPrice)}" min="0">
                             </div>
                             <c:if test="${not empty maxPriceInSystem}">
@@ -536,7 +804,7 @@
                         <c:choose>
                             <c:when test="${empty searchResults}">
                                 <div class="no-results">
-                                    <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 15px; color: #ddd;"></i>
+                                    <i class="fas fa-search"></i>
                                     <h3>Không tìm thấy sản phẩm nào</h3>
                                     <p>Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm</p>
                                 </div>
@@ -546,9 +814,21 @@
                                     <a href="${pageContext.request.contextPath}/MotaServlet?carID=${car.carID}">
                                         <div class="car-item ${car.quantity <= 0 ? 'out-of-stock' : ''}">
                                             <div class="car-image-container">
-                                                <!-- SỬA: Dùng đơn giản như trang chủ -->
-                                                <img src="${pageContext.request.contextPath}/uploads/${car.mainImageURL}" 
-                                                     onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/images/default-car.jpg'">
+                                                <c:choose>
+                                                    <%-- TRƯỜNG HỢP 1: NẾU car.mainImageURL BỊ NULL/RỖNG (Lỗi từ DAO) --%>
+                                                    <c:when test="${empty car.mainImageURL}">
+                                                        <img src="${pageContext.request.contextPath}/image/default-car.jpg" 
+                                                             alt="${fn:escapeXml(car.carName)} (No Image)">
+                                                    </c:when>
+
+                                                    <%-- TRƯỜNG HỢP 2: NẾU CÓ mainImageURL, thử tải nó --%>
+                                                    <c:otherwise>
+                                                        <img src="${pageContext.request.contextPath}/uploads/${car.mainImageURL}" 
+                                                             alt="${fn:escapeXml(car.carName)}"
+                                                             onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/image/default-car.jpg'">
+                                                    </c:otherwise>
+                                                </c:choose>
+
                                                 <c:if test="${car.quantity <= 0}">
                                                     <div class="car-badge">HẾT HÀNG</div>
                                                 </c:if>
@@ -576,7 +856,6 @@
         <jsp:include page="footer.jsp" />
 
         <script>
-            // Xử lý loading state khi áp dụng filter
             document.getElementById('filterForm').addEventListener('submit', function () {
                 const applyBtn = document.getElementById('applyFilter');
                 const loadingSpinner = document.getElementById('loadingSpinner');
@@ -588,29 +867,24 @@
                 carList.style.opacity = '0.5';
             });
 
-            // Xử lý sắp xếp
             document.querySelectorAll('.sort-btn').forEach(button => {
                 button.addEventListener('click', function () {
                     const sortBy = this.getAttribute('data-sort');
                     const sortOrder = this.getAttribute('data-order');
 
-                    // Update hidden inputs
                     document.getElementById('sortBy').value = sortBy;
                     document.getElementById('sortOrder').value = sortOrder;
 
-                    // Hiển thị loading
                     const loadingSpinner = document.getElementById('loadingSpinner');
                     const carList = document.getElementById('carList');
 
                     loadingSpinner.style.display = 'block';
                     carList.style.opacity = '0.5';
 
-                    // Submit form
                     document.getElementById('filterForm').submit();
                 });
             });
 
-            // Format price inputs
             document.querySelectorAll('input[name="minPrice"], input[name="maxPrice"]').forEach(input => {
                 input.addEventListener('blur', function () {
                     if (this.value) {
@@ -625,31 +899,17 @@
                 });
             });
 
-            // Auto-submit form when checkbox changes (optional)
-            document.querySelectorAll('.checkbox-list input[type="checkbox"]').forEach(checkbox => {
-                checkbox.addEventListener('change', function () {
-                    // Optional: Auto-submit when filter changes
-                    // document.getElementById('filterForm').submit();
-                });
-            });
-
-            // Handle responsive layout
-            function handleResponsive() {
-                if (window.innerWidth <= 768) {
-                    document.querySelector('.search-page').style.flexDirection = 'column';
-                } else {
-                    document.querySelector('.search-page').style.flexDirection = 'row';
-                }
-            }
-
-            window.addEventListener('resize', handleResponsive);
-            handleResponsive();
-
-            // Initialize page
             document.addEventListener('DOMContentLoaded', function () {
                 console.log('VELYRA AERO Search Page Loaded');
 
-                // Ẩn loading spinner nếu đang hiển thị
+                // Debug: log thông tin ảnh
+            <c:if test="${not empty searchResults}">
+                console.log('Search results found:', ${fn:length(searchResults)});
+                <c:forEach var="car" items="${searchResults}" varStatus="status">
+                console.log('Car ${status.index + 1}:', '${car.carName}', 'Image URL:', '${car.mainImageURL}');
+                </c:forEach>
+            </c:if>
+
                 const loadingSpinner = document.getElementById('loadingSpinner');
                 if (loadingSpinner) {
                     loadingSpinner.style.display = 'none';
@@ -659,6 +919,17 @@
                 if (carList) {
                     carList.style.opacity = '1';
                 }
+
+                // Debug: kiểm tra ảnh load
+                const images = document.querySelectorAll('.car-image-container img');
+                images.forEach((img, index) => {
+                    img.addEventListener('load', function () {
+                        console.log('Image loaded successfully:', this.src);
+                    });
+                    img.addEventListener('error', function () {
+                        console.log('Image failed to load:', this.src);
+                    });
+                });
             });
         </script>
     </body>
